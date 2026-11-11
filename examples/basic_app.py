@@ -13,4 +13,4 @@ def greet(payload, context):
 
 
 if __name__ == "__main__":
-    app.run(persistent="--persistent" in sys.argv[1:])
+    raise SystemExit(app.run(persistent="--persistent" in sys.argv[1:]))

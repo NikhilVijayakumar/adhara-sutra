@@ -21,6 +21,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-DI-005/006, test replacement and optional dependencies: services replaceable with test implementations; unused capabilities not required.
 - [x] Complete and practically verify FR-ERR-001/004/005, standard error model/serialization/sensitive-info protection: structured error envelopes with code/message/retryable/details and request correlation; frontend-facing errors follow protocol; internal details not exposed in responses.
 - [x] Complete and practically verify FR-CFG-001/005, central configuration and application-specific settings: app config provided/accessible via centralized context; `validate_config` supports app-defined schemas and normalized config.
+- [x] Complete and practically verify FR-CLI-005, one-shot CLI execution: a stdin request is dispatched, a structured response is returned, and the process exits with a documented status. Checked success (0), unknown action (4), invalid JSON and unsupported version (8), empty input (2), action failure (4), and initialization failure (3); persistent action failures do not force a nonzero exit.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

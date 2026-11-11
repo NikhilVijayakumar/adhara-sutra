@@ -7,6 +7,12 @@ run `PYTHONPATH=src python3 examples/basic_app.py` and send a newline-terminated
 request such as `{"kind":"request","protocol_version":"1.0","request_id":"1","action":"greeting.create","payload":{"name":"world"}}`.
 Use `--persistent` to keep the process open; the first request must call
 `system.hello`. Persistent requests currently execute sequentially.
+`Application.run()` returns the process exit code, so entry points should
+`raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
+session), 2 no request was received, 3 initialization failed, 4 an action
+failed, 8 a protocol failure, 10 an internal failure. Codes 5 (timeout), 6
+(cancellation), and 7 (dependency unavailable) are reserved for those
+capabilities. Action failures do not end a persistent session.
 Application names are unique among live `Application` objects in a process.
 Invalid definitions raise `ApplicationDefinitionError`, a `ValueError` with
 `code` and `field` attributes; a name can be reused after its object is released.

@@ -82,9 +82,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-CLI-002 | Action Registration | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-003 | Input Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-004 | Structured Output | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-CLI-005 | One-Shot CLI Execution | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| FR-CLI-005 | One-Shot CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-006 | Persistent CLI Execution | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-CLI-007 | Standard Exit Codes | New | Not mapped |
+| FR-CLI-007 | Standard Exit Codes | Partially implemented | Not mapped |
 | FR-CLI-008 | CLI Help and Discovery | New | Not mapped |
 | FR-CLI-009 | CLI Version Information | New | Not mapped |
 | FR-CLI-010 | Standard Input Support | New | Not mapped |

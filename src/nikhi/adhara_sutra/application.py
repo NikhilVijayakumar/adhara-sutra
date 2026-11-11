@@ -18,6 +18,17 @@ from weakref import WeakValueDictionary
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 _LOG = logging.getLogger(__name__)
 _MAX_LINE = 1024 * 1024
+_EXIT_INVALID_INVOCATION = 2
+_EXIT_INITIALIZATION_FAILED = 3
+_EXIT_ACTION_FAILED = 4
+_EXIT_PROTOCOL_FAILED = 8
+_EXIT_INTERNAL_FAILED = 10
+_ERROR_EXIT_CODES = {
+    "PROTOCOL_INVALID_MESSAGE": _EXIT_PROTOCOL_FAILED,
+    "PROTOCOL_INVALID_STATE": _EXIT_PROTOCOL_FAILED,
+    "PROTOCOL_UNSUPPORTED_VERSION": _EXIT_PROTOCOL_FAILED,
+    "RUNTIME_NOT_READY": _EXIT_INITIALIZATION_FAILED,
+}
 _APPLICATIONS: WeakValueDictionary[str, Application] = WeakValueDictionary()
 _APPLICATIONS_LOCK = threading.Lock()
 
@@ -245,39 +256,61 @@ class Application:
         return {"kind": "response", "protocol_version": "1.0", "request_id": request_id,
                 "success": error is None, "data": data, "error": error}
 
-    async def serve(self, *, persistent: bool = False, stdin: TextIO | None = None, stdout: TextIO | None = None) -> None:
-        """Serve one request, or a sequential persistent session until EOF."""
+    async def serve(self, *, persistent: bool = False, stdin: TextIO | None = None, stdout: TextIO | None = None) -> int:
+        """Serve one request, or a sequential persistent session until EOF, and return a process exit code."""
         source, target = stdin or sys.stdin, stdout or sys.stdout
-        await self.start()
+        try:
+            await self.start()
+        except Exception:
+            _LOG.exception("Application initialization failed")
+            return _EXIT_INITIALIZATION_FAILED
         self._transition("running")
         negotiated = not persistent
+        handled = False
+        exit_code = 0
         try:
             while True:
                 line = await asyncio.to_thread(source.readline, _MAX_LINE + 1)
                 if not line:
                     break
-                if len(line.encode("utf-8")) > _MAX_LINE or not line.endswith("\n"):
+                handled = True
+                fatal = len(line.encode("utf-8")) > _MAX_LINE or not line.endswith("\n")
+                if fatal:
                     response = self._response(None, error={"code": "PROTOCOL_INVALID_MESSAGE", "message": "Message too large or incomplete", "retryable": False})
-                    target.write(json.dumps(response) + "\n")
-                    target.flush()
-                    break
-                try:
-                    request = json.loads(line, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Invalid JSON constant")))
-                    if not negotiated and isinstance(request, dict) and request.get("action") != "system.hello":
-                        raise ProtocolError("PROTOCOL_INVALID_STATE", "Handshake required")
-                    response = await self.dispatch(request)
-                    if isinstance(request, dict) and request.get("action") == "system.hello" and response["success"]:
-                        negotiated = True
-                except (ValueError, ProtocolError) as exc:
-                    code = exc.code if isinstance(exc, ProtocolError) else "PROTOCOL_INVALID_MESSAGE"
-                    response = self._response(None, error={"code": code, "message": str(exc) if isinstance(exc, ProtocolError) else "Invalid JSON", "retryable": False})
+                    exit_code = _EXIT_PROTOCOL_FAILED
+                else:
+                    try:
+                        request = json.loads(line, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Invalid JSON constant")))
+                        if not negotiated and isinstance(request, dict) and request.get("action") != "system.hello":
+                            raise ProtocolError("PROTOCOL_INVALID_STATE", "Handshake required")
+                        response = await self.dispatch(request)
+                        if isinstance(request, dict) and request.get("action") == "system.hello" and response["success"]:
+                            negotiated = True
+                    except (ValueError, ProtocolError) as exc:
+                        code = exc.code if isinstance(exc, ProtocolError) else "PROTOCOL_INVALID_MESSAGE"
+                        response = self._response(None, error={"code": code, "message": str(exc) if isinstance(exc, ProtocolError) else "Invalid JSON", "retryable": False})
+                    exit_code = self._exit_code(response, persistent)
                 target.write(json.dumps(response, allow_nan=False) + "\n")
                 target.flush()
-                if not persistent:
+                if fatal or not persistent:
                     break
+            if not persistent and not handled:
+                exit_code = _EXIT_INVALID_INVOCATION
+            return exit_code
         finally:
             await self.stop()
 
-    def run(self, *, persistent: bool = False) -> None:
-        """Run the CLI from a synchronous application entry point."""
-        asyncio.run(self.serve(persistent=persistent))
+    @staticmethod
+    def _exit_code(response: dict[str, Any], persistent: bool) -> int:
+        """Map a response to a process exit code; persistent action failures do not end the session."""
+        if response["success"] or persistent:
+            return 0
+        return _ERROR_EXIT_CODES.get(response["error"]["code"], _EXIT_ACTION_FAILED)
+
+    def run(self, *, persistent: bool = False) -> int:
+        """Run the CLI from a synchronous entry point and return its process exit code."""
+        try:
+            return asyncio.run(self.serve(persistent=persistent))
+        except Exception:
+            _LOG.exception("Application runtime failed")
+            return _EXIT_INTERNAL_FAILED

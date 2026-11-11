@@ -9,6 +9,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-RUN-001, framework-based application creation, against its acceptance criteria. Checked creation, startup and shutdown, invalid version, duplicate name, and name reuse after release.
 - [x] Complete and practically verify FR-RUN-002, application bootstrap: validate configuration, start named service and connector dependencies in order, reject missing or cyclic dependencies, and clean up after partial failure.
 - [x] Complete and practically verify FR-RUN-003, application lifecycle: managed states and transitions (including `running` during serving), invalid transitions rejected, lifecycle events observable via `on_lifecycle`, and shutdown releasing resources.
+- [x] Complete and practically verify FR-RUN-004, application extension points: actions and services register via public API without framework modification, services use framework facilities, no framework dependency on consuming modules, handlers testable independently of CLI transport (direct dispatch and plain calls).
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

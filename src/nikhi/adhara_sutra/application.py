@@ -91,7 +91,7 @@ class Application:
             raise ApplicationDefinitionError("INVALID_CONFIG_VALIDATOR", "validate_config", "Configuration validator must be callable")
         self._validate_config = validate_config
         self.state = "created"
-        self._actions: dict[str, tuple[Callable[..., Any], Callable[..., Any] | None]] = {}
+        self._actions: dict[str, dict[str, Any]] = {}
         self._services: dict[str, tuple[Callable[..., Any], tuple[str, ...]]] = {}
         self._stack = AsyncExitStack()
         self._lifecycle_handlers: list[Callable[[str, str], Any]] = []
@@ -114,17 +114,23 @@ class Application:
         for handler in list(self._lifecycle_handlers):
             handler(previous, target)
 
-    def action(self, name: str, *, validate: Callable[[dict[str, Any]], Any] | None = None) -> Callable:
-        """Register a handler accepting (payload, context); validator may raise ValueError."""
+    def action(self, name: str, *, validate: Callable[[dict[str, Any]], Any] | None = None,
+               output: Callable[[Any], Any] | None = None) -> Callable:
+        """Register a handler (payload, context). Optional validators may transform input/output or raise ValueError/TypeError."""
         if not isinstance(name, str) or not _ACTION.fullmatch(name) or name.startswith(("system.", "protocol.")):
             raise ValueError("Invalid or reserved action name")
 
         def register(handler: Callable[..., Any]) -> Callable[..., Any]:
             if name in self._actions:
                 raise ValueError(f"Action already registered: {name}")
-            self._actions[name] = (handler, validate)
+            self._actions[name] = {"handler": handler, "validate": validate, "output": output}
             return handler
         return register
+
+    def list_actions(self) -> list[dict[str, Any]]:
+        """Return registered action metadata for diagnostics and documentation."""
+        return [{"name": name, "input_schema": meta["validate"] is not None, "output_schema": meta["output"] is not None}
+                for name, meta in sorted(self._actions.items())]
 
     def service(self, name: str, factory: Callable[[ApplicationContext], Any], *,
                 depends_on: tuple[str, ...] = ()) -> None:
@@ -202,7 +208,8 @@ class Application:
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
                 if name not in self._actions:
                     raise ProtocolError("ACTION_NOT_FOUND", "Action is not registered")
-                handler, validate = self._actions[name]
+                meta = self._actions[name]
+                handler, validate, output = meta["handler"], meta["validate"], meta["output"]
                 if validate is not None:
                     try:
                         payload = validate(payload)
@@ -213,6 +220,11 @@ class Application:
                 result = handler(payload, request_context)
                 if inspect.isawaitable(result):
                     result = await result
+                if output is not None:
+                    try:
+                        result = output(result)
+                    except (ValueError, TypeError) as exc:
+                        raise ProtocolError("ACTION_OUTPUT_INVALID", "Action produced invalid output") from exc
             json.dumps(result, allow_nan=False)
             return self._response(request_id, data=result)
         except ProtocolError as exc:

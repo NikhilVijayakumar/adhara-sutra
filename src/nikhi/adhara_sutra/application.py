@@ -49,10 +49,17 @@ class BootstrapError(RuntimeError):
 
 @dataclass(frozen=True)
 class ApplicationContext:
-    """Access to the application's registered services and configuration."""
+    """Access to registered runtime facilities for a request or the application."""
 
     services: dict[str, Any]
     config: dict[str, Any]
+    metadata: dict[str, Any]
+
+    def get_service(self, name: str) -> Any:
+        """Return a registered service or raise a clear error."""
+        if name not in self.services:
+            raise LookupError(f"Unregistered capability: {name}")
+        return self.services[name]
 
 
 _LIFECYCLE_STATES = {"created", "initializing", "ready", "running", "stopping", "stopped", "failed"}
@@ -79,7 +86,7 @@ class Application:
         if config is not None and not isinstance(config, dict):
             raise ApplicationDefinitionError("INVALID_APPLICATION_CONFIG", "config", "Configuration must be a dictionary")
         self.name, self.version = name, version
-        self.context = ApplicationContext({}, dict(config or {}))
+        self.context = ApplicationContext({}, dict(config or {}), {})
         if validate_config is not None and not callable(validate_config):
             raise ApplicationDefinitionError("INVALID_CONFIG_VALIDATOR", "validate_config", "Configuration validator must be callable")
         self._validate_config = validate_config
@@ -201,7 +208,9 @@ class Application:
                         payload = validate(payload)
                     except (ValueError, TypeError) as exc:
                         raise ProtocolError("ACTION_VALIDATION_FAILED", "Invalid action payload") from exc
-                result = handler(payload, self.context)
+                request_context = ApplicationContext(self.context.services, self.context.config,
+                                                     {"request_id": request_id, "action": name})
+                result = handler(payload, request_context)
                 if inspect.isawaitable(result):
                     result = await result
             json.dumps(result, allow_nan=False)

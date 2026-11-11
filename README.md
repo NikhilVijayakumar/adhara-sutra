@@ -16,7 +16,10 @@ capabilities. Action failures do not end a persistent session. Handlers emit
 correlated progress events with `context.emit(event, data)`; each event is a
 newline-delimited `{"kind": "event", ...}` envelope written before the request's
 terminal response. The `system.hello` response reports the application name and
-version, the framework version, and the supported protocol versions.
+version, the framework version, and the supported protocol versions. Protocol
+error objects carry a stable `category` (protocol, validation, action,
+lifecycle, internal) alongside `code`, `message`, `retryable`, and optional
+`details`.
 Application names are unique among live `Application` objects in a process.
 Invalid definitions raise `ApplicationDefinitionError`, a `ValueError` with
 `code` and `field` attributes; a name can be reused after its object is released.

@@ -24,6 +24,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-CLI-005, one-shot CLI execution: a stdin request is dispatched, a structured response is returned, and the process exits with a documented status. Checked success (0), unknown action (4), invalid JSON and unsupported version (8), empty input (2), action failure (4), and initialization failure (3); persistent action failures do not force a nonzero exit.
 - [x] Complete and practically verify FR-CLI-006, persistent CLI execution: multiple requests run in one process lifetime, responses correlate by `request_id`, handlers emit correlated events that precede the terminal response, and EOF or a malformed frame ends the session with documented cleanup and exit status.
 - [x] Complete and practically verify FR-CLI-009, CLI version information: `system.hello` reports the application name and version, the framework version, and the supported protocol versions in both one-shot and persistent sessions.
+- [x] Complete and practically verify FR-ERR-002, error classification: every protocol error now carries a stable `category` (protocol, validation, action, lifecycle, internal) derived from its code; checked each category and confirmed the mapping is stable across requests.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

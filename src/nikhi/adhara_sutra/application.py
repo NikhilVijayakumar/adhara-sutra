@@ -31,6 +31,16 @@ _ERROR_EXIT_CODES = {
     "PROTOCOL_UNSUPPORTED_VERSION": _EXIT_PROTOCOL_FAILED,
     "RUNTIME_NOT_READY": _EXIT_INITIALIZATION_FAILED,
 }
+_ERROR_CATEGORIES = {
+    "PROTOCOL_INVALID_MESSAGE": "protocol",
+    "PROTOCOL_INVALID_STATE": "protocol",
+    "PROTOCOL_UNSUPPORTED_VERSION": "protocol",
+    "ACTION_VALIDATION_FAILED": "validation",
+    "ACTION_OUTPUT_INVALID": "validation",
+    "ACTION_NOT_FOUND": "action",
+    "RUNTIME_NOT_READY": "lifecycle",
+    "RUNTIME_EXECUTION_FAILED": "internal",
+}
 _APPLICATIONS: WeakValueDictionary[str, Application] = WeakValueDictionary()
 _APPLICATIONS_LOCK = threading.Lock()
 
@@ -59,6 +69,16 @@ class BootstrapError(RuntimeError):
     def __init__(self, code: str, message: str):
         super().__init__(message)
         self.code = code
+
+
+def _error(code: str, message: str, *, retryable: bool | None = False,
+           details: Any = None) -> dict[str, Any]:
+    """Build a protocol error with its stable category."""
+    error = {"code": code, "category": _ERROR_CATEGORIES.get(code, "internal"),
+             "message": message, "retryable": retryable}
+    if details is not None:
+        error["details"] = details
+    return error
 
 
 @dataclass(frozen=True)
@@ -257,13 +277,10 @@ class Application:
             json.dumps(result, allow_nan=False)
             return self._response(request_id, data=result)
         except ProtocolError as exc:
-            error = {"code": exc.code, "message": str(exc), "retryable": False}
-            if exc.details is not None:
-                error["details"] = exc.details
-            return self._response(request_id, error=error)
+            return self._response(request_id, error=_error(exc.code, str(exc), details=exc.details))
         except Exception:
             _LOG.exception("Action execution failed")
-            return self._response(request_id, error={"code": "RUNTIME_EXECUTION_FAILED", "message": "Action execution failed", "retryable": None})
+            return self._response(request_id, error=_error("RUNTIME_EXECUTION_FAILED", "Action execution failed", retryable=None))
 
     @staticmethod
     def _response(request_id: Any, *, data: Any = None, error: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -295,7 +312,7 @@ class Application:
                 handled = True
                 fatal = len(line.encode("utf-8")) > _MAX_LINE or not line.endswith("\n")
                 if fatal:
-                    response = self._response(None, error={"code": "PROTOCOL_INVALID_MESSAGE", "message": "Message too large or incomplete", "retryable": False})
+                    response = self._response(None, error=_error("PROTOCOL_INVALID_MESSAGE", "Message too large or incomplete"))
                     exit_code = _EXIT_PROTOCOL_FAILED
                 else:
                     try:
@@ -307,7 +324,7 @@ class Application:
                             negotiated = True
                     except (ValueError, ProtocolError) as exc:
                         code = exc.code if isinstance(exc, ProtocolError) else "PROTOCOL_INVALID_MESSAGE"
-                        response = self._response(None, error={"code": code, "message": str(exc) if isinstance(exc, ProtocolError) else "Invalid JSON", "retryable": False})
+                        response = self._response(None, error=_error(code, str(exc) if isinstance(exc, ProtocolError) else "Invalid JSON"))
                     exit_code = self._exit_code(response, persistent)
                 target.write(json.dumps(response, allow_nan=False) + "\n")
                 target.flush()

@@ -30,6 +30,11 @@ model and serialized through the protocol error envelope. (FR-ERR-001, FR-ERR-00
 - **WHEN** an application handler raises an error during a request
 - **THEN** the failure reaches the caller as a structured protocol error with a stable category and no internal traceback by default
 
+#### Scenario: Errors are classified by kind
+
+- **WHEN** an error is returned for a protocol, validation, action, lifecycle, or internal failure
+- **THEN** its `category` identifies the failure kind and stays stable for that error code across requests
+
 ### Requirement: Structured diagnostics with correlation
 
 Logging SHALL be structured, correlated across requests and jobs, and kept

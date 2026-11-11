@@ -16,7 +16,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | FR-RUN-001 | Framework-Based Application Creation | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | FR-RUN-002 | Application Bootstrap | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md), [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
-| FR-RUN-003 | Application Lifecycle | In progress (active task) | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md), [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| FR-RUN-003 | Application Lifecycle | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md), [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | FR-RUN-004 | Application Extension Points | Partially implemented | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | FR-RUN-005 | Application Context | Partially implemented | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | FR-RUN-006 | Runtime Execution Modes | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |

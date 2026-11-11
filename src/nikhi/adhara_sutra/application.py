@@ -55,6 +55,18 @@ class ApplicationContext:
     config: dict[str, Any]
 
 
+_LIFECYCLE_STATES = {"created", "initializing", "ready", "running", "stopping", "stopped", "failed"}
+_LIFECYCLE_TRANSITIONS = {
+    "created": {"initializing"},
+    "initializing": {"ready", "failed"},
+    "ready": {"running", "stopping"},
+    "running": {"stopping"},
+    "stopping": {"stopped", "failed"},
+    "stopped": set(),
+    "failed": set(),
+}
+
+
 class Application:
     """Register actions and serve requests for a consuming application."""
 
@@ -75,10 +87,25 @@ class Application:
         self._actions: dict[str, tuple[Callable[..., Any], Callable[..., Any] | None]] = {}
         self._services: dict[str, tuple[Callable[..., Any], tuple[str, ...]]] = {}
         self._stack = AsyncExitStack()
+        self._lifecycle_handlers: list[Callable[[str, str], Any]] = []
         with _APPLICATIONS_LOCK:
             if name in _APPLICATIONS:
                 raise ApplicationDefinitionError("DUPLICATE_APPLICATION_NAME", "name", "Application name is already registered in this process")
             _APPLICATIONS[name] = self
+
+    def on_lifecycle(self, handler: Callable[[str, str], Any]) -> Callable[[str, str], Any]:
+        """Register a callback invoked as (previous_state, current_state) on lifecycle transitions."""
+        if not callable(handler):
+            raise ValueError("Lifecycle handler must be callable")
+        self._lifecycle_handlers.append(handler)
+        return handler
+
+    def _transition(self, target: str) -> None:
+        if target not in _LIFECYCLE_TRANSITIONS.get(self.state, set()):
+            raise RuntimeError(f"Invalid lifecycle transition: {self.state} -> {target}")
+        previous, self.state = self.state, target
+        for handler in list(self._lifecycle_handlers):
+            handler(previous, target)
 
     def action(self, name: str, *, validate: Callable[[dict[str, Any]], Any] | None = None) -> Callable:
         """Register a handler accepting (payload, context); validator may raise ValueError."""
@@ -102,9 +129,7 @@ class Application:
         self._services[name] = (factory, tuple(depends_on))
 
     async def start(self) -> None:
-        if self.state != "created":
-            raise RuntimeError("Application has already started")
-        self.state = "initializing"
+        self._transition("initializing")
         try:
             if self._validate_config is not None:
                 try:
@@ -128,24 +153,28 @@ class Application:
                     value = self._stack.enter_context(resource)
                 self.context.services[name] = value
         except BaseException:
-            self.state = "failed"
+            self._transition("failed")
             try:
                 await self._stack.aclose()
             except Exception:
                 _LOG.exception("Resource cleanup failed after startup failure")
             self.context.services.clear()
             raise
-        self.state = "ready"
+        self._transition("ready")
 
     async def stop(self) -> None:
         if self.state in ("stopped", "failed"):
             return
-        self.state = "stopping"
+        self._transition("stopping")
         try:
             await self._stack.aclose()
+        except Exception:
+            self._transition("failed")
+            self.context.services.clear()
+            raise
         finally:
             self.context.services.clear()
-            self.state = "stopped"
+        self._transition("stopped")
 
     async def dispatch(self, request: Any) -> dict[str, Any]:
         request_id = request.get("request_id") if isinstance(request, dict) else None
@@ -162,7 +191,7 @@ class Application:
             if name == "system.hello":
                 result = {"protocol_version": "1.0", "name": self.name, "version": self.version}
             else:
-                if self.state != "ready":
+                if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
                 if name not in self._actions:
                     raise ProtocolError("ACTION_NOT_FOUND", "Action is not registered")
@@ -192,6 +221,7 @@ class Application:
         """Serve one request, or a sequential persistent session until EOF."""
         source, target = stdin or sys.stdin, stdout or sys.stdout
         await self.start()
+        self._transition("running")
         negotiated = not persistent
         try:
             while True:

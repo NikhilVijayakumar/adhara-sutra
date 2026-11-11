@@ -119,10 +119,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-DI-001 | Service Registration | Partially implemented | Not mapped |
-| FR-DI-002 | Dependency Resolution | Partially implemented | Not mapped |
-| FR-DI-003 | Service Lifecycle | Partially implemented | Not mapped |
-| FR-DI-004 | Dependency Validation | New | Not mapped |
+| FR-DI-001 | Service Registration | Completed | Not mapped |
+| FR-DI-002 | Dependency Resolution | Completed | Not mapped |
+| FR-DI-003 | Service Lifecycle | Completed | Not mapped |
+| FR-DI-004 | Dependency Validation | Completed | Not mapped |
 | FR-DI-005 | Test Replacement | New | Not mapped |
 | FR-DI-006 | Optional Dependencies | New | Not mapped |
 

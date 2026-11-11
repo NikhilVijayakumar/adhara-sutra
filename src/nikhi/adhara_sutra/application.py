@@ -10,7 +10,7 @@ import re
 import sys
 import threading
 from contextlib import AsyncExitStack
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from graphlib import CycleError, TopologicalSorter
 from typing import Any, Callable, TextIO
 from weakref import WeakValueDictionary
@@ -66,12 +66,22 @@ class ApplicationContext:
     services: dict[str, Any]
     config: dict[str, Any]
     metadata: dict[str, Any]
+    _emit: Callable[[dict[str, Any]], None] | None = field(default=None, repr=False)
 
     def get_service(self, name: str) -> Any:
         """Return a registered service or raise a clear error."""
         if name not in self.services:
             raise LookupError(f"Unregistered capability: {name}")
         return self.services[name]
+
+    def emit(self, event: str, data: Any = None) -> None:
+        """Emit a best-effort event correlated with the current request."""
+        if self._emit is None:
+            return
+        if not isinstance(event, str) or not _ACTION.fullmatch(event):
+            raise ValueError("Invalid event name")
+        self._emit({"kind": "event", "protocol_version": "1.0",
+                    "request_id": self.metadata.get("request_id"), "event": event, "data": data})
 
 
 _LIFECYCLE_STATES = {"created", "initializing", "ready", "running", "stopping", "stopped", "failed"}
@@ -203,7 +213,8 @@ class Application:
             self.context.services.clear()
         self._transition("stopped")
 
-    async def dispatch(self, request: Any) -> dict[str, Any]:
+    async def dispatch(self, request: Any, *,
+                       emit: Callable[[dict[str, Any]], None] | None = None) -> dict[str, Any]:
         request_id = request.get("request_id") if isinstance(request, dict) else None
         try:
             if not isinstance(request, dict) or request.get("kind") != "request":
@@ -231,7 +242,7 @@ class Application:
                         raise ProtocolError("ACTION_VALIDATION_FAILED", "Invalid action payload",
                                             details=str(exc) or None) from exc
                 request_context = ApplicationContext(self.context.services, self.context.config,
-                                                     {"request_id": request_id, "action": name})
+                                                     {"request_id": request_id, "action": name}, emit)
                 result = handler(payload, request_context)
                 if inspect.isawaitable(result):
                     result = await result
@@ -268,6 +279,11 @@ class Application:
         negotiated = not persistent
         handled = False
         exit_code = 0
+
+        def send_event(event: dict[str, Any]) -> None:
+            target.write(json.dumps(event, allow_nan=False) + "\n")
+            target.flush()
+
         try:
             while True:
                 line = await asyncio.to_thread(source.readline, _MAX_LINE + 1)
@@ -283,7 +299,7 @@ class Application:
                         request = json.loads(line, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Invalid JSON constant")))
                         if not negotiated and isinstance(request, dict) and request.get("action") != "system.hello":
                             raise ProtocolError("PROTOCOL_INVALID_STATE", "Handshake required")
-                        response = await self.dispatch(request)
+                        response = await self.dispatch(request, emit=send_event)
                         if isinstance(request, dict) and request.get("action") == "system.hello" and response["success"]:
                             negotiated = True
                     except (ValueError, ProtocolError) as exc:

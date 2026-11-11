@@ -37,6 +37,23 @@ action semantics. (FR-RUN-006, FR-CLI-005, FR-CLI-006)
 - **WHEN** multiple requests are sent during one process lifetime
 - **THEN** the process can handle them and correlate each response with its request
 
+### Requirement: Events during request execution
+
+The runtime SHALL let handlers emit structured events correlated with the active
+request, distinguishable from terminal responses. (FR-CLI-006, FR-ELC-005)
+
+#### Scenario: Handler reports progress
+
+- **WHEN** a handler emits events while processing a request
+- **THEN** each event carries the request's `request_id` and a `kind` of `event`
+- **AND** the terminal response is still returned with a `kind` of `response`
+
+#### Scenario: Malformed event
+
+- **WHEN** a handler emits an event with an invalid name or non-serializable data
+- **THEN** the event is not written
+- **AND** the request fails with a structured error
+
 ### Requirement: Framed protocol messages
 
 The protocol SHALL use UTF-8 newline-delimited JSON and SHALL handle partial

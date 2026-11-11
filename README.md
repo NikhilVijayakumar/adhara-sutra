@@ -12,7 +12,10 @@ Use `--persistent` to keep the process open; the first request must call
 session), 2 no request was received, 3 initialization failed, 4 an action
 failed, 8 a protocol failure, 10 an internal failure. Codes 5 (timeout), 6
 (cancellation), and 7 (dependency unavailable) are reserved for those
-capabilities. Action failures do not end a persistent session.
+capabilities. Action failures do not end a persistent session. Handlers emit
+correlated progress events with `context.emit(event, data)`; each event is a
+newline-delimited `{"kind": "event", ...}` envelope written before the request's
+terminal response.
 Application names are unique among live `Application` objects in a process.
 Invalid definitions raise `ApplicationDefinitionError`, a `ValueError` with
 `code` and `field` attributes; a name can be reused after its object is released.

@@ -83,7 +83,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-CLI-003 | Input Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-004 | Structured Output | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-005 | One-Shot CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-CLI-006 | Persistent CLI Execution | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| FR-CLI-006 | Persistent CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-007 | Standard Exit Codes | Partially implemented | Not mapped |
 | FR-CLI-008 | CLI Help and Discovery | New | Not mapped |
 | FR-CLI-009 | CLI Version Information | New | Not mapped |
@@ -157,7 +157,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-ELC-002 | CLI-Based Communication | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-ELC-003 | Standard Request Envelope | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-004 | Standard Response Envelope | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-ELC-005 | Event Streaming | New | Not mapped |
+| FR-ELC-005 | Event Streaming | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-006 | Cancellation | New | Not mapped |
 | FR-ELC-007 | Connection and Process Failure Handling | New | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-ELC-008 | Correlation and Ordering | New | Not mapped |

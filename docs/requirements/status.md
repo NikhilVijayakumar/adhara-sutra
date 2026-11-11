@@ -19,7 +19,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-RUN-003 | Application Lifecycle | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md), [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | FR-RUN-004 | Application Extension Points | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | FR-RUN-005 | Application Context | Partially implemented | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
-| FR-RUN-006 | Runtime Execution Modes | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| FR-RUN-006 | Runtime Execution Modes | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-RUN-007 | Graceful Shutdown | Partially implemented | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 
 ## [Architecture and Migration Reporting Requirements](functional-architecture-and-migration-reporting-requirements.md)

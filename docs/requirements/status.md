@@ -86,7 +86,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-CLI-006 | Persistent CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-007 | Standard Exit Codes | Partially implemented | Not mapped |
 | FR-CLI-008 | CLI Help and Discovery | New | Not mapped |
-| FR-CLI-009 | CLI Version Information | New | Not mapped |
+| FR-CLI-009 | CLI Version Information | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-010 | Standard Input Support | New | Not mapped |
 
 ## [Configuration Requirements](functional-configuration-requirements.md)

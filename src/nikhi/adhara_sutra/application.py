@@ -15,6 +15,8 @@ from graphlib import CycleError, TopologicalSorter
 from typing import Any, Callable, TextIO
 from weakref import WeakValueDictionary
 
+from ._version import __version__
+
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 _LOG = logging.getLogger(__name__)
 _MAX_LINE = 1024 * 1024
@@ -227,7 +229,8 @@ class Application:
             if not isinstance(name, str) or not isinstance(payload, dict):
                 raise ProtocolError("PROTOCOL_INVALID_MESSAGE", "Action and object payload are required")
             if name == "system.hello":
-                result = {"protocol_version": "1.0", "name": self.name, "version": self.version}
+                result = {"protocol_version": "1.0", "supported_protocol_versions": ["1.0"],
+                          "framework_version": __version__, "name": self.name, "version": self.version}
             else:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")

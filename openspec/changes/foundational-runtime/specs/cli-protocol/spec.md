@@ -54,6 +54,16 @@ request, distinguishable from terminal responses. (FR-CLI-006, FR-ELC-005)
 - **THEN** the event is not written
 - **AND** the request fails with a structured error
 
+### Requirement: Version information
+
+The runtime SHALL expose application, framework, and supported protocol
+versions. (FR-CLI-009)
+
+#### Scenario: Version discovery
+
+- **WHEN** a caller sends `system.hello`
+- **THEN** the response reports the application name and version, the framework version, and the supported protocol versions
+
 ### Requirement: Framed protocol messages
 
 The protocol SHALL use UTF-8 newline-delimited JSON and SHALL handle partial

@@ -1,0 +1,19 @@
+─ 01-vision-and-scope.md
+        ├── 02-functional-requirements.md
+        ├── 03-non-functional-requirements.md
+        ├── 04-system-architecture.md
+        ├── 05-module-architecture.md
+        ├── 06-application-architecture.md
+        ├── 07-cli-protocol.md
+        ├── 08-electron-integration.md
+        ├── 09-connector-framework.md
+        ├── 10-state-management.md
+        ├── 11-job-and-process-management.md
+        ├── 12-configuration-and-lifecycle.md
+        ├── 13-error-handling-and-observability.md
+        ├── 14-project-scaffolding.md
+        ├── 15-architecture-discovery.md
+        ├── 16-architecture-verification.md
+        ├── 17-migration-framework.md
+        ├── 18-testing-strategy.md
+        ├── 19-security-and-reliability.md

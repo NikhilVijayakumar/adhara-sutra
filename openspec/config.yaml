@@ -1,0 +1,18 @@
+schema: spec-driven
+context: |
+  AdharaSutra is a proposed CLI-first Python framework for independent applications.
+  Consult docs/requirements/ and knowledge/ before specifying behavior. Existing
+  requirements and architecture are proposed until reviewed; do not imply that
+  a feature exists or that an open design decision has been approved. Framework
+  mechanisms must remain independent of consuming applications' business logic.
+  Trace specifications to requirement IDs and verify behavior with deterministic
+  tests where feasible. Preserve existing behavior during migration.
+rules:
+  proposal:
+    - State scope, motivation, dependencies, requirement IDs, and open questions.
+  specs:
+    - Specify observable behavior with scenarios and trace it to requirements.
+  design:
+    - Describe boundaries, contracts, failure handling, and unresolved decisions.
+  tasks:
+    - Include implementation and verification tasks; do not mark unverified work complete.

@@ -1,5 +1,23 @@
 # AdharaSutra (आधारसूत्र)
 
+**Documentation:** [Requirements](docs/requirements/README.md) · [OpenSpec changes](openspec/README.md) · [Knowledge](knowledge/index.md)
+
+The initial runtime is available as `nikhi.adhara_sutra`. For a working example,
+run `PYTHONPATH=src python3 examples/basic_app.py` and send a newline-terminated
+request such as `{"kind":"request","protocol_version":"1.0","request_id":"1","action":"greeting.create","payload":{"name":"world"}}`.
+Use `--persistent` to keep the process open; the first request must call
+`system.hello`. Persistent requests currently execute sequentially.
+Application names are unique among live `Application` objects in a process.
+Invalid definitions raise `ApplicationDefinitionError`, a `ValueError` with
+`code` and `field` attributes; a name can be reused after its object is released.
+For bootstrap, pass a synchronous `validate_config` callback to `Application`;
+raise `ValueError` or `TypeError` to reject configuration. Register services or
+connectors with `app.service(name, factory, depends_on=(... ,))`. Factories
+return synchronous or asynchronous context managers and receive the application
+context. Dependencies start first and resources close in reverse startup order.
+Unknown or cyclic dependencies and invalid configuration raise `BootstrapError`
+before any service starts. The original exception is available as `__cause__`.
+
 **A CLI-First Python Application Framework**
 
 *Build once. Standardize everywhere.*

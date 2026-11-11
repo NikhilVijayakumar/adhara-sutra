@@ -304,6 +304,7 @@ class Application:
             target.write(json.dumps(event, allow_nan=False) + "\n")
             target.flush()
 
+        failed = False
         try:
             while True:
                 line = await asyncio.to_thread(source.readline, _MAX_LINE + 1)
@@ -333,8 +334,16 @@ class Application:
             if not persistent and not handled:
                 exit_code = _EXIT_INVALID_INVOCATION
             return exit_code
+        except BaseException:
+            failed = True
+            raise
         finally:
-            await self.stop()
+            try:
+                await self.stop()
+            except Exception:
+                _LOG.exception("Application shutdown failed")
+                if not failed:
+                    raise
 
     @staticmethod
     def _exit_code(response: dict[str, Any], persistent: bool) -> int:

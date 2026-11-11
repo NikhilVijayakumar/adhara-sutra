@@ -34,9 +34,10 @@ class ApplicationDefinitionError(ValueError):
 class ProtocolError(Exception):
     """An error safe to return to a protocol caller."""
 
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: str, message: str, *, details: Any = None):
         super().__init__(message)
         self.code = code
+        self.details = details
 
 
 class BootstrapError(RuntimeError):
@@ -214,7 +215,8 @@ class Application:
                     try:
                         payload = validate(payload)
                     except (ValueError, TypeError) as exc:
-                        raise ProtocolError("ACTION_VALIDATION_FAILED", "Invalid action payload") from exc
+                        raise ProtocolError("ACTION_VALIDATION_FAILED", "Invalid action payload",
+                                            details=str(exc) or None) from exc
                 request_context = ApplicationContext(self.context.services, self.context.config,
                                                      {"request_id": request_id, "action": name})
                 result = handler(payload, request_context)
@@ -228,7 +230,10 @@ class Application:
             json.dumps(result, allow_nan=False)
             return self._response(request_id, data=result)
         except ProtocolError as exc:
-            return self._response(request_id, error={"code": exc.code, "message": str(exc), "retryable": False})
+            error = {"code": exc.code, "message": str(exc), "retryable": False}
+            if exc.details is not None:
+                error["details"] = exc.details
+            return self._response(request_id, error=error)
         except Exception:
             _LOG.exception("Action execution failed")
             return self._response(request_id, error={"code": "RUNTIME_EXECUTION_FAILED", "message": "Action execution failed", "retryable": None})

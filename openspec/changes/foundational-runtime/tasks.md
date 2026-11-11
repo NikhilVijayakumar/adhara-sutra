@@ -14,6 +14,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-RUN-005, application context: per-request context with isolated metadata (`request_id`, `action`), access to registered services/config, and clear `get_service` errors for unregistered capabilities.
 - [x] Complete and practically verify FR-CLI-001, centralized CLI routing: actions invoked by identifier, unknown actions return standardized `ACTION_NOT_FOUND`, duplicate registrations rejected, routing contains no application-specific business logic.
 - [x] Complete and practically verify FR-CLI-002, action registration: identifier validation, input/output schema hooks, sync and async handlers, and `list_actions()` discovery metadata.
+- [x] Complete and practically verify FR-CLI-003, input validation: protocol envelopes rejected, payload validation errors structured with affected-field details before handler execution.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

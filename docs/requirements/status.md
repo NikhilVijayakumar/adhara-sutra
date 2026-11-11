@@ -93,11 +93,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-CFG-001 | Central Configuration | Partially implemented | Not mapped |
+| FR-CFG-001 | Central Configuration | Completed | Not mapped |
 | FR-CFG-002 | Multiple Configuration Sources | New | Not mapped |
 | FR-CFG-003 | Configuration Validation | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | FR-CFG-004 | Configuration Precedence | New | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
-| FR-CFG-005 | Application-Specific Settings | New | Not mapped |
+| FR-CFG-005 | Application-Specific Settings | Completed | Not mapped |
 | FR-CFG-006 | Secret Handling | New | Not mapped |
 | FR-CFG-007 | Runtime Overrides | New | Not mapped |
 | FR-CFG-008 | Configuration Diagnostics | New | Not mapped |

@@ -147,9 +147,11 @@ class Application:
         try:
             if self._validate_config is not None:
                 try:
-                    self._validate_config(self.context.config)
+                    validated = self._validate_config(self.context.config)
                 except (ValueError, TypeError) as exc:
                     raise BootstrapError("INVALID_CONFIGURATION", "Application configuration is invalid") from exc
+                if isinstance(validated, dict):
+                    self.context = ApplicationContext(self.context.services, validated, self.context.metadata)
             graph = {name: deps for name, (_, deps) in self._services.items()}
             missing = {dep for deps in graph.values() for dep in deps if dep not in graph}
             if missing:

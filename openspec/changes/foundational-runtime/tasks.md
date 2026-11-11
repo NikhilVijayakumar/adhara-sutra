@@ -19,6 +19,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-CFG-003, configuration validation: `validate_config` runs before dependent services initialize and rejects invalid config.
 - [x] Complete and practically verify FR-DI-001/002/003/004, service registration/resolution/lifecycle/validation: `app.service` registration with dependencies, dependency-ordered startup, context-managed cleanup, and detectable missing/circular dependency errors.
 - [x] Complete and practically verify FR-DI-005/006, test replacement and optional dependencies: services replaceable with test implementations; unused capabilities not required.
+- [x] Complete and practically verify FR-ERR-001/004/005, standard error model/serialization/sensitive-info protection: structured error envelopes with code/message/retryable/details and request correlation; frontend-facing errors follow protocol; internal details not exposed in responses.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

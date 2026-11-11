@@ -169,11 +169,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-ERR-001 | Standard Error Model | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-ERR-001 | Standard Error Model | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-ERR-002 | Error Classification | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-ERR-003 | Error Propagation | Partially implemented | Not mapped |
-| FR-ERR-004 | Error Serialization | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-ERR-005 | Sensitive Information Protection | Partially implemented | Not mapped |
+| FR-ERR-004 | Error Serialization | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-ERR-005 | Sensitive Information Protection | Completed | Not mapped |
 | FR-ERR-006 | Application-Specific Error Mapping | New | Not mapped |
 
 ## [Existing Application Migration Requirements](functional-existing-application-migration-requirements.md)

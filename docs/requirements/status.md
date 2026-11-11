@@ -78,7 +78,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-CLI-001 | Centralized CLI Routing | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| FR-CLI-001 | Centralized CLI Routing | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-002 | Action Registration | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-003 | Input Validation | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-004 | Structured Output | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |

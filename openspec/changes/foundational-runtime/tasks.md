@@ -12,6 +12,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-RUN-004, application extension points: actions and services register via public API without framework modification, services use framework facilities, no framework dependency on consuming modules, handlers testable independently of CLI transport (direct dispatch and plain calls).
 - [x] Complete and practically verify FR-RUN-006, runtime execution modes: one-shot `serve` executes a request and terminates; persistent `serve` processes multiple requests (handshake + actions) with consistent action semantics; runtime resources are started/stopped per serve session.
 - [x] Complete and practically verify FR-RUN-005, application context: per-request context with isolated metadata (`request_id`, `action`), access to registered services/config, and clear `get_service` errors for unregistered capabilities.
+- [x] Complete and practically verify FR-CLI-001, centralized CLI routing: actions invoked by identifier, unknown actions return standardized `ACTION_NOT_FOUND`, duplicate registrations rejected, routing contains no application-specific business logic.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

@@ -1,4 +1,4 @@
-<!-- Extracted from ../../docs/raw/non-functional-requirements.md; proposed, not approved. -->
+<!-- Extracted from the original requirement drafts; proposed, not approved. -->
 
 # 19. Observability Requirements
 

@@ -41,7 +41,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-DISC-001 | Project Inspection | New | Not mapped |
+| FR-DISC-001 | Project Inspection | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-DISC-002 | Entry Point Discovery | New | Not mapped |
 | FR-DISC-003 | Module and Dependency Discovery | New | Not mapped |
 | FR-DISC-004 | CLI Command Discovery | New | Not mapped |
@@ -49,8 +49,8 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-DISC-006 | External Integration Discovery | New | Not mapped |
 | FR-DISC-007 | State and Job Discovery | New | Not mapped |
 | FR-DISC-008 | Current Implementation Report | New | Not mapped |
-| FR-DISC-009 | Source Evidence | New | Not mapped |
-| FR-DISC-010 | Uncertainty Reporting | New | Not mapped |
+| FR-DISC-009 | Source Evidence | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-010 | Uncertainty Reporting | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-DISC-011 | Incremental Analysis | New | Not mapped |
 
 ## [Architecture Verification Requirements](functional-architecture-verification-requirements.md)
@@ -169,10 +169,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-ERR-001 | Standard Error Model | Partially implemented | Not mapped |
-| FR-ERR-002 | Error Classification | Partially implemented | Not mapped |
+| FR-ERR-001 | Standard Error Model | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-ERR-002 | Error Classification | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-ERR-003 | Error Propagation | Partially implemented | Not mapped |
-| FR-ERR-004 | Error Serialization | Partially implemented | Not mapped |
+| FR-ERR-004 | Error Serialization | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-ERR-005 | Sensitive Information Protection | Partially implemented | Not mapped |
 | FR-ERR-006 | Application-Specific Error Mapping | New | Not mapped |
 
@@ -188,8 +188,8 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-MIG-006 | Business Behavior Preservation | New | Not mapped |
 | FR-MIG-007 | CLI Compatibility Preservation | New | Not mapped |
 | FR-MIG-008 | Persistence Preservation | New | Not mapped |
-| FR-MIG-009 | Incremental Migration | New | Not mapped |
-| FR-MIG-010 | Migration Status Tracking | New | Not mapped |
+| FR-MIG-009 | Incremental Migration | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-010 | Migration Status Tracking | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-011 | Safe Automated Transformations | New | Not mapped |
 | FR-MIG-012 | Reviewable Changes | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-013 | Migration Verification | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
@@ -237,26 +237,26 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-JOB-001 | Job Registration and Execution | New | Not mapped |
+| FR-JOB-001 | Job Registration and Execution | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-002 | Job Identifiers | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-JOB-003 | Job Lifecycle | New | Not mapped |
+| FR-JOB-003 | Job Lifecycle | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-004 | Progress Reporting | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-005 | Cancellation | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-006 | Timeout Management | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-JOB-007 | Concurrency Management | New | Not mapped |
+| FR-JOB-007 | Concurrency Management | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-008 | Job Results | New | Not mapped |
 | FR-JOB-009 | Job Persistence | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-010 | Worker Ownership | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-JOB-011 | Recovery Policy | New | Not mapped |
+| FR-JOB-011 | Recovery Policy | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 
 ## [Logging and Diagnostics Requirements](functional-logging-and-diagnostics-requirements.md)
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | FR-LOG-001 | Central Logging | Partially implemented | Not mapped |
-| FR-LOG-002 | Structured Logs | Partially implemented | Not mapped |
-| FR-LOG-003 | Request Correlation | New | Not mapped |
-| FR-LOG-004 | Log Destination Separation | New | Not mapped |
+| FR-LOG-002 | Structured Logs | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-LOG-003 | Request Correlation | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-LOG-004 | Log Destination Separation | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-005 | Configurable Log Levels | New | Not mapped |
 | FR-LOG-006 | Runtime Diagnostics | New | Not mapped |
 | FR-LOG-007 | Diagnostic Export | New | Not mapped |
@@ -279,7 +279,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-SCAF-001 | New Project Generation | New | Not mapped |
+| FR-SCAF-001 | New Project Generation | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-SCAF-002 | Architecture Profiles | New | Not mapped |
 | FR-SCAF-003 | Standard Folder Structure | New | Not mapped |
 | FR-SCAF-004 | Framework Bootstrap Generation | New | Not mapped |
@@ -287,7 +287,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-SCAF-006 | Testing Boilerplate | New | Not mapped |
 | FR-SCAF-007 | Documentation Generation | New | Not mapped |
 | FR-SCAF-008 | Architecture Verification Readiness | New | Not mapped |
-| FR-SCAF-009 | Safe Generation | New | Not mapped |
+| FR-SCAF-009 | Safe Generation | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [Security-Related Functional Requirements](functional-security-related-functional-requirements.md)
 

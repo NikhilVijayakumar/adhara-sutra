@@ -31,3 +31,24 @@ when the underlying operation supports it. (FR-JOB-004, FR-JOB-005, FR-JOB-006)
 
 - **WHEN** cancellation is requested for an operation that cannot be cancelled
 - **THEN** the outcome reports that cancellation is unsupported rather than claiming that the operation stopped
+
+### Requirement: Job lifecycle and bounded concurrency
+
+Managed jobs SHALL follow the documented lifecycle states and bounded
+concurrency rules. (FR-JOB-001, FR-JOB-003, FR-JOB-007)
+
+#### Scenario: Admission limit reached
+
+- **WHEN** a job submission arrives while the configured concurrency or queue limit is reached
+- **THEN** the framework rejects or queues the submission explicitly rather than accepting unbounded work
+
+### Requirement: Interruption recovery
+
+After an owning process exits unexpectedly, recovery SHALL distinguish
+interruption from confirmed terminal outcomes before reporting job status.
+(FR-JOB-011)
+
+#### Scenario: Owner process crashes mid-execution
+
+- **WHEN** the process owning a running job exits unexpectedly
+- **THEN** the recovered job is marked interrupted rather than completed or failed without evidence

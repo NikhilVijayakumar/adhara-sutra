@@ -1,32 +1,39 @@
 # Documentation migration status
 
-The target is requirements in `docs/requirements/`, behavioral specifications
-in OpenSpec, and durable context in `knowledge/`. `docs/raw/` is temporary input,
-not a long-term authority. A source can be removed only after its substantive
-content and open questions have been reviewed, placed in the target structure,
-and checked for traceability and unresolved contradictions.
+The original brainstorming corpus under `docs/raw/` has been migrated into the
+target structure and removed. Requirements live in `docs/requirements/`,
+behavioral draft specifications in OpenSpec, and durable design context
+(`knowledge/`, OKF). Git history preserves the original documents.
 
-| Source area | Status | Remaining work |
+| Original source | Requirements | Knowledge concept |
 | --- | --- | --- |
-| Functional and non-functional requirements | Requirement sections split by topic; context remains | Migrate cross-cutting acceptance gates, scenarios, measurement rules, and open questions; reconcile duplicates and status. |
-| Vision and scope | Product summary drafted | Migrate remaining scope, goals, non-goals, and open decisions. |
-| System, module, and application architecture | Boundary summary drafted | Migrate component responsibilities, dependency rules, diagrams, alternatives, and open decisions. |
-| CLI protocol | Concept and initial scenarios drafted | Migrate detailed event, control, session, cancellation, concurrency, ordering, errors, security, testing, and compatibility contracts; reconcile alternatives. |
-| Electron integration | Not migrated | Extract bridge and process boundaries, security, lifecycle, scenarios, and open decisions. |
-| Connector framework | Not migrated | Extract shared and connector-specific contracts, lifecycle, failures, security, and scenarios. |
-| State management | Not migrated | Extract state ownership, persistence, consistency, recovery, and open decisions. |
-| Jobs and process management | Not migrated | Extract state machines, ownership, cancellation, recovery, and process semantics. |
-| Configuration and lifecycle | Partly covered by initial runtime change | Extract configuration, bootstrap, lifecycle, cleanup, and error contracts. |
-| Error handling and observability | Not migrated | Extract error taxonomy, logging, redaction, diagnostics, and correlation. |
-| Project scaffolding | Not migrated | Extract profiles, generated artifacts, validation, and compatibility. |
-| Architecture discovery and verification | Boundary summary drafted | Extract evidence, rules, coverage, reporting, and deterministic verification contracts. |
-| Migration framework | Product summary drafted | Extract planning, baselines, safety, review, rollback, and verification. |
-| Testing strategy | Not migrated | Extract test layers, fixtures, acceptance gates, and evidence requirements. |
-| Security and reliability | Not migrated | Extract trust boundaries, controls, failure and recovery scenarios. |
-| Packaging and distribution | Not migrated | Extract Python, npm, desktop packaging, compatibility, and release contracts. |
+| functional-requirements.md | All FR-* topic files plus [scenarios and acceptance gates](requirements/functional-scenarios-and-acceptance-gates.md) | — |
+| non-functional-requirements.md | All NFR-* topic files plus [validation and quality gates](requirements/non-functional-validation-and-quality-gates.md) | — |
+| vision-and-scope.md | — | [Product and scope](../knowledge/product.md) |
+| system/application/module-architecture.md | — | [Architecture and boundaries](../knowledge/architecture.md) |
+| cli-protocol.md | FR-CLI, FR-ELC | [CLI protocol](../knowledge/concepts/cli-protocol.md) |
+| electron-integration.md | FR-ELC | [Electron integration](../knowledge/concepts/electron-integration.md) |
+| connector-framework.md | FR-CON and connector topic files | [Connector framework](../knowledge/concepts/connectors.md) |
+| configuration-and-lifecycle.md | FR-CFG, FR-RUN, FR-DI | [Configuration and lifecycle](../knowledge/concepts/configuration-and-lifecycle.md) |
+| state-management.md | FR-STATE, FR-DB | [State and jobs](../knowledge/concepts/state-and-jobs.md) |
+| job-and-process-management.md | FR-JOB | [Job and process management](../knowledge/concepts/job-and-process-management.md) |
+| error-handling-and-observability.md | FR-ERR, FR-LOG | [Error handling and observability](../knowledge/concepts/error-handling-and-observability.md) |
+| security-and-reliability.md | FR-SEC, NFR-SEC, NFR-REL | [Security and reliability](../knowledge/concepts/security-and-reliability.md) |
+| architecture-discovery.md | FR-DISC | [Architecture discovery](../knowledge/concepts/architecture-discovery.md) |
+| architecture-verification.md | FR-ARCH, NFR-ARCH | [Architecture verification](../knowledge/concepts/architecture-verification.md) |
+| migration-framework.md | FR-MIG, NFR-MIG | [Migration framework](../knowledge/concepts/migration-framework.md) |
+| project-scaffolding.md | FR-SCAF | [Project scaffolding](../knowledge/concepts/project-scaffolding.md) |
+| testing-strategy.md | FR-TEST, NFR-TEST | [Testing strategy](../knowledge/concepts/testing-strategy.md) |
+| packaging-and-distribution.md | FR-PKG, NFR-OPS, NFR-PORT | [Packaging and distribution](../knowledge/concepts/packaging-and-distribution.md) |
 
-For each area, trace specifications to requirement IDs and use draft status until
-decisions are reviewed. Do not treat an illustrative example as an approved API
-or a target as measured performance. The source corpus includes repeated and
-potentially conflicting proposals; migration needs semantic review, not just file
-relocation or mechanical conversion.
+Migration distilled the durable substance of each source: requirement
+statements, design principles, proposed contracts and state machines,
+alternatives considered, and open questions (kept with their original IDs).
+Scenario walkthroughs and diagrams were summarized rather than copied
+wholesale; their conclusions live in the concept files, requirements, and
+OpenSpec scenarios.
+
+Remaining work is review, not migration: reconcile contradictions between the
+former sources, resolve the recorded open questions, and decide the traced
+requirements before approving any specification. Do not treat an illustrative
+example as an approved API or a proposed target as measured performance.

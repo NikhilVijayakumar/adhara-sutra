@@ -5,12 +5,13 @@ implementation progress, see the [status index](status.md). OpenSpec planning
 artifact completion does not mean implementation is complete.
 Work on one requirement at a time; the status index identifies the active one.
 
-All requirements are proposed. The original documents remain the source for context, review criteria, scenarios, and unresolved questions. These topic files reproduce their requirement sections without approving them.
-
-The topic files are the working requirements; `docs/raw/` preserves the original
-drafts as historical source material. After this initial extraction, update the
-topic files and record decisions and specification changes rather than editing
-the source drafts. Reconcile contradictions before approving a requirement.
+All requirements are proposed. The topic files are the working requirements;
+the original brainstorming corpus was distilled into these files, the
+[knowledge concepts](../../knowledge/concepts/index.md), and the OpenSpec
+drafts, and has since been removed (git history preserves it). Update the topic
+files and record decisions and specification changes here rather than
+recreating source drafts. Reconcile contradictions before approving a
+requirement.
 
 ## Functional
 
@@ -39,6 +40,7 @@ the source drafts. Reconcile contradictions before approving a requirement.
 - [Packaging and Distribution Requirements](functional-packaging-and-distribution-requirements.md) — 9 requirements (FR-PKG-001 to FR-PKG-009)
 - [Documentation Requirements](functional-documentation-requirements.md) — 7 requirements (FR-DOC-001 to FR-DOC-007)
 - [Security-Related Functional Requirements](functional-security-related-functional-requirements.md) — 8 requirements (FR-SEC-001 to FR-SEC-008)
+- [Scenarios and Acceptance Gates](functional-scenarios-and-acceptance-gates.md) — 12 end-to-end scenarios, capability dependencies, and gates A–G
 
 ## Non-Functional
 
@@ -60,9 +62,4 @@ the source drafts. Reconcile contradictions before approving a requirement.
 - [Operational and Packaging Requirements](non-functional-operational-and-packaging-requirements.md) — 8 requirements (NFR-OPS-001 to NFR-OPS-008)
 - [Observability Requirements](non-functional-observability-requirements.md) — 6 requirements (NFR-OBS-001 to NFR-OBS-006)
 - [Open Questions](non-functional-open-questions.md) — 10 requirements (NFR-OQ-001 to NFR-OQ-010)
-
-## Original context
-
-- [Functional source](../raw/functional-requirements.md)
-- [Non-functional source](../raw/non-functional-requirements.md)
-- [Vision and scope](../raw/vision-and-scope.md)
+- [Validation and Quality Gates](non-functional-validation-and-quality-gates.md) — benchmark environment, performance acceptance matrix, validation scenarios NFS-01 to NFS-10, and gates Q1–Q7

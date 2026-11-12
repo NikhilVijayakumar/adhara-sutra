@@ -47,7 +47,9 @@ version, the framework version, and the supported protocol versions. Send
 hooks; an unknown action reports the available action names. Protocol
 error objects carry a stable `category` (protocol, validation, action,
 lifecycle, connector, internal) alongside `code`, `message`, `retryable`, and
-optional `details`.
+optional `details`. See [docs/protocol-reference.md](docs/protocol-reference.md)
+for the maintained protocol reference covering messages, events, errors,
+sessions, version compatibility, and exit codes.
 Application names are unique among live `Application` objects in a process.
 Invalid definitions raise `ApplicationDefinitionError`, a `ValueError` with
 `code` and `field` attributes; a name can be reused after its object is released.

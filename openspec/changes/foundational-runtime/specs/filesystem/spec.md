@@ -41,3 +41,18 @@ and removed when their context exits, including on error. (FR-FS-003)
 
 - **WHEN** a temporary directory context exits successfully or raises
 - **THEN** the directory and its contents are removed
+
+### Requirement: Reusable file operations
+
+The framework SHALL provide text and JSON file operations within a configured
+path boundary. (FR-FS-004)
+
+#### Scenario: Reading and writing files
+
+- **WHEN** an application writes and reads text or JSON within a boundary
+- **THEN** the content is encoded and decoded as UTF-8 by default, and filesystem and JSON errors are reported to the caller
+
+#### Scenario: Writing outside the boundary
+
+- **WHEN** a write resolves outside all configured roots
+- **THEN** it fails with a path violation before creating the file

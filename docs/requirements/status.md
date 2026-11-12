@@ -218,7 +218,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-FS-001 | Application Data Directories | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-FS-002 | Path Validation | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-FS-003 | Temporary File Management | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
-| FR-FS-004 | File Operation Utilities | New | Not mapped |
+| FR-FS-004 | File Operation Utilities | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-FS-005 | Large Artifact Handling | New | Not mapped |
 
 ## [HTTP Connector Requirements](functional-http-connector-requirements.md)

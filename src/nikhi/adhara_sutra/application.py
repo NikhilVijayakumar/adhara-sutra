@@ -91,6 +91,9 @@ class ApplicationContext:
     config: dict[str, Any]
     metadata: dict[str, Any]
     _emit: Callable[[dict[str, Any]], None] | None = field(default=None, repr=False)
+    state: dict[str, Any] = field(default_factory=dict)
+    session_state: dict[str, Any] = field(default_factory=dict)
+    request_state: dict[str, Any] = field(default_factory=dict)
 
     def get_service(self, name: str) -> Any:
         """Return a registered service or raise a clear error."""
@@ -132,7 +135,8 @@ class Application:
         if config is not None and not isinstance(config, dict):
             raise ApplicationDefinitionError("INVALID_APPLICATION_CONFIG", "config", "Configuration must be a dictionary")
         self.name, self.version = name, version
-        self.context = ApplicationContext({}, dict(config or {}), {})
+        self._state: dict[str, Any] = {}
+        self.context = ApplicationContext({}, dict(config or {}), {}, state=self._state)
         if validate_config is not None and not callable(validate_config):
             raise ApplicationDefinitionError("INVALID_CONFIG_VALIDATOR", "validate_config", "Configuration validator must be callable")
         self._validate_config = validate_config
@@ -197,7 +201,8 @@ class Application:
                 except (ValueError, TypeError) as exc:
                     raise BootstrapError("INVALID_CONFIGURATION", "Application configuration is invalid") from exc
                 if isinstance(validated, dict):
-                    self.context = ApplicationContext(self.context.services, validated, self.context.metadata)
+                    self.context = ApplicationContext(self.context.services, validated, self.context.metadata,
+                                                      state=self.context.state)
             graph = {name: deps for name, (_, deps) in self._services.items()}
             missing = {dep for deps in graph.values() for dep in deps if dep not in graph}
             if missing:
@@ -239,7 +244,8 @@ class Application:
         self._transition("stopped")
 
     async def dispatch(self, request: Any, *,
-                       emit: Callable[[dict[str, Any]], None] | None = None) -> dict[str, Any]:
+                       emit: Callable[[dict[str, Any]], None] | None = None,
+                       session_state: dict[str, Any] | None = None) -> dict[str, Any]:
         request_id = request.get("request_id") if isinstance(request, dict) else None
         action = request.get("action") if isinstance(request, dict) else None
         token = _REQUEST.set({"request_id": request_id, "action": action})
@@ -273,7 +279,10 @@ class Application:
                         raise ProtocolError("ACTION_VALIDATION_FAILED", "Invalid action payload",
                                             details=str(exc) or None) from exc
                 request_context = ApplicationContext(self.context.services, self.context.config,
-                                                     {"request_id": request_id, "action": name}, emit)
+                                                     {"request_id": request_id, "action": name}, emit,
+                                                     state=self._state,
+                                                     session_state=session_state if session_state is not None else {},
+                                                     request_state={})
                 result = handler(payload, request_context)
                 if inspect.isawaitable(result):
                     result = await result
@@ -309,6 +318,7 @@ class Application:
         negotiated = not persistent
         handled = False
         exit_code = 0
+        session_state: dict[str, Any] = {}
 
         def send_event(event: dict[str, Any]) -> None:
             target.write(json.dumps(event, allow_nan=False) + "\n")
@@ -330,7 +340,7 @@ class Application:
                         request = json.loads(line, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Invalid JSON constant")))
                         if not negotiated and isinstance(request, dict) and request.get("action") != "system.hello":
                             raise ProtocolError("PROTOCOL_INVALID_STATE", "Handshake required")
-                        response = await self.dispatch(request, emit=send_event)
+                        response = await self.dispatch(request, emit=send_event, session_state=session_state)
                         if isinstance(request, dict) and request.get("action") == "system.hello" and response["success"]:
                             negotiated = True
                     except (ValueError, ProtocolError) as exc:

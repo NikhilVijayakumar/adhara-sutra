@@ -272,7 +272,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-PKG-005 | Supported Platform Packaging | New | Not mapped |
 | FR-PKG-006 | Production Runtime Support | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-007 | External Executable Packaging | New | Not mapped |
-| FR-PKG-008 | Version Compatibility | New | Not mapped |
+| FR-PKG-008 | Version Compatibility | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-009 | Upgrade and Migration Guidance | New | Not mapped |
 
 ## [Project Scaffolding Requirements](functional-project-scaffolding-requirements.md)
@@ -383,11 +383,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-COMP-001 | Semantic Versioning Policy | New | Not mapped |
-| NFR-COMP-002 | Protocol Versioning | New | Not mapped |
-| NFR-COMP-003 | Schema Versioning | New | Not mapped |
+| NFR-COMP-001 | Semantic Versioning Policy | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| NFR-COMP-002 | Protocol Versioning | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| NFR-COMP-003 | Schema Versioning | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | NFR-COMP-004 | Public API Compatibility | New | Not mapped |
-| NFR-COMP-005 | Electron Bridge Compatibility | New | Not mapped |
+| NFR-COMP-005 | Electron Bridge Compatibility | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | NFR-COMP-006 | Deprecation Policy | New | Not mapped |
 | NFR-COMP-007 | Migration Compatibility | New | Not mapped |
 | NFR-COMP-008 | Historical Report Compatibility | New | Not mapped |

@@ -92,9 +92,11 @@ stream reads and multiple messages in a read. (FR-ELC-002, FR-CLI-004)
 
 ### Requirement: Version validation
 
-The runtime SHALL validate the protocol version before dispatching an action.
-Persistent sessions SHALL establish a compatible version before application
-actions execute. (FR-ELC-001, FR-ELC-003)
+The runtime SHALL validate the request's `protocol_version` against
+`SUPPORTED_PROTOCOL_VERSIONS` before dispatching an action, and `system.hello`
+SHALL advertise `PROTOCOL_VERSION` and every supported version. Persistent
+sessions SHALL establish a compatible version before application actions
+execute. (FR-ELC-001, FR-ELC-003, NFR-COMP-002)
 
 #### Scenario: Unsupported version
 

@@ -55,3 +55,21 @@ and dispatch registered actions without Electron or the CLI transport.
 
 - **WHEN** a test uses `ApplicationTestClient` to call an action
 - **THEN** the handler runs with the real runtime lifecycle and returns its data, and a failure raises an assertion with the protocol error
+
+### Requirement: Version compatibility
+
+Public releases SHALL follow Semantic Versioning, the CLI protocol SHALL carry a
+version independent of the application version, and machine-readable reports
+SHALL carry their own schema versions. The framework and bridge SHALL advertise
+the protocol versions they support and reject incompatible peers.
+(FR-PKG-008, NFR-COMP-001, NFR-COMP-002, NFR-COMP-003, NFR-COMP-005)
+
+#### Scenario: Discovering compatible versions
+
+- **WHEN** a client calls `system.hello`
+- **THEN** the response reports the framework version, the current protocol version, and every supported protocol version, independent of the application version
+
+#### Scenario: An incompatible bridge backend
+
+- **WHEN** the bridge completes the handshake with a backend that does not list its protocol version
+- **THEN** startup fails with `BRIDGE_PROTOCOL_UNSUPPORTED` and no requests are sent

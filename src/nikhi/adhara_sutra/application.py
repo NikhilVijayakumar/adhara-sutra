@@ -20,6 +20,9 @@ from ._version import __version__
 from .diagnostics import _REQUEST, configure_logging, redact, redact_text
 from .jobs import JobManager, JobService
 
+PROTOCOL_VERSION = "1.0"
+SUPPORTED_PROTOCOL_VERSIONS = (PROTOCOL_VERSION,)
+
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 _LOG = logging.getLogger(__name__)
 _MAX_LINE = 1024 * 1024
@@ -122,7 +125,7 @@ class ApplicationContext:
             return
         if not isinstance(event, str) or not _ACTION.fullmatch(event):
             raise ValueError("Invalid event name")
-        envelope = {"kind": "event", "protocol_version": "1.0",
+        envelope = {"kind": "event", "protocol_version": PROTOCOL_VERSION,
                     "request_id": self.metadata.get("request_id"), "event": event, "data": data}
         if "job_id" in self.metadata:
             envelope["job_id"] = self.metadata["job_id"]
@@ -361,7 +364,7 @@ class Application:
         try:
             if not isinstance(request, dict) or request.get("kind") != "request":
                 raise ProtocolError("PROTOCOL_INVALID_MESSAGE", "Expected a request object")
-            if request.get("protocol_version") != "1.0":
+            if request.get("protocol_version") not in SUPPORTED_PROTOCOL_VERSIONS:
                 raise ProtocolError("PROTOCOL_UNSUPPORTED_VERSION", "Unsupported protocol version")
             if not isinstance(request_id, str) or not request_id:
                 raise ProtocolError("PROTOCOL_INVALID_MESSAGE", "A request_id is required")
@@ -369,7 +372,8 @@ class Application:
             if not isinstance(name, str) or not isinstance(payload, dict):
                 raise ProtocolError("PROTOCOL_INVALID_MESSAGE", "Action and object payload are required")
             if name == "system.hello":
-                result = {"protocol_version": "1.0", "supported_protocol_versions": ["1.0"],
+                result = {"protocol_version": PROTOCOL_VERSION,
+                          "supported_protocol_versions": list(SUPPORTED_PROTOCOL_VERSIONS),
                           "framework_version": __version__, "name": self.name, "version": self.version}
             elif name == "system.help":
                 result = {"framework_version": __version__, "actions": self.list_actions(),
@@ -431,7 +435,7 @@ class Application:
 
     @staticmethod
     def _response(request_id: Any, *, data: Any = None, error: dict[str, Any] | None = None) -> dict[str, Any]:
-        return {"kind": "response", "protocol_version": "1.0", "request_id": request_id,
+        return {"kind": "response", "protocol_version": PROTOCOL_VERSION, "request_id": request_id,
                 "success": error is None, "data": data, "error": error}
 
     async def _health(self) -> dict[str, Any]:

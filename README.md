@@ -9,7 +9,11 @@ Use `--persistent` to keep the process open; the first request must call
 `system.hello`. Persistent requests currently execute sequentially. With the
 package installed, `adhara run examples/basic_app.py` (or a module name) loads
 the application's `app`, `application`, or `create_app()` and serves the same
-protocol; `adhara version` prints the framework version. Tests can use
+protocol; `adhara version` prints the framework version. Package releases follow
+Semantic Versioning. The CLI protocol has its own `PROTOCOL_VERSION` (`1.0`),
+advertised by `system.hello` and validated before dispatch; the Electron bridge
+exports the same constant and refuses a backend that does not support it. Report
+formats carry independent `schema_version` and profile versions. Tests can use
 `ApplicationTestClient(app)` as an async context manager to start the runtime
 and `await client.call(action, payload)` (or `.dispatch` for the full envelope)
 without the CLI transport. `adhara inspect [path] [--json] [--output FILE]`

@@ -1,8 +1,8 @@
 """Core application runtime, CLI protocol, connectors, and architecture inspection."""
 
 from ._version import __version__
-from .application import (Application, ApplicationContext, ApplicationDefinitionError, BootstrapError, ConnectorError,
-                          ProtocolError)
+from .application import (PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS, Application, ApplicationContext,
+                          ApplicationDefinitionError, BootstrapError, ConnectorError, ProtocolError)
 from .diagnostics import configure_logging, redact
 from .discovery import Evidence, Finding, ProjectInspector, ProjectProfile
 from .external import CommandResult, ExternalCommand
@@ -21,8 +21,9 @@ __all__ = ["AppDirectories", "Application", "ApplicationContext", "ApplicationDe
            "ApplicationTestClient", "ArchitectureProfile", "BootstrapError", "Check", "CommandResult",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse",
            "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "PathBoundary",
-           "PathViolation", "ProjectInspector", "ProjectProfile", "ProtocolError", "REPORT_SCHEMA_VERSION",
-           "RULE_CATALOG", "SQLiteDatabase", "STRATEGIES", "TASK_STATUSES", "VerificationResult", "__version__",
+           "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",
+           "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "SQLiteDatabase", "STRATEGIES",
+           "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "__version__",
            "analyze_migration", "configure_logging", "default_profile", "implementation_report",
            "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
            "verification_report", "verify"]

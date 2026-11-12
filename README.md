@@ -54,11 +54,13 @@ from a handler with `context.jobs.submit(name, payload)`, which returns an
 identifier. Job handlers receive `(payload, context)`; events they emit carry the
 `job_id`, and their log records are correlated with it. Use
 `context.jobs.status(id)`, `.list()`, `.cancel(id)`, and `.wait(id)` to inspect
-execution. Jobs run in-process with bounded concurrency (`max_concurrent_jobs`,
-default 4) and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts
-apply to async handlers. Stopping the application cancels active jobs before
-services close, so jobs never outlive their owning process. Persistence and
-recovery across processes are not yet provided.
+execution. Send `system.cancel` with `{"job_id": ...}` to cancel a managed job;
+the result reports whether cancellation was accepted and the current status.
+Jobs run in-process with bounded concurrency (`max_concurrent_jobs`, default 4)
+and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts apply to
+async handlers. Stopping the application cancels active jobs before services
+close, so jobs never outlive their owning process. Persistence and recovery
+across processes are not yet provided.
 
 Connectors are services: register them with `app.service`, resolve them with
 `context.get_service`, and replace them with a test double by registering the
@@ -69,6 +71,16 @@ double in place of the live factory. A service with a callable `health()`
 for an expected upstream failure: the response reports code `CONNECTOR_FAILURE`,
 category `connector`, the retryability flag, and optional details, and one-shot
 execution exits 7 while a persistent session continues.
+
+The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
+spawns one persistent backend, performs the `system.hello` handshake, correlates
+responses, forwards events, and rejects pending work when the backend exits. The
+package exposes `start()`, `request(action, payload, {timeoutMs})`,
+`cancel(jobId)`, `health()`, `help()`, and `close()`, plus `event`, `stderr`,
+`exit`, `protocolError`, and `processError` events. Its command and arguments are
+fixed at construction, so renderer input can only become an action name and
+payload. A running request cannot be cancelled because the persistent session is
+sequential; cancellation targets managed jobs.
 
 **A CLI-First Python Application Framework**
 

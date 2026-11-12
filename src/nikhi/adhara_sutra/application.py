@@ -378,6 +378,15 @@ class Application:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
                 result = await self._health()
+            elif name == "system.cancel":
+                if self.state not in ("ready", "running"):
+                    raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
+                job_id = payload.get("job_id")
+                if not isinstance(job_id, str) or not job_id:
+                    raise ProtocolError("ACTION_VALIDATION_FAILED", "A job_id is required", details="job_id")
+                cancelled = bool(self.context.jobs.cancel(job_id))
+                result = {"job_id": job_id, "cancelled": cancelled,
+                          "status": self.context.jobs.status(job_id)}
             else:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")

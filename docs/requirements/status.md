@@ -6,7 +6,7 @@ Snapshot: 2026-11-12. Requirements and linked OpenSpec specifications remain pro
 
 The specification column identifies draft specifications that explicitly cite the requirement, including cited ranges. A link does not imply the entire requirement is specified. “Not mapped” means no explicit citation was found; it does not mean the requirement is rejected. Open questions are decisions, not implementation tasks.
 
-Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connector implementations, the Electron bridge, migration, and verification tooling are not present.
+Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [Electron bridge](../../bridge/index.js); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connector implementations, migration, and verification tooling are not present.
 
 OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundational-runtime/proposal.md) and its [implementation tasks](../../openspec/changes/foundational-runtime/tasks.md). Four completed OpenSpec planning artifacts describe document readiness, not finished functionality.
 
@@ -157,13 +157,13 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-ELC-002 | CLI-Based Communication | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-ELC-003 | Standard Request Envelope | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-004 | Standard Response Envelope | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-ELC-005 | Event Streaming | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-ELC-006 | Cancellation | New | Not mapped |
-| FR-ELC-007 | Connection and Process Failure Handling | New | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
-| FR-ELC-008 | Correlation and Ordering | New | Not mapped |
-| FR-ELC-009 | Protocol Compatibility | New | Not mapped |
-| FR-ELC-010 | Shared Electron Bridge | New | Not mapped |
-| FR-ELC-011 | Electron Security Boundary | New | Not mapped |
+| FR-ELC-005 | Event Streaming | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-006 | Cancellation | Partially implemented | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-007 | Connection and Process Failure Handling | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-008 | Correlation and Ordering | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-009 | Protocol Compatibility | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-010 | Shared Electron Bridge | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-011 | Electron Security Boundary | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 
 ## [Error Handling Requirements](functional-error-handling-requirements.md)
 
@@ -268,7 +268,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-PKG-001 | Python Package Distribution | Partially implemented | Not mapped |
 | FR-PKG-002 | Command-Line Entry Point | New | Not mapped |
 | FR-PKG-003 | Optional Dependencies | New | Not mapped |
-| FR-PKG-004 | Electron Bridge Distribution | New | Not mapped |
+| FR-PKG-004 | Electron Bridge Distribution | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-PKG-005 | Supported Platform Packaging | New | Not mapped |
 | FR-PKG-006 | Production Runtime Support | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-007 | External Executable Packaging | New | Not mapped |
@@ -571,7 +571,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-SEC-004 | Filesystem Safety | New | Not mapped |
 | NFR-SEC-005 | Secret Protection | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-006 | Secure Configuration | New | Not mapped |
-| NFR-SEC-007 | Electron Process Isolation | New | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| NFR-SEC-007 | Electron Process Isolation | Partially implemented | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-008 | Controlled IPC Exposure | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-009 | External Network Safety | New | Not mapped |
 | NFR-SEC-010 | Dependency Security | New | Not mapped |

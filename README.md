@@ -1113,48 +1113,37 @@ Profiles determine generated conventions and applicable architecture verificatio
 
 ## 13. Application Scaffolding
 
-AdharaSutra must provide a project generator.
+AdharaSutra provides a project generator.
 
-### Proposed Commands
+### Commands
 
 ```bash
 adhara new my-application
-
-adhara new my-application \
-  --profile electron-cli \
-  --architecture ddd
+adhara new my-application --profile cli --connectors http,sqlite
 ```
 
-Optional capabilities may be selected during generation.
-
-```bash
-adhara new image-studio \
-  --profile electron-cli \
-  --architecture ddd \
-  --connectors http,sqlite,websocket \
-  --openspec
-```
+The implemented `minimal` and `cli` profiles generate packaging, a working
+bootstrap and entry point, an example action and test, documentation, and the
+selected `http`, `sqlite`, or `external` connector services. Generation refuses
+to overwrite existing files unless `--force` is set.
 
 ### Generated Artifacts
 
-The generator should create:
+The generator creates:
 
-- Standard project structure
+- Standard `src/` project structure
 - Python packaging configuration
-- Application bootstrap
-- Framework configuration
-- CLI registration
+- Application bootstrap and module entry point
 - Example action handler
-- Connector configuration
-- State configuration
-- Testing structure
-- Architecture rules
-- OpenSpec setup
-- Development scripts
-- CI verification configuration
-- Electron bridge integration examples, when selected
+- Selected connector services
+- Example test using `ApplicationTestClient`
+- Project README and `.gitignore`
+- CLI registration, for the `cli` profile
 
-Generated projects should be valid and testable immediately after dependency installation.
+Generated projects are valid, testable, and pass `adhara verify` immediately
+after dependency installation. Additional profiles (DDD, Electron CLI, AI worker),
+configuration and state templates, OpenSpec setup, and CI configuration remain
+future work.
 
 ---
 

@@ -15,6 +15,7 @@ from .discovery import ProjectInspector
 from .doctor import application_report, environment_report, render_text
 from .migration import STRATEGIES, analyze_migration, load_statuses
 from .report import (implementation_report, migration_report, render_json, render_markdown, verification_report)
+from .scaffolding import PROFILES, generate
 from .verification import default_profile, verify
 
 
@@ -58,6 +59,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     run.add_argument("--persistent", action="store_true",
                      help="serve sequential JSON-line requests until EOF")
     commands.add_parser("version", help="print the framework version")
+    new = commands.add_parser("new", help="generate a new application project")
+    new.add_argument("path", help="directory to create the project in")
+    new.add_argument("--name", help="application name (default: directory name)")
+    new.add_argument("--package", help="Python package name (default: derived from the name)")
+    new.add_argument("--profile", choices=PROFILES, default="minimal", help="architecture profile (default: minimal)")
+    new.add_argument("--connectors", default="",
+                     help="comma-separated connectors: http, sqlite, external")
+    new.add_argument("--force", action="store_true", help="overwrite existing files")
     doctor = commands.add_parser("doctor", help="diagnose the environment and an optional application")
     doctor.add_argument("target", nargs="?", help="optional module name or path to a Python file defining 'app'")
     doctor.add_argument("--json", action="store_true", help="emit JSON instead of text")
@@ -82,6 +91,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "version":
         print(__version__)
+        return 0
+    if args.command == "new":
+        connectors = [item.strip() for item in args.connectors.split(",") if item.strip()]
+        try:
+            written = generate(args.path, name=args.name, package=args.package,
+                               profile=args.profile, connectors=connectors, force=args.force)
+        except ValueError as exc:
+            print(f"adhara: {exc}", file=sys.stderr)
+            return 2
+        for path in written:
+            print(f"created {path}")
         return 0
     if args.command == "doctor":
         report = environment_report()

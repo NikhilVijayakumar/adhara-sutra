@@ -279,15 +279,15 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-SCAF-001 | New Project Generation | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-SCAF-002 | Architecture Profiles | New | Not mapped |
-| FR-SCAF-003 | Standard Folder Structure | New | Not mapped |
-| FR-SCAF-004 | Framework Bootstrap Generation | New | Not mapped |
-| FR-SCAF-005 | Connector Selection | New | Not mapped |
-| FR-SCAF-006 | Testing Boilerplate | New | Not mapped |
-| FR-SCAF-007 | Documentation Generation | New | Not mapped |
-| FR-SCAF-008 | Architecture Verification Readiness | New | Not mapped |
-| FR-SCAF-009 | Safe Generation | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-SCAF-001 | New Project Generation | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-002 | Architecture Profiles | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-003 | Standard Folder Structure | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-004 | Framework Bootstrap Generation | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-005 | Connector Selection | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-006 | Testing Boilerplate | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-007 | Documentation Generation | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-008 | Architecture Verification Readiness | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
+| FR-SCAF-009 | Safe Generation | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
 
 ## [Security-Related Functional Requirements](functional-security-related-functional-requirements.md)
 

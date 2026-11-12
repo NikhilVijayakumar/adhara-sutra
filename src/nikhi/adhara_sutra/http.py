@@ -44,10 +44,12 @@ class HttpClient:
 
     def __init__(self, *, base_url: str = "", timeout: float = 30.0,
                  headers: Mapping[str, str] | None = None,
+                 auth: tuple[str, str] | None = None,
                  verify: bool = True, follow_redirects: bool = True) -> None:
         self.base_url = base_url
         self.timeout = timeout
         self.headers = dict(headers or {})
+        self.auth = auth
         self.verify = verify
         self.follow_redirects = follow_redirects
         self._client = None
@@ -61,7 +63,7 @@ class HttpClient:
                                  retryable=False) from exc
         self._httpx = httpx
         self._client = httpx.Client(base_url=self.base_url, timeout=self.timeout,
-                                    headers=self.headers, verify=self.verify,
+                                    headers=self.headers, auth=self.auth, verify=self.verify,
                                     follow_redirects=self.follow_redirects)
         return self
 

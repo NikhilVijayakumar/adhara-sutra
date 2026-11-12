@@ -40,6 +40,17 @@ documented interfaces. (FR-HTTP-006)
 - **WHEN** the upstream returns a non-success status
 - **THEN** the caller can inspect the response, or raise a connector error whose retryability follows the status
 
+### Requirement: Authentication configuration
+
+The connector SHALL support HTTP Basic credentials and authorization headers
+provided by application configuration, without requiring credentials in source
+code. (FR-HTTP-005)
+
+#### Scenario: Configured credentials
+
+- **WHEN** an application supplies a username and password or a bearer authorization header
+- **THEN** the connector sends the corresponding authorization on requests
+
 ### Requirement: Operation outcome uncertainty
 
 Transport failures SHALL distinguish requests that were never sent from those

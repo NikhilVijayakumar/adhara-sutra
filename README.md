@@ -128,8 +128,11 @@ service, call `get`/`post`/`put`/`patch`/`delete`/`head`, and read `status`,
 `headers`, `body`, `.text()`, or `.json()`. `raise_for_status()` raises a
 `ConnectorError` for non-success statuses, marking only server, timeout, and
 rate-limit statuses as retryable; transport failures and timeouts are retryable
-connector errors. The client closes when the application stops. Retries,
-authentication helpers, and streaming are not yet provided.
+connector errors. The client closes when the application stops. For Basic
+authentication pass `auth=(username, password)`; for bearer tokens pass an
+`Authorization` header. Obtain credentials from environment variables or the
+application's configuration rather than embedding them in source code. Use HTTPS
+to protect credentials in transit. Retries and streaming are not yet provided.
 
 SQLite is available as `SQLiteDatabase(path=...)`: register it as a service and
 use `execute`, `executemany`, `query`, `query_one`, and `transaction()` for

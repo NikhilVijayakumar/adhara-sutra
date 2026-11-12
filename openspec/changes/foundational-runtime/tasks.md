@@ -26,6 +26,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-CLI-009, CLI version information: `system.hello` reports the application name and version, the framework version, and the supported protocol versions in both one-shot and persistent sessions.
 - [x] Complete and practically verify FR-ERR-002, error classification: every protocol error now carries a stable `category` (protocol, validation, action, lifecycle, internal) derived from its code; checked each category and confirmed the mapping is stable across requests.
 - [x] Complete and practically verify FR-ERR-003, error propagation: handler, validation, and startup failures keep their original exception as the cause and are logged with the traceback while responses stay safe; a shutdown failure no longer replaces an error already propagating.
+- [x] Complete and practically verify FR-LOG-001..004, structured diagnostics: `configure_logging()` installs a JSON stderr handler that `run()` uses, request scope is tracked with a context variable so records carry `request_id`/`action`, tracebacks are preserved, stdout stays protocol-only, and records logged outside a request have empty correlation. Job correlation follows when jobs exist.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

@@ -253,10 +253,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-LOG-001 | Central Logging | Partially implemented | Not mapped |
-| FR-LOG-002 | Structured Logs | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-LOG-003 | Request Correlation | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-LOG-004 | Log Destination Separation | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-LOG-001 | Central Logging | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-LOG-002 | Structured Logs | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-LOG-003 | Request Correlation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-LOG-004 | Log Destination Separation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-005 | Configurable Log Levels | New | Not mapped |
 | FR-LOG-006 | Runtime Diagnostics | New | Not mapped |
 | FR-LOG-007 | Diagnostic Export | New | Not mapped |

@@ -16,6 +16,7 @@ from typing import Any, Callable, TextIO
 from weakref import WeakValueDictionary
 
 from ._version import __version__
+from .diagnostics import _REQUEST, configure_logging
 
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 _LOG = logging.getLogger(__name__)
@@ -238,6 +239,8 @@ class Application:
     async def dispatch(self, request: Any, *,
                        emit: Callable[[dict[str, Any]], None] | None = None) -> dict[str, Any]:
         request_id = request.get("request_id") if isinstance(request, dict) else None
+        action = request.get("action") if isinstance(request, dict) else None
+        token = _REQUEST.set({"request_id": request_id, "action": action})
         try:
             if not isinstance(request, dict) or request.get("kind") != "request":
                 raise ProtocolError("PROTOCOL_INVALID_MESSAGE", "Expected a request object")
@@ -281,6 +284,8 @@ class Application:
         except Exception:
             _LOG.exception("Action execution failed")
             return self._response(request_id, error=_error("RUNTIME_EXECUTION_FAILED", "Action execution failed", retryable=None))
+        finally:
+            _REQUEST.reset(token)
 
     @staticmethod
     def _response(request_id: Any, *, data: Any = None, error: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -354,6 +359,7 @@ class Application:
 
     def run(self, *, persistent: bool = False) -> int:
         """Run the CLI from a synchronous entry point and return its process exit code."""
+        configure_logging()
         try:
             return asyncio.run(self.serve(persistent=persistent))
         except Exception:

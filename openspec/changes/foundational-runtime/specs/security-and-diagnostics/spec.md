@@ -43,9 +43,19 @@ model and serialized through the protocol error envelope. (FR-ERR-001, FR-ERR-00
 ### Requirement: Structured diagnostics with correlation
 
 Logging SHALL be structured, correlated across requests and jobs, and kept
-separate from protocol output. (FR-LOG-002, FR-LOG-003, FR-LOG-004)
+separate from protocol output. (FR-LOG-001, FR-LOG-002, FR-LOG-003, FR-LOG-004)
 
 #### Scenario: Concurrent requests log diagnostics
 
 - **WHEN** two requests are processed concurrently and one logs a diagnostic
 - **THEN** each log line identifies the request it belongs to and protocol messages on stdout remain unpolluted
+
+#### Scenario: A handler logs during a request
+
+- **WHEN** an application handler writes a diagnostic through standard logging
+- **THEN** the record identifies the request's `request_id` and `action`, and stdout carries only protocol messages
+
+#### Scenario: A diagnostic is logged outside a request
+
+- **WHEN** the runtime logs while no request is active
+- **THEN** the record's request correlation fields are empty

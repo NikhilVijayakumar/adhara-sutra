@@ -30,6 +30,11 @@ return synchronous or asynchronous context managers and receive the application
 context. Dependencies start first and resources close in reverse startup order.
 Unknown or cyclic dependencies and invalid configuration raise `BootstrapError`
 before any service starts. The original exception is available as `__cause__`.
+Diagnostics are structured JSON written to stderr; `Application.run()` installs
+the handler automatically and `configure_logging()` is available for custom
+entry points. Each record carries `timestamp`, `level`, `logger`, and `message`,
+plus `request_id` and `action` while a request is being handled and `exception`
+for tracebacks. stdout stays reserved for protocol messages.
 
 **A CLI-First Python Application Framework**
 

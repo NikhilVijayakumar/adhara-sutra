@@ -12,7 +12,8 @@ from typing import Sequence
 from ._version import __version__
 from .application import Application
 from .discovery import ProjectInspector
-from .report import (implementation_report, render_json, render_markdown, verification_report)
+from .migration import STRATEGIES, analyze_migration, load_statuses
+from .report import (implementation_report, migration_report, render_json, render_markdown, verification_report)
 from .verification import default_profile, verify
 
 
@@ -66,6 +67,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     verify_command.add_argument("--output", help="write the report to a file instead of stdout")
     verify_command.add_argument("--strict", action="store_true",
                                 help="treat checks needing review as failures")
+    migrate = commands.add_parser("migrate", help="analyze a project and produce a migration plan")
+    migrate.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
+    migrate.add_argument("--strategy", choices=STRATEGIES, default="incremental",
+                         help="migration strategy (default: incremental)")
+    migrate.add_argument("--status", help="JSON file mapping task ids to recorded statuses")
+    migrate.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
+    migrate.add_argument("--output", help="write the report to a file instead of stdout")
     args = parser.parse_args(argv)
     if args.command == "version":
         print(__version__)
@@ -96,6 +104,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         _write(text, args.output)
         failed = result.status == "fail" or (args.strict and result.status == "needs_review")
         return 1 if failed else 0
+    if args.command == "migrate":
+        if not Path(args.target).is_dir():
+            print(f"adhara: not a directory: {args.target}", file=sys.stderr)
+            return 2
+        try:
+            project = ProjectInspector(args.target).inspect()
+            plan = analyze_migration(project, verify(project), strategy=args.strategy)
+            report = migration_report(plan, statuses=load_statuses(args.status) if args.status else None)
+        except Exception as exc:
+            print(f"adhara: cannot plan migration for {args.target}: {exc}", file=sys.stderr)
+            return 2
+        _write(render_json(report) if args.json else render_markdown(report), args.output)
+        return 0
     if args.command != "run":
         parser.print_help()
         return 0

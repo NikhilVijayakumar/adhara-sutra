@@ -22,6 +22,13 @@ versioned architecture profile against that discovery and reports each check as
 pass, fail, needs review, or not checked, with evidence and remediation. It
 exits 0 without failures, 1 with failures (or with needs-review checks under
 `--strict`), and 2 for an invalid invocation, so it can run in CI.
+`adhara migrate [path] [--strategy adapter-first|incremental|rebuild] [--status FILE]
+[--json] [--output FILE]` combines discovery and verification into a structured
+migration plan: actionable findings with evidence and recommendations, and
+independently verifiable tasks with verification and rollback guidance. The plan
+preserves existing business behavior, CLI and Electron contracts, and persistent
+data, and changes no source files. A status file maps task ids to `pending`,
+`in_progress`, `done`, `deferred`, or `blocked` for progress reporting.
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action

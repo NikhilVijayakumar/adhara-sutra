@@ -120,6 +120,47 @@ Scaffolding SHALL NOT silently overwrite application-owned files.
 - **WHEN** a scaffold command runs in a project that already contains application-owned files
 - **THEN** the generator requires explicit confirmation before replacing any such file
 
+### Requirement: Migration analysis and planning
+
+Migration analysis SHALL combine discovered implementation facts with
+architecture verification results, identify gaps, and produce a structured,
+deterministic plan of independently verifiable tasks for a selected strategy.
+(FR-MIG-001..005, FR-MIG-009, FR-MIG-014, NFR-MIG-005, NFR-MIG-006)
+
+#### Scenario: Planning an existing application
+
+- **WHEN** migration analysis runs on an existing project
+- **THEN** it reports actionable findings with evidence and a plan of tasks, each naming its verification and rollback
+
+### Requirement: Migration preservation constraints
+
+Migration planning SHALL preserve existing business behavior, CLI and Electron
+contracts, and persistent data, and SHALL NOT modify sources or data during
+analysis. (FR-MIG-006, FR-MIG-007, FR-MIG-008, NFR-MIG-001, NFR-MIG-002, NFR-MIG-004, NFR-MIG-010)
+
+#### Scenario: Planning a migration
+
+- **WHEN** a plan is generated for an application with CLI commands, Electron IPC, or persistent data
+- **THEN** the plan records contract-preservation and backup tasks and changes no source files
+
+### Requirement: Migration reporting and status
+
+Migration reports SHALL list completed, deferred, and unresolved tasks and
+findings, record the analyzed source revision, and require deterministic
+verification before completion is claimed.
+(FR-MIG-010, FR-MIG-013, FR-MIG-015, FR-REP-002, FR-REP-003, FR-REP-009, FR-REP-010,
+NFR-MIG-007, NFR-MIG-008, NFR-MIG-009)
+
+#### Scenario: Recording progress
+
+- **WHEN** a status file maps planned task ids to recorded statuses
+- **THEN** the report reflects those statuses and still requires verification evidence before claiming completion
+
+#### Scenario: Source changes after analysis
+
+- **WHEN** the working tree changes after a plan is generated
+- **THEN** the plan's recorded revision identifies that the analysis may be stale
+
 ### Requirement: Migration status tracking
 
 Migration SHALL track task and application-level status without presenting a

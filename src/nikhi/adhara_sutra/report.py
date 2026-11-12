@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .discovery import ProjectProfile
+from .migration import TASK_STATUSES, MigrationPlan
 from .verification import VerificationResult
 
 REPORT_SCHEMA_VERSION = "1"
@@ -61,11 +62,101 @@ def verification_report(result: VerificationResult, *, generated_at: str | None 
             "generated_at": generated_at or _now(), **result.to_dict()}
 
 
+def migration_report(plan: MigrationPlan, *, statuses: dict[str, str] | None = None,
+                     generated_at: str | None = None) -> dict[str, Any]:
+    """Build the versioned, machine-readable migration report for one plan."""
+    statuses = statuses or {}
+    known = {task.id for task in plan.tasks}
+    unknown = sorted(set(statuses) - known)
+    if unknown:
+        raise ValueError(f"unknown migration task id(s): {', '.join(unknown)}")
+    tasks = []
+    for task in plan.tasks:
+        item = task.to_dict()
+        item["status"] = statuses.get(task.id, task.status)
+        tasks.append(item)
+    by_status = {status: 0 for status in TASK_STATUSES}
+    by_phase: dict[str, int] = {}
+    for task in tasks:
+        by_status[task["status"]] += 1
+        by_phase[task["phase"]] = by_phase.get(task["phase"], 0) + 1
+    body = plan.to_dict()
+    body.pop("tasks")
+    return {"schema_version": REPORT_SCHEMA_VERSION, "kind": "migration",
+            "generated_at": generated_at or _now(), **body,
+            "summary": {"findings": len(plan.findings), "tasks": len(tasks),
+                        "by_status": by_status,
+                        "by_phase": {phase: by_phase[phase] for phase in sorted(by_phase)}},
+            "tasks": tasks}
+
+
 def render_markdown(report: dict[str, Any]) -> str:
-    """Render an implementation or verification report as human-readable Markdown."""
-    if report.get("kind") == "verification":
+    """Render an implementation, verification, or migration report as Markdown."""
+    kind = report.get("kind")
+    if kind == "verification":
         return _render_verification(report)
+    if kind == "migration":
+        return _render_migration(report)
     return _render_implementation(report)
+
+
+def _render_migration(report: dict[str, Any]) -> str:
+    source = report["source"]
+    revision = source.get("revision") or "unavailable"
+    dirty = " (uncommitted changes)" if source.get("dirty") else ""
+    summary = report["summary"]
+    by_status = summary["by_status"]
+    lines = ["# Migration plan", "",
+             f"- Schema version: {report['schema_version']}",
+             f"- Generated: {report['generated_at']}",
+             f"- Source: `{source['root']}` at `{revision}`{dirty}",
+             f"- Profile version: {report['profile']['version']}",
+             f"- Strategy: {report['strategy']}", "",
+             "## Summary", "",
+             "| Findings | Tasks | Pending | In progress | Done | Deferred | Blocked |",
+             "| --- | --- | --- | --- | --- | --- | --- |",
+             f"| {summary['findings']} | {summary['tasks']} | {by_status['pending']} | "
+             f"{by_status['in_progress']} | {by_status['done']} | {by_status['deferred']} | "
+             f"{by_status['blocked']} |", ""]
+    if summary["by_phase"]:
+        lines += ["Tasks by phase:", ""]
+        lines += [f"- {phase}: {count}" for phase, count in summary["by_phase"].items()]
+        lines.append("")
+    lines += ["## Findings", ""]
+    if not report["findings"]:
+        lines += ["_None detected._", ""]
+    for finding in report["findings"]:
+        lines += [f"### `{finding['id']}` - {finding['title']}", "",
+                  f"- Severity: {finding['severity']}",
+                  f"- Confidence: {finding['confidence']}"]
+        if finding["rule"]:
+            lines.append(f"- Rule: `{finding['rule']}`")
+        if finding["detail"]:
+            lines.append(f"- Detail: {finding['detail']}")
+        if finding["recommendation"]:
+            lines.append(f"- Recommendation: {finding['recommendation']}")
+        for evidence in finding["evidence"]:
+            lines.append(f"- Evidence: `{evidence['path']}:{evidence['line']}` - `{evidence['snippet']}`")
+        lines.append("")
+    lines += ["## Tasks", ""]
+    for task in report["tasks"]:
+        lines += [f"### `{task['id']}` - {task['title']}", "",
+                  f"- Phase: {task['phase']}",
+                  f"- Status: {task['status']}",
+                  f"- Reversible: {'yes' if task['reversible'] else 'no'}"]
+        if task["findings"]:
+            lines.append(f"- Findings: {', '.join(f'`{item}`' for item in task['findings'])}")
+        if task["verification"]:
+            lines.append(f"- Verification: {task['verification']}")
+        if task["rollback"]:
+            lines.append(f"- Rollback: {task['rollback']}")
+        lines.append("")
+    for title, key in (("Constraints", "constraints"), ("Completion criteria", "completion"),
+                       ("Rollback", "rollback")):
+        lines += [f"## {title}", ""]
+        lines += [f"- {item}" for item in report[key]]
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def _render_verification(report: dict[str, Any]) -> str:

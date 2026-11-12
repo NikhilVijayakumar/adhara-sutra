@@ -27,15 +27,15 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | FR-REP-001 | Implementation Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-REP-002 | Verification Report | New | Not mapped |
-| FR-REP-003 | Migration Report | New | Not mapped |
+| FR-REP-002 | Verification Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-REP-003 | Migration Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-004 | Markdown Output | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-005 | JSON Output | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-006 | Report Versioning | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-007 | Source Revision Tracking | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-008 | Finding Traceability | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-REP-009 | Actionable Recommendations | New | Not mapped |
-| FR-REP-010 | Report Refresh | New | Not mapped |
+| FR-REP-009 | Actionable Recommendations | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-REP-010 | Report Refresh | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [Architecture Discovery Requirements](functional-architecture-discovery-requirements.md)
 
@@ -180,21 +180,21 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-MIG-001 | Existing Project Migration | New | Not mapped |
-| FR-MIG-002 | Migration Analysis | New | Not mapped |
-| FR-MIG-003 | Gap Analysis | New | Not mapped |
-| FR-MIG-004 | Migration Strategies | New | Not mapped |
-| FR-MIG-005 | Migration Plan Generation | New | Not mapped |
-| FR-MIG-006 | Business Behavior Preservation | New | Not mapped |
-| FR-MIG-007 | CLI Compatibility Preservation | New | Not mapped |
-| FR-MIG-008 | Persistence Preservation | New | Not mapped |
-| FR-MIG-009 | Incremental Migration | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-MIG-010 | Migration Status Tracking | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-001 | Existing Project Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-002 | Migration Analysis | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-003 | Gap Analysis | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-004 | Migration Strategies | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-005 | Migration Plan Generation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-006 | Business Behavior Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-007 | CLI Compatibility Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-008 | Persistence Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-009 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-010 | Migration Status Tracking | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-011 | Safe Automated Transformations | New | Not mapped |
 | FR-MIG-012 | Reviewable Changes | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-MIG-013 | Migration Verification | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-MIG-014 | Rollback Planning | New | Not mapped |
-| FR-MIG-015 | Migration Completion Report | New | Not mapped |
+| FR-MIG-013 | Migration Verification | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-014 | Rollback Planning | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-015 | Migration Completion Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [External CLI Connector Requirements](functional-external-cli-connector-requirements.md)
 
@@ -449,16 +449,16 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-MIG-001 | Business Behavior Preservation | New | Not mapped |
-| NFR-MIG-002 | Non-Destructive Analysis | New | Not mapped |
+| NFR-MIG-001 | Business Behavior Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-002 | Non-Destructive Analysis | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-003 | Reviewable Transformations | New | Not mapped |
-| NFR-MIG-004 | Data Integrity | New | Not mapped |
-| NFR-MIG-005 | Incremental Migration | New | Not mapped |
-| NFR-MIG-006 | Rollback Readiness | New | Not mapped |
-| NFR-MIG-007 | Source Revision Awareness | New | Not mapped |
-| NFR-MIG-008 | Agent Report Accuracy | New | Not mapped |
-| NFR-MIG-009 | Migration Completion Evidence | New | Not mapped |
-| NFR-MIG-010 | Business Logic Modification Control | New | Not mapped |
+| NFR-MIG-004 | Data Integrity | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-005 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-006 | Rollback Readiness | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-007 | Source Revision Awareness | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-008 | Agent Report Accuracy | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-009 | Migration Completion Evidence | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-010 | Business Logic Modification Control | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [Observability Requirements](non-functional-observability-requirements.md)
 

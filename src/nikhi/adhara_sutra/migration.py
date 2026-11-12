@@ -1,0 +1,288 @@
+"""Deterministic migration analysis and planning for existing applications."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass, replace
+from pathlib import Path
+from typing import Any
+
+from .discovery import Evidence, Finding, ProjectProfile
+from .verification import FAIL, NEEDS_REVIEW, VerificationResult
+
+STRATEGIES = ("adapter-first", "incremental", "rebuild")
+TASK_STATUSES = ("pending", "in_progress", "done", "deferred", "blocked")
+
+_PHASE_BY_RULE = {
+    "ARCH-STRUCT-001": "structure",
+    "ARCH-STRUCT-002": "structure",
+    "ARCH-STRUCT-003": "structure",
+    "ARCH-STRUCT-004": "structure",
+    "ARCH-DEP-001": "dependencies",
+    "ARCH-FW-001": "runtime",
+    "ARCH-FW-002": "runtime",
+    "ARCH-ENTRY-001": "entry-points",
+    "ARCH-CONN-001": "integrations",
+    "ARCH-CONN-002": "integrations",
+    "ARCH-CONN-003": "integrations",
+    "ARCH-STATE-001": "state-jobs",
+    "ARCH-JOB-001": "state-jobs",
+}
+_VERIFICATION_BY_RULE = {
+    "ARCH-STRUCT-001": "`adhara verify` reports ARCH-STRUCT-001 as pass.",
+    "ARCH-STRUCT-002": "`adhara verify` reports ARCH-STRUCT-002 as pass.",
+    "ARCH-STRUCT-003": "`adhara verify` reports ARCH-STRUCT-003 as pass.",
+    "ARCH-STRUCT-004": "`adhara verify` reports ARCH-STRUCT-004 as pass.",
+    "ARCH-DEP-001": "`adhara verify` reports ARCH-DEP-001 as pass.",
+    "ARCH-FW-001": "The migrated runtime starts and `adhara verify` reports ARCH-FW-001 as pass.",
+    "ARCH-FW-002": "The existing behavior is reachable through actions and `adhara verify` reports ARCH-FW-002 as pass.",
+    "ARCH-ENTRY-001": "The entry point runs through the framework and `adhara verify` reports ARCH-ENTRY-001 as pass.",
+    "ARCH-CONN-001": "HTTP behavior matches the existing integration and `adhara verify` reports ARCH-CONN-001 as pass.",
+    "ARCH-CONN-002": "External command behavior matches the existing integration and `adhara verify` reports ARCH-CONN-002 as pass.",
+    "ARCH-CONN-003": "Database behavior matches the existing integration and `adhara verify` reports ARCH-CONN-003 as pass.",
+    "ARCH-STATE-001": "State behavior is preserved and `adhara verify` reports ARCH-STATE-001 as pass.",
+    "ARCH-JOB-001": "Job behavior is preserved and `adhara verify` reports ARCH-JOB-001 as pass.",
+}
+_STRATEGY_TASKS = {
+    "adapter-first": {
+        "phase": "integrations",
+        "title": "Adopt managed connectors behind the existing interfaces",
+        "verification": "Existing integration tests pass with the connector in place.",
+        "rollback": "Restore the direct integration and the previous application version.",
+    },
+    "incremental": {
+        "phase": "runtime",
+        "title": "Migrate one action or module at a time and verify each unit",
+        "verification": "Each migrated unit passes `adhara verify` and its regression tests before the next unit starts.",
+        "rollback": "Revert the current unit with version control; earlier verified units remain.",
+    },
+    "rebuild": {
+        "phase": "runtime",
+        "title": "Rebuild captured behaviors on the framework while the old application stays runnable",
+        "verification": "Rebuilt behaviors match the captured baseline and `adhara verify` passes.",
+        "rollback": "Keep the old application runnable until the rebuild is verified, then remove it.",
+    },
+}
+
+
+@dataclass(frozen=True)
+class MigrationFinding:
+    """An actionable gap between the current implementation and the target architecture."""
+
+    id: str
+    title: str
+    severity: str
+    confidence: str
+    detail: str
+    evidence: tuple[Evidence, ...] = ()
+    rule: str = ""
+    recommendation: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"id": self.id, "title": self.title, "severity": self.severity,
+                "confidence": self.confidence, "detail": self.detail,
+                "evidence": [asdict(item) for item in self.evidence],
+                "rule": self.rule, "recommendation": self.recommendation}
+
+
+@dataclass(frozen=True)
+class MigrationTask:
+    """An independently verifiable unit of migration work."""
+
+    id: str
+    phase: str
+    title: str
+    status: str = "pending"
+    findings: tuple[str, ...] = ()
+    verification: str = ""
+    rollback: str = ""
+    reversible: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"id": self.id, "phase": self.phase, "title": self.title,
+                "status": self.status, "findings": list(self.findings),
+                "verification": self.verification, "rollback": self.rollback,
+                "reversible": self.reversible}
+
+
+@dataclass
+class MigrationPlan:
+    """A structured, deterministic plan for adopting the framework in an existing project."""
+
+    profile_version: str
+    source: dict[str, Any]
+    strategy: str
+    constraints: tuple[str, ...]
+    findings: list[MigrationFinding]
+    tasks: list[MigrationTask]
+    completion: tuple[str, ...]
+    rollback: tuple[str, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"profile": {"version": self.profile_version}, "source": self.source,
+                "strategy": self.strategy, "constraints": list(self.constraints),
+                "findings": [finding.to_dict() for finding in self.findings],
+                "tasks": [task.to_dict() for task in self.tasks],
+                "completion": list(self.completion), "rollback": list(self.rollback)}
+
+
+def analyze_migration(project: ProjectProfile, verification: VerificationResult,
+                      *, strategy: str = "incremental") -> MigrationPlan:
+    """Derive a migration plan from discovery and architecture verification results."""
+    if strategy not in STRATEGIES:
+        raise ValueError(f"unknown migration strategy: {strategy}")
+    findings = _findings(project, verification)
+    tasks = _tasks(project, findings, strategy)
+    return MigrationPlan(
+        profile_version=verification.profile_version,
+        source={"root": project.root, "revision": project.revision, "dirty": project.dirty},
+        strategy=strategy,
+        constraints=(
+            "Existing business behavior is preserved unless a change is explicitly authorized.",
+            "Existing CLI commands and Electron IPC contracts remain available during migration.",
+            "Persistent data is backed up before any schema or write-path change.",
+            "Migration changes are applied incrementally and reviewed before they are verified.",
+        ),
+        findings=findings,
+        tasks=tasks,
+        completion=(
+            "`adhara verify --strict` passes for the migrated project.",
+            "The captured regression tests pass.",
+            "Existing CLI and Electron contract tests pass.",
+            "A database backup and restore have been exercised when persistence changes.",
+        ),
+        rollback=(
+            "Keep the existing application entry point until the migrated runtime is verified.",
+            "The plan changes no source files; revert applied changes with version control.",
+            "Restore the database backup and the previous application version when persistence changes.",
+            "Tasks marked irreversible require a reviewed backup and recovery procedure.",
+        ),
+    )
+
+
+def load_statuses(path: str | Path) -> dict[str, str]:
+    """Load a JSON object mapping task ids to recorded migration statuses."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("the status file must contain a JSON object mapping task ids to statuses")
+    statuses = {str(key): str(value) for key, value in data.items()}
+    invalid = sorted({value for value in statuses.values() if value not in TASK_STATUSES})
+    if invalid:
+        raise ValueError(f"invalid task status(es): {', '.join(invalid)}; "
+                         f"expected one of {', '.join(TASK_STATUSES)}")
+    return statuses
+
+
+def _findings(project: ProjectProfile, verification: VerificationResult) -> list[MigrationFinding]:
+    findings: list[MigrationFinding] = []
+    for check in verification.checks:
+        if check.status not in (FAIL, NEEDS_REVIEW):
+            continue
+        findings.append(MigrationFinding(
+            id=f"MIG-{check.rule}", title=check.title, severity=check.severity,
+            confidence="observed" if check.evidence else "inferred", detail=check.detail,
+            evidence=check.evidence, rule=check.rule,
+            recommendation=check.remediation or "Review the check and update the implementation."))
+    covered = {finding.rule for finding in findings}
+    for integration, rule, title, recommendation in (
+            ("HTTP", "ARCH-CONN-001", "Adopt the managed HTTP connector",
+             "Replace direct HTTP calls with HttpClient behind the existing interface."),
+            ("external CLI", "ARCH-CONN-002", "Adopt the managed external CLI connector",
+             "Replace subprocess calls with ExternalCommand behind the existing interface."),
+            ("SQLite", "ARCH-CONN-003", "Adopt the managed SQLite connector",
+             "Replace direct sqlite3 access with SQLiteDatabase behind the existing interface.")):
+        if rule in covered:
+            continue
+        direct = [finding for finding in project.by_kind("integration")
+                  if finding.name == integration and not _is_framework_path(finding)]
+        if direct:
+            findings.append(MigrationFinding(
+                id=f"MIG-INT-{integration.upper().replace(' ', '-')}-001", title=title,
+                severity="warning", confidence="inferred",
+                detail=f"Direct {integration} usage was detected in the existing implementation.",
+                evidence=tuple(item for finding in direct[:3] for item in finding.evidence),
+                rule=rule, recommendation=recommendation))
+    if project.by_kind("cli") or _scripts(project):
+        evidence = _first_evidence(project, "cli") or _first_evidence(project, "entry_point")
+        findings.append(MigrationFinding(
+            id="MIG-CLI-001", title="Preserve existing CLI commands",
+            severity="warning", confidence="observed" if evidence else "inferred",
+            detail="Existing CLI commands and their output contracts must remain available.",
+            evidence=evidence, recommendation="Add CLI contract tests and route commands through actions "
+                                              "while preserving names, arguments, and output."))
+    if project.by_kind("electron-process") or project.by_kind("electron-ipc"):
+        evidence = _first_evidence(project, "electron-ipc") or _first_evidence(project, "electron-process")
+        findings.append(MigrationFinding(
+            id="MIG-ELECTRON-001", title="Preserve Electron IPC contracts",
+            severity="warning", confidence="observed" if evidence else "inferred",
+            detail="Electron IPC channels, payloads, and process boundaries must remain stable.",
+            evidence=evidence, recommendation="Keep channel names and payloads stable and test the bridge "
+                                              "during and after migration."))
+    sqlite = [finding for finding in project.by_kind("integration")
+              if finding.name == "SQLite" and not _is_framework_path(finding)]
+    if sqlite:
+        findings.append(MigrationFinding(
+            id="MIG-DATA-001", title="Preserve persistent data",
+            severity="warning", confidence="inferred",
+            detail="Persistent data is present; schema compatibility and write paths must be preserved.",
+            evidence=tuple(item for finding in sqlite[:3] for item in finding.evidence),
+            recommendation="Back up the database, verify schema compatibility, and test restore "
+                           "before changing persistence."))
+    return sorted({finding.id: finding for finding in findings}.values(), key=lambda item: item.id)
+
+
+def _tasks(project: ProjectProfile, findings: list[MigrationFinding],
+           strategy: str) -> list[MigrationTask]:
+    tasks: list[MigrationTask] = []
+    if project.by_kind("action") or project.by_kind("entry_point") or project.by_kind("cli"):
+        tasks.append(MigrationTask(
+            id="", phase="baseline", title="Capture current behavior with regression tests",
+            verification="The captured regression tests pass against the current application.",
+            rollback="Revert test-only changes."))
+    for finding in findings:
+        phase = _PHASE_BY_RULE.get(finding.rule)
+        if phase is None:
+            phase = {"MIG-CLI-001": "contracts", "MIG-ELECTRON-001": "contracts",
+                     "MIG-DATA-001": "persistence"}.get(finding.id, "integrations")
+        tasks.append(MigrationTask(
+            id="", phase=phase, title=finding.title, findings=(finding.id,),
+            verification=_VERIFICATION_BY_RULE.get(
+                finding.rule, "The existing behavior is preserved and the related regression tests pass."),
+            rollback="Revert this change with version control; the previous implementation remains runnable.",
+            reversible=finding.id != "MIG-DATA-001"))
+    strategy_task = _STRATEGY_TASKS[strategy]
+    tasks.append(MigrationTask(id="", phase=strategy_task["phase"], title=strategy_task["title"],
+                               verification=strategy_task["verification"],
+                               rollback=strategy_task["rollback"]))
+    tasks.append(MigrationTask(
+        id="", phase="verification", title="Run architecture verification and required regression tests",
+        verification="`adhara verify --strict` and the regression suite pass.",
+        rollback="Not applicable; this task changes no source.", reversible=False))
+    order = _phase_order(strategy)
+    tasks.sort(key=lambda task: (order.index(task.phase), task.title))
+    return [replace(task, id=f"MIG-{index:03d}") for index, task in enumerate(tasks, 1)]
+
+
+def _phase_order(strategy: str) -> tuple[str, ...]:
+    if strategy == "adapter-first":
+        return ("baseline", "integrations", "runtime", "entry-points", "state-jobs", "contracts",
+                "persistence", "dependencies", "structure", "verification")
+    if strategy == "rebuild":
+        return ("baseline", "runtime", "structure", "dependencies", "integrations", "entry-points",
+                "state-jobs", "contracts", "persistence", "verification")
+    return ("baseline", "structure", "dependencies", "runtime", "entry-points", "integrations",
+            "state-jobs", "contracts", "persistence", "verification")
+
+
+def _scripts(project: ProjectProfile) -> list[Finding]:
+    return [finding for finding in project.by_kind("entry_point")
+            if finding.name not in ("__main__", "app.run()", "application.run()")]
+
+
+def _first_evidence(project: ProjectProfile, kind: str) -> tuple[Evidence, ...]:
+    findings = project.by_kind(kind)
+    return findings[0].evidence if findings else ()
+
+
+def _is_framework_path(finding: Finding) -> bool:
+    return any("nikhi/adhara_sutra/" in evidence.path for evidence in finding.evidence)

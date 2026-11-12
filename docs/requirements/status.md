@@ -265,9 +265,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-PKG-001 | Python Package Distribution | Partially implemented | Not mapped |
-| FR-PKG-002 | Command-Line Entry Point | New | Not mapped |
-| FR-PKG-003 | Optional Dependencies | New | Not mapped |
+| FR-PKG-001 | Python Package Distribution | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-PKG-002 | Command-Line Entry Point | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-PKG-003 | Optional Dependencies | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-004 | Electron Bridge Distribution | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-PKG-005 | Supported Platform Packaging | New | Not mapped |
 | FR-PKG-006 | Production Runtime Support | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
@@ -333,9 +333,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-TEST-001 | Framework Testing Utilities | New | Not mapped |
+| FR-TEST-001 | Framework Testing Utilities | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-002 | CLI Contract Tests | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-TEST-003 | Action Handler Tests | New | Not mapped |
+| FR-TEST-003 | Action Handler Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-004 | Connector Test Doubles | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-005 | Process Execution Tests | New | Not mapped |
 | FR-TEST-006 | State and Job Tests | New | Not mapped |

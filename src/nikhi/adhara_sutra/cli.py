@@ -1,0 +1,64 @@
+"""The ``adhara`` developer command."""
+
+from __future__ import annotations
+
+import argparse
+import importlib
+import importlib.util
+import sys
+from pathlib import Path
+from typing import Sequence
+
+from ._version import __version__
+from .application import Application
+
+
+def _load(target: str) -> Application:
+    """Load an Application from a module name or a Python file defining app/application/create_app."""
+    path = Path(target)
+    if path.is_file():
+        spec = importlib.util.spec_from_file_location(f"_adhara_app_{path.stem}", path)
+        if spec is None or spec.loader is None:
+            raise ValueError("the file cannot be loaded as a Python module")
+        module = importlib.util.module_from_spec(spec)
+        sys.path.insert(0, str(path.resolve().parent))
+        try:
+            spec.loader.exec_module(module)
+        finally:
+            sys.path.pop(0)
+    else:
+        module = importlib.import_module(target)
+    app = getattr(module, "app", None) or getattr(module, "application", None)
+    if app is None and callable(getattr(module, "create_app", None)):
+        app = module.create_app()
+    if not isinstance(app, Application):
+        raise ValueError("define an Application as 'app', 'application', or create_app()")
+    return app
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="adhara", description="AdharaSutra developer command")
+    parser.add_argument("--version", action="version", version=__version__)
+    commands = parser.add_subparsers(dest="command")
+    run = commands.add_parser("run", help="run an application")
+    run.add_argument("target", help="module name or path to a Python file defining 'app'")
+    run.add_argument("--persistent", action="store_true",
+                     help="serve sequential JSON-line requests until EOF")
+    commands.add_parser("version", help="print the framework version")
+    args = parser.parse_args(argv)
+    if args.command == "version":
+        print(__version__)
+        return 0
+    if args.command != "run":
+        parser.print_help()
+        return 0
+    try:
+        app = _load(args.target)
+    except Exception as exc:
+        print(f"adhara: cannot load {args.target}: {exc}", file=sys.stderr)
+        return 2
+    return app.run(persistent=args.persistent)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

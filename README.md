@@ -6,7 +6,13 @@ The initial runtime is available as `nikhi.adhara_sutra`. For a working example,
 run `PYTHONPATH=src python3 examples/basic_app.py` and send a newline-terminated
 request such as `{"kind":"request","protocol_version":"1.0","request_id":"1","action":"greeting.create","payload":{"name":"world"}}`.
 Use `--persistent` to keep the process open; the first request must call
-`system.hello`. Persistent requests currently execute sequentially.
+`system.hello`. Persistent requests currently execute sequentially. With the
+package installed, `adhara run examples/basic_app.py` (or a module name) loads
+the application's `app`, `application`, or `create_app()` and serves the same
+protocol; `adhara version` prints the framework version. Tests can use
+`ApplicationTestClient(app)` as an async context manager to start the runtime
+and `await client.call(action, payload)` (or `.dispatch` for the full envelope)
+without the CLI transport.
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action

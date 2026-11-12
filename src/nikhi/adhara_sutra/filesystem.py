@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import shutil
 import sys
 import tempfile
@@ -90,3 +91,19 @@ class PathBoundary:
     def open(self, path: str | os.PathLike, mode: str = "r", **kwargs) -> Any:
         """Open a file inside the boundary; read modes require the file to exist."""
         return self.resolve(path, must_exist=mode.startswith("r")).open(mode, **kwargs)
+
+    def read_text(self, path: str | os.PathLike, *, encoding: str = "utf-8") -> str:
+        """Read a text file within the boundary."""
+        return self.resolve(path, must_exist=True).read_text(encoding=encoding)
+
+    def write_text(self, path: str | os.PathLike, content: str, *, encoding: str = "utf-8") -> int:
+        """Write text within the boundary; the parent directory must already exist."""
+        return self.resolve(path).write_text(content, encoding=encoding)
+
+    def read_json(self, path: str | os.PathLike, *, encoding: str = "utf-8") -> Any:
+        """Read and decode JSON within the boundary."""
+        return json.loads(self.read_text(path, encoding=encoding))
+
+    def write_json(self, path: str | os.PathLike, value: Any, *, encoding: str = "utf-8") -> int:
+        """Encode and write JSON within the boundary."""
+        return self.write_text(path, json.dumps(value, ensure_ascii=False, allow_nan=False), encoding=encoding)

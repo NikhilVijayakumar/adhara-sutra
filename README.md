@@ -155,9 +155,11 @@ for a portable layout); `ensure()` creates them and `temporary()` yields an
 application-scoped temporary directory that is removed on exit, including on
 error. `PathBoundary(*roots)` resolves framework-managed paths against configured
 roots and rejects traversal, escaping symbolic links, and sibling-prefix paths
-with `PathViolation`; `open()` applies the same check to reads and writes.
-Large-artifact references and generic file-operation helpers are not yet
-provided.
+with `PathViolation`; `open()`, `read_text()`, `write_text()`, `read_json()`,
+and `write_json()` apply the same check. Text and JSON use UTF-8 by default;
+write helpers require the parent directory to exist and propagate errors.
+Large-artifact references are not yet provided. Path checks resolve symbolic
+links at the time of the check and do not protect against concurrent path changes.
 
 The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
 spawns one persistent backend, performs the `system.hello` handshake, correlates

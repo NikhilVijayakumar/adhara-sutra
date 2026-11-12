@@ -6,6 +6,7 @@ import asyncio
 import inspect
 import json
 import logging
+import os
 import re
 import sys
 import threading
@@ -133,6 +134,7 @@ class Application:
 
     def __init__(self, name: str, version: str, *, config: dict[str, Any] | None = None,
                  validate_config: Callable[[dict[str, Any]], None] | None = None,
+                 config_file: str | os.PathLike | None = None,
                  max_concurrent_jobs: int = 4, max_queued_jobs: int = 64):
         if not isinstance(name, str) or not name.strip() or name != name.strip():
             raise ApplicationDefinitionError("INVALID_APPLICATION_NAME", "name", "Application name must be a non-empty string without surrounding whitespace")
@@ -140,6 +142,8 @@ class Application:
             raise ApplicationDefinitionError("INVALID_APPLICATION_VERSION", "version", "Application version must be a non-empty string without surrounding whitespace")
         if config is not None and not isinstance(config, dict):
             raise ApplicationDefinitionError("INVALID_APPLICATION_CONFIG", "config", "Configuration must be a dictionary")
+        if config_file is not None and not isinstance(config_file, (str, os.PathLike)):
+            raise ApplicationDefinitionError("INVALID_CONFIG_FILE", "config_file", "Configuration file must be a path")
         if not isinstance(max_concurrent_jobs, int) or max_concurrent_jobs < 1:
             raise ApplicationDefinitionError("INVALID_JOB_CONCURRENCY", "max_concurrent_jobs", "Job concurrency must be a positive integer")
         if not isinstance(max_queued_jobs, int) or max_queued_jobs < 0:
@@ -149,7 +153,10 @@ class Application:
         self._max_concurrent_jobs, self._max_queued_jobs = max_concurrent_jobs, max_queued_jobs
         self._job_handlers: dict[str, tuple[Callable[..., Any], float | None]] = {}
         self._jobs: JobManager | None = None
-        self.context = ApplicationContext({}, dict(config or {}), {}, state=self._state)
+        self._base_config = dict(config or {})
+        self._config_file = os.fspath(config_file) if config_file is not None else None
+        self._config_overrides: dict[str, Any] = {}
+        self.context = ApplicationContext({}, dict(self._base_config), {}, state=self._state)
         if validate_config is not None and not callable(validate_config):
             raise ApplicationDefinitionError("INVALID_CONFIG_VALIDATOR", "validate_config", "Configuration validator must be callable")
         self._validate_config = validate_config
@@ -233,17 +240,53 @@ class Application:
                                   state=self._state, session_state=session_state, request_state={},
                                   jobs=JobService(self._jobs, emit, session_state))
 
+    def override_config(self, values: dict[str, Any]) -> None:
+        """Override configuration at runtime; overrides must precede startup."""
+        if not isinstance(values, dict):
+            raise ValueError("Configuration overrides must be a dictionary")
+        if self.state != "created":
+            raise RuntimeError("Configuration overrides must precede startup")
+        self._config_overrides.update(values)
+
+    def _merged_config(self) -> dict[str, Any]:
+        """Merge defaults, the JSON config file, environment values, then overrides."""
+        config = dict(self._base_config)
+        path = self._config_file or os.environ.get("ADHARA_CONFIG_FILE")
+        if path:
+            try:
+                with open(path, encoding="utf-8") as handle:
+                    loaded = json.load(handle)
+            except OSError as exc:
+                raise BootstrapError("INVALID_CONFIGURATION", f"Configuration file cannot be read: {path}") from exc
+            except ValueError as exc:
+                raise BootstrapError("INVALID_CONFIGURATION", f"Configuration file is not valid JSON: {path}") from exc
+            if not isinstance(loaded, dict):
+                raise BootstrapError("INVALID_CONFIGURATION", f"Configuration file must contain an object: {path}")
+            config.update(loaded)
+        prefix = "ADHARA_CONFIG_"
+        for key, value in os.environ.items():
+            if key.startswith(prefix) and len(key) > len(prefix) and key != "ADHARA_CONFIG_FILE":
+                try:
+                    value = json.loads(value)
+                except ValueError:
+                    pass
+                config[key[len(prefix):].lower()] = value
+        config.update(self._config_overrides)
+        return config
+
     async def start(self) -> None:
         self._transition("initializing")
         try:
+            config = self._merged_config()
             if self._validate_config is not None:
                 try:
-                    validated = self._validate_config(self.context.config)
+                    validated = self._validate_config(config)
                 except (ValueError, TypeError) as exc:
-                    raise BootstrapError("INVALID_CONFIGURATION", "Application configuration is invalid") from exc
+                    raise BootstrapError("INVALID_CONFIGURATION", f"Application configuration is invalid: {exc}") from exc
                 if isinstance(validated, dict):
-                    self.context = ApplicationContext(self.context.services, validated, self.context.metadata,
-                                                      state=self.context.state)
+                    config = validated
+            self.context = ApplicationContext(self.context.services, config, self.context.metadata,
+                                              state=self.context.state)
             graph = {name: deps for name, (_, deps) in self._services.items()}
             missing = {dep for deps in graph.values() for dep in deps if dep not in graph}
             if missing:

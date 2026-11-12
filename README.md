@@ -32,6 +32,12 @@ return synchronous or asynchronous context managers and receive the application
 context. Dependencies start first and resources close in reverse startup order.
 Unknown or cyclic dependencies and invalid configuration raise `BootstrapError`
 before any service starts. The original exception is available as `__cause__`.
+Configuration merges, lowest priority first: the `config` mapping, a JSON object
+from `config_file=` or `ADHARA_CONFIG_FILE`, `ADHARA_CONFIG_<KEY>` environment
+variables (lowercased top-level keys, values parsed as JSON when possible), and
+`app.override_config({...})` before startup. Validation runs on the merged
+mapping. An unreadable, malformed, or non-object config file aborts startup with
+its path in the error.
 Diagnostics are structured JSON written to stderr; `Application.run()` installs
 the handler automatically and `configure_logging()` is available for custom
 entry points. The level defaults to `ADHARA_LOG_LEVEL` (INFO when unset) and can

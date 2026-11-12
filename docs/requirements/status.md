@@ -6,7 +6,7 @@ Snapshot: 2026-11-12. Requirements and linked OpenSpec specifications remain pro
 
 The specification column identifies draft specifications that explicitly cite the requirement, including cited ranges. A link does not imply the entire requirement is specified. “Not mapped” means no explicit citation was found; it does not mean the requirement is rejected. Open questions are decisions, not implementation tasks.
 
-Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connector, Electron, job, state, migration and verifier implementations are not present.
+Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connectors, the Electron bridge, migration, and verification tooling are not present.
 
 OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundational-runtime/proposal.md) and its [implementation tasks](../../openspec/changes/foundational-runtime/tasks.md). Four completed OpenSpec planning artifacts describe document readiness, not finished functionality.
 
@@ -94,13 +94,13 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | FR-CFG-001 | Central Configuration | Completed | Not mapped |
-| FR-CFG-002 | Multiple Configuration Sources | New | Not mapped |
+| FR-CFG-002 | Multiple Configuration Sources | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | FR-CFG-003 | Configuration Validation | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
-| FR-CFG-004 | Configuration Precedence | New | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| FR-CFG-004 | Configuration Precedence | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | FR-CFG-005 | Application-Specific Settings | Completed | Not mapped |
-| FR-CFG-006 | Secret Handling | New | Not mapped |
-| FR-CFG-007 | Runtime Overrides | New | Not mapped |
-| FR-CFG-008 | Configuration Diagnostics | New | Not mapped |
+| FR-CFG-006 | Secret Handling | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| FR-CFG-007 | Runtime Overrides | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| FR-CFG-008 | Configuration Diagnostics | Partially implemented | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 
 ## [Connector Framework Requirements](functional-connector-framework-requirements.md)
 

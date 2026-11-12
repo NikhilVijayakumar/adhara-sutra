@@ -3,13 +3,28 @@
 ### Requirement: Validate configuration before dependent startup
 
 The runtime SHALL validate configuration before starting dependent components.
-(FR-RUN-002, FR-CFG-003, FR-CFG-004)
+(FR-RUN-002, FR-CFG-003, FR-CFG-004, FR-CFG-008)
 
 #### Scenario: Higher-priority configuration is invalid
 
 - **WHEN** an override contains an invalid value
 - **THEN** startup reports validation failure instead of silently falling back to a lower-priority value
 - **AND** dependent components do not start
+
+### Requirement: Deterministic configuration sources
+
+The runtime SHALL merge documented configuration sources in a deterministic
+precedence before validation. (FR-CFG-002, FR-CFG-004, FR-CFG-006, FR-CFG-007)
+
+#### Scenario: Sources overlap
+
+- **WHEN** defaults, a config file, environment values, and runtime overrides all define a key
+- **THEN** the highest-priority source wins, in the order overrides, environment, file, defaults
+
+#### Scenario: A higher-priority source is invalid
+
+- **WHEN** the config file is missing, unreadable, or not a JSON object
+- **THEN** startup fails with an actionable error naming the file and no service starts
 
 ### Requirement: Clean up failed initialization
 

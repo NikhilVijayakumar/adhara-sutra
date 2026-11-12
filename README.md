@@ -88,6 +88,16 @@ owned by the thread that starts the application, so cross-thread use is
 rejected. Schema migrations, backup and integrity helpers, and a persistent-state
 adapter are not yet provided.
 
+External commands run through `ExternalCommand(executable, search_path=...)`:
+`await run(args, timeout=..., input=..., cwd=..., env=..., on_output=...)`
+passes a structured argument array without a shell, streams stdout and stderr
+lines to `on_output(stream, chunk)`, and returns `CommandResult` with the exit
+status, captured output, and duration. `raise_for_status()` raises a
+non-retryable `ConnectorError` for a non-zero exit. Timeouts and cancellation
+terminate the process tree and report retryable errors; stopping the application
+also terminates any command still running. Output parsers and interactive
+process sessions are not yet provided.
+
 The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
 spawns one persistent backend, performs the `system.hello` handshake, correlates
 responses, forwards events, and rejects pending work when the backend exits. The

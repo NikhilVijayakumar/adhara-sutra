@@ -200,13 +200,13 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-EXT-001 | External Executable Invocation | New | Not mapped |
-| FR-EXT-002 | Executable Discovery | New | Not mapped |
-| FR-EXT-003 | Argument Management | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
-| FR-EXT-004 | Process Output Capture | New | Not mapped |
-| FR-EXT-005 | Streaming Output | New | Not mapped |
-| FR-EXT-006 | Timeout and Cancellation | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
-| FR-EXT-007 | Process Cleanup | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-EXT-001 | External Executable Invocation | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
+| FR-EXT-002 | Executable Discovery | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
+| FR-EXT-003 | Argument Management | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
+| FR-EXT-004 | Process Output Capture | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
+| FR-EXT-005 | Streaming Output | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
+| FR-EXT-006 | Timeout and Cancellation | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
+| FR-EXT-007 | Process Cleanup | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 | FR-EXT-008 | Output Parsing Extensions | New | Not mapped |
 | FR-EXT-009 | External CLI Compatibility | New | Not mapped |
 | FR-EXT-010 | Interactive External Processes | New | Not mapped |

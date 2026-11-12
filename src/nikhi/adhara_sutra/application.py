@@ -24,6 +24,7 @@ _MAX_LINE = 1024 * 1024
 _EXIT_INVALID_INVOCATION = 2
 _EXIT_INITIALIZATION_FAILED = 3
 _EXIT_ACTION_FAILED = 4
+_EXIT_CANCELLED = 6
 _EXIT_PROTOCOL_FAILED = 8
 _EXIT_INTERNAL_FAILED = 10
 _ERROR_EXIT_CODES = {
@@ -174,7 +175,8 @@ class Application:
 
     def list_actions(self) -> list[dict[str, Any]]:
         """Return registered action metadata for diagnostics and documentation."""
-        return [{"name": name, "input_schema": meta["validate"] is not None, "output_schema": meta["output"] is not None}
+        return [{"name": name, "description": inspect.getdoc(meta["handler"]) or "",
+                 "input_schema": meta["validate"] is not None, "output_schema": meta["output"] is not None}
                 for name, meta in sorted(self._actions.items())]
 
     def service(self, name: str, factory: Callable[[ApplicationContext], Any], *,
@@ -254,11 +256,14 @@ class Application:
             if name == "system.hello":
                 result = {"protocol_version": "1.0", "supported_protocol_versions": ["1.0"],
                           "framework_version": __version__, "name": self.name, "version": self.version}
+            elif name == "system.help":
+                result = {"framework_version": __version__, "actions": self.list_actions()}
             else:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
                 if name not in self._actions:
-                    raise ProtocolError("ACTION_NOT_FOUND", "Action is not registered")
+                    raise ProtocolError("ACTION_NOT_FOUND", "Action is not registered",
+                                        details={"available_actions": sorted(self._actions)})
                 meta = self._actions[name]
                 handler, validate, output = meta["handler"], meta["validate"], meta["output"]
                 if validate is not None:
@@ -362,6 +367,9 @@ class Application:
         configure_logging()
         try:
             return asyncio.run(self.serve(persistent=persistent))
+        except KeyboardInterrupt:
+            _LOG.warning("Application interrupted")
+            return _EXIT_CANCELLED
         except Exception:
             _LOG.exception("Application runtime failed")
             return _EXIT_INTERNAL_FAILED

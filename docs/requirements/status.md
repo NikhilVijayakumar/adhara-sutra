@@ -1,6 +1,6 @@
 # Requirement and implementation status
 
-Snapshot: 2026-11-11. Requirements and linked OpenSpec specifications remain proposed; implementation status records the evidence available so far, not architectural approval.
+Snapshot: 2026-11-12. Requirements and linked OpenSpec specifications remain proposed; implementation status records the evidence available so far, not architectural approval.
 
 **In progress**: the single active requirement. **New**: no implementation of the requirement has been identified. **Partially implemented**: related code exists, but the requirement or its verification is incomplete; this does not mean it is being actively worked on. **Completed**: the requirement has been implemented and checked against its stated acceptance criteria. Status is per requirement, not per OpenSpec artifact.
 
@@ -85,9 +85,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-CLI-005 | One-Shot CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-006 | Persistent CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-007 | Standard Exit Codes | Partially implemented | Not mapped |
-| FR-CLI-008 | CLI Help and Discovery | New | Not mapped |
+| FR-CLI-008 | CLI Help and Discovery | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-009 | CLI Version Information | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-CLI-010 | Standard Input Support | New | Not mapped |
+| FR-CLI-010 | Standard Input Support | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 
 ## [Configuration Requirements](functional-configuration-requirements.md)
 
@@ -153,10 +153,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-ELC-001 | Unified Electron Protocol | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
-| FR-ELC-002 | CLI-Based Communication | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
-| FR-ELC-003 | Standard Request Envelope | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-ELC-004 | Standard Response Envelope | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| FR-ELC-001 | Unified Electron Protocol | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-002 | CLI-Based Communication | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-003 | Standard Request Envelope | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| FR-ELC-004 | Standard Response Envelope | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-005 | Event Streaming | Partially implemented | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-006 | Cancellation | New | Not mapped |
 | FR-ELC-007 | Connection and Process Failure Handling | New | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
@@ -257,7 +257,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-LOG-002 | Structured Logs | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-003 | Request Correlation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-004 | Log Destination Separation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-LOG-005 | Configurable Log Levels | New | Not mapped |
+| FR-LOG-005 | Configurable Log Levels | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-006 | Runtime Diagnostics | New | Not mapped |
 | FR-LOG-007 | Diagnostic Export | New | Not mapped |
 
@@ -464,11 +464,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-OBS-001 | Structured Diagnostics | New | Not mapped |
-| NFR-OBS-002 | Request and Job Correlation | New | Not mapped |
+| NFR-OBS-001 | Structured Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| NFR-OBS-002 | Request and Job Correlation | Partially implemented | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-OBS-003 | Connector Diagnostics | New | Not mapped |
 | NFR-OBS-004 | Runtime Health | New | Not mapped |
-| NFR-OBS-005 | Diagnostic Isolation | New | Not mapped |
+| NFR-OBS-005 | Diagnostic Isolation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-OBS-006 | Optional Advanced Telemetry | New | Not mapped |
 
 ## [Open Questions](non-functional-open-questions.md)

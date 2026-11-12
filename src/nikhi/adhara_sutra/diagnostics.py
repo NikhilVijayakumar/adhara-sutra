@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import sys
 from contextvars import ContextVar
 from datetime import datetime, timezone
@@ -40,8 +41,15 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(payload, ensure_ascii=False)
 
 
-def configure_logging(level: int = logging.INFO, stream: TextIO | None = None) -> logging.Handler:
-    """Install a structured stderr handler; stdout stays reserved for protocol messages."""
+def configure_logging(level: int | None = None, stream: TextIO | None = None) -> logging.Handler:
+    """Install a structured stderr handler; stdout stays reserved for protocol messages.
+
+    The level defaults to ADHARA_LOG_LEVEL (INFO when unset or invalid).
+    """
+    if level is None:
+        level = getattr(logging, os.environ.get("ADHARA_LOG_LEVEL", "INFO").upper(), None)
+        if not isinstance(level, int):
+            level = logging.INFO
     root = logging.getLogger()
     for existing in root.handlers:
         if getattr(existing, _STRUCTURED, False):

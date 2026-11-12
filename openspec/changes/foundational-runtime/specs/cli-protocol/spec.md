@@ -35,7 +35,7 @@ and keep diagnostics separate from protocol output. (FR-CLI-004, FR-ELC-001 thro
 ### Requirement: Execution modes
 
 The framework SHALL support one-shot and persistent CLI execution with consistent
-action semantics. (FR-RUN-006, FR-CLI-005, FR-CLI-006)
+action semantics. (FR-RUN-006, FR-CLI-005, FR-CLI-006, FR-CLI-010)
 
 #### Scenario: Persistent process handles multiple requests
 
@@ -52,6 +52,17 @@ request, distinguishable from terminal responses. (FR-CLI-006, FR-ELC-005)
 - **WHEN** a handler emits events while processing a request
 - **THEN** each event carries the request's `request_id` and a `kind` of `event`
 - **AND** the terminal response is still returned with a `kind` of `response`
+
+#### Scenario: Caller asks for help
+
+- **WHEN** a caller sends `system.help`
+- **THEN** the response lists the registered actions with their descriptions and schema hooks
+- **AND** an unknown action reports the available action names
+
+#### Scenario: Requests arrive on standard input
+
+- **WHEN** requests are provided as newline-delimited JSON on stdin
+- **THEN** they are validated and dispatched without command-line arguments
 
 #### Scenario: Malformed event
 

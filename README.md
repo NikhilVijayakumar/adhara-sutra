@@ -10,13 +10,15 @@ Use `--persistent` to keep the process open; the first request must call
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action
-failed, 8 a protocol failure, 10 an internal failure. Codes 5 (timeout), 6
-(cancellation), and 7 (dependency unavailable) are reserved for those
+failed, 6 an interrupt (cancellation), 8 a protocol failure, 10 an internal
+failure. Codes 5 (timeout) and 7 (dependency unavailable) are reserved for those
 capabilities. Action failures do not end a persistent session. Handlers emit
 correlated progress events with `context.emit(event, data)`; each event is a
 newline-delimited `{"kind": "event", ...}` envelope written before the request's
 terminal response. The `system.hello` response reports the application name and
-version, the framework version, and the supported protocol versions. Protocol
+version, the framework version, and the supported protocol versions. Send
+`system.help` to list registered actions with their descriptions and schema
+hooks; an unknown action reports the available action names. Protocol
 error objects carry a stable `category` (protocol, validation, action,
 lifecycle, internal) alongside `code`, `message`, `retryable`, and optional
 `details`.
@@ -32,9 +34,10 @@ Unknown or cyclic dependencies and invalid configuration raise `BootstrapError`
 before any service starts. The original exception is available as `__cause__`.
 Diagnostics are structured JSON written to stderr; `Application.run()` installs
 the handler automatically and `configure_logging()` is available for custom
-entry points. Each record carries `timestamp`, `level`, `logger`, and `message`,
-plus `request_id` and `action` while a request is being handled and `exception`
-for tracebacks. stdout stays reserved for protocol messages.
+entry points. The level defaults to `ADHARA_LOG_LEVEL` (INFO when unset) and can
+be set programmatically. Each record carries `timestamp`, `level`, `logger`, and
+`message`, plus `request_id` and `action` while a request is being handled and
+`exception` for tracebacks. stdout stays reserved for protocol messages.
 
 **A CLI-First Python Application Framework**
 

@@ -43,7 +43,7 @@ model and serialized through the protocol error envelope. (FR-ERR-001, FR-ERR-00
 ### Requirement: Structured diagnostics with correlation
 
 Logging SHALL be structured, correlated across requests and jobs, and kept
-separate from protocol output. (FR-LOG-001, FR-LOG-002, FR-LOG-003, FR-LOG-004)
+separate from protocol output. (FR-LOG-001, FR-LOG-002, FR-LOG-003, FR-LOG-004, FR-LOG-005)
 
 #### Scenario: Concurrent requests log diagnostics
 
@@ -59,3 +59,8 @@ separate from protocol output. (FR-LOG-001, FR-LOG-002, FR-LOG-003, FR-LOG-004)
 
 - **WHEN** the runtime logs while no request is active
 - **THEN** the record's request correlation fields are empty
+
+#### Scenario: Log verbosity is configured
+
+- **WHEN** the environment sets `ADHARA_LOG_LEVEL` or the application configures a level
+- **THEN** records below that level are suppressed and protocol output is unchanged

@@ -30,3 +30,8 @@ managed resources according to documented policies. (FR-RUN-003, FR-RUN-007)
 
 - **WHEN** shutdown is requested while shutdown is already in progress
 - **THEN** the runtime does not perform unsafe duplicate cleanup
+
+#### Scenario: The process is interrupted
+
+- **WHEN** the process is interrupted while serving
+- **THEN** managed resources are released and the process exits with the cancellation status

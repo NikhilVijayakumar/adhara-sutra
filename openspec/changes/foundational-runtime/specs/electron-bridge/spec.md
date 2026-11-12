@@ -13,7 +13,8 @@ protocol, with backend process ownership in the main process. (FR-ELC-001, FR-EL
 ### Requirement: Report lost backend communication
 
 The bridge SHALL detect and report unexpected process termination or communication
-failure. (FR-ELC-007)
+failure, and pending requests SHALL receive explicit failure outcomes.
+(FR-ELC-007, NFR-REL-005)
 
 #### Scenario: Python exits during a request
 

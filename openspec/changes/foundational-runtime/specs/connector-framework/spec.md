@@ -50,6 +50,11 @@ failures into a consistent framework error category. (FR-CON-004, FR-CON-006, NF
 - **WHEN** a caller sends `system.health` after startup
 - **THEN** each service with a health check reports its availability and the overall status reflects them
 
+#### Scenario: A configured dependency is unreachable
+
+- **WHEN** an external dependency is configured but fails during an operation
+- **THEN** the failure is reported through the connector category instead of assuming the dependency is operational
+
 ### Requirement: Safe process invocation
 
 The external CLI connector SHALL use structured argument arrays, support timeout

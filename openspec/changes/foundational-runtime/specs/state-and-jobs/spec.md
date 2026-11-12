@@ -32,6 +32,17 @@ unsynchronized. (FR-STATE-007)
 - **WHEN** an application performs compound updates without the lock while work runs concurrently
 - **THEN** the application is responsible for its own synchronization
 
+### Requirement: Concurrency safety and application isolation
+
+Framework-managed metadata SHALL follow documented concurrency rules, and
+independent applications SHALL NOT share state, configuration, jobs, or services.
+(NFR-SCALE-002, NFR-SCALE-006)
+
+#### Scenario: Independent applications run together
+
+- **WHEN** two applications with their own state, configuration, and jobs are started in one process
+- **THEN** each request observes only its own application's facilities and stopping one does not affect the other
+
 ### Requirement: Job execution ownership
 
 Every managed job SHALL have an identifiable execution record and an execution

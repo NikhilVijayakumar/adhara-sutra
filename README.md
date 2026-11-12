@@ -85,7 +85,8 @@ service factories receive the same process state at startup. `context.state_lock
 is one `asyncio.Lock` per application, shared by request and job contexts; use it
 to serialize compound process-state updates when jobs run concurrently. Plain
 state mappings are otherwise unsynchronized, so the application owns any other
-coordination it needs.
+coordination it needs. Independent `Application` instances do not share state,
+configuration, jobs, or services.
 
 Background jobs are registered with `@app.job(name, timeout=...)` and submitted
 from a handler with `context.jobs.submit(name, payload)`, which returns an

@@ -41,6 +41,28 @@ on shutdown. (FR-RUN-003)
 - **WHEN** a running application shuts down
 - **THEN** the runtime releases framework-managed resources according to the lifecycle policy
 
+### Requirement: Failure isolation and traceability
+
+Expected handler and connector failures SHALL be contained in structured errors,
+SHALL NOT terminate a healthy application, and SHALL remain traceable through
+request correlation. Managed resources SHALL be released when the application
+stops. (NFR-REL-001, NFR-REL-002, NFR-REL-008, NFR-RES-003)
+
+#### Scenario: A handler fails
+
+- **WHEN** one handler raises an expected exception
+- **THEN** the request returns a structured error, the application keeps serving, and other requests succeed
+
+#### Scenario: A request fails
+
+- **WHEN** a handler failure is logged
+- **THEN** the diagnostic record carries the request identifier and action, with sensitive values redacted
+
+#### Scenario: The application stops
+
+- **WHEN** an application with started services stops
+- **THEN** each managed service is released exactly once
+
 ### Requirement: Application extension points
 
 Applications SHALL be able to register business actions and services without

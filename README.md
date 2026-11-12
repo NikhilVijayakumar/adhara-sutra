@@ -100,7 +100,10 @@ identifier. Job handlers receive `(payload, context)`; events they emit carry th
 `job_id`, and their log records are correlated with it. Use
 `context.jobs.status(id)`, `.list()`, `.cancel(id)`, and `.wait(id)` to inspect
 execution. Send `system.cancel` with `{"job_id": ...}` to cancel a managed job;
-the result reports whether cancellation was accepted and the current status.
+the result reports whether cancellation was accepted, its phase (`requested`,
+`completed`, `unsupported`, or `failed`), and the current status. A full queue
+rejects new work with the retryable `JOB_QUEUE_FULL` error instead of growing
+without bound.
 Jobs run in-process with bounded concurrency (`max_concurrent_jobs`, default 4)
 and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts apply to
 async handlers. Stopping the application cancels active jobs before services

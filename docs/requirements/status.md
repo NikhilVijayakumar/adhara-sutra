@@ -372,7 +372,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-AVAIL-001 | Startup Readiness | New | Not mapped |
+| NFR-AVAIL-001 | Startup Readiness | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | NFR-AVAIL-002 | Optional Dependency Degradation | New | Not mapped |
 | NFR-AVAIL-003 | Job Recovery Semantics | New | Not mapped |
 | NFR-AVAIL-004 | Persistent Data Recovery | New | Not mapped |
@@ -533,21 +533,21 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-REL-003 | Partial Initialization Recovery | Partially implemented | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | NFR-REL-004 | External Dependency Failure Handling | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
 | NFR-REL-005 | Process Failure Detection | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
-| NFR-REL-006 | Cancellation Consistency | New | Not mapped |
+| NFR-REL-006 | Cancellation Consistency | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | NFR-REL-007 | Idempotent Cleanup | Partially implemented | Not mapped |
 | NFR-REL-008 | Error Traceability | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | NFR-REL-009 | Communication Failure Recovery | New | Not mapped |
-| NFR-REL-010 | External Operation Uncertainty | New | Not mapped |
+| NFR-REL-010 | External Operation Uncertainty | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 
 ## [Resource Efficiency Requirements](non-functional-resource-efficiency-requirements.md)
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | NFR-RES-001 | Runtime Memory Overhead | New | Not mapped |
-| NFR-RES-002 | Bounded Queues | New | Not mapped |
+| NFR-RES-002 | Bounded Queues | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | NFR-RES-003 | Resource Cleanup | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | NFR-RES-004 | Long-Running Stability | New | Not mapped |
-| NFR-RES-005 | Configurable Concurrency Limits | New | Not mapped |
+| NFR-RES-005 | Configurable Concurrency Limits | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 
 ## [Scalability and Concurrency Requirements](non-functional-scalability-and-concurrency-requirements.md)
 
@@ -555,8 +555,8 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | NFR-SCALE-001 | Concurrent Request Handling | New | Not mapped |
 | NFR-SCALE-002 | Concurrency Safety | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| NFR-SCALE-003 | Backpressure | New | Not mapped |
-| NFR-SCALE-004 | Job Scheduling Limits | New | Not mapped |
+| NFR-SCALE-003 | Backpressure | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| NFR-SCALE-004 | Job Scheduling Limits | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | NFR-SCALE-005 | Connector Independence | New | Not mapped |
 | NFR-SCALE-006 | Application Isolation | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | NFR-SCALE-007 | Large Project Analysis | New | Not mapped |

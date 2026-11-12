@@ -84,7 +84,7 @@ the terminal response and carry the same `request_id`; job events also carry
 | `system.hello` | `{}` | `protocol_version`, `supported_protocol_versions`, `framework_version`, application `name` and `version`. |
 | `system.help` | `{}` | `framework_version`, registered `actions` metadata, registered `jobs` metadata. |
 | `system.health` | `{}` | `status` (`ok` or `degraded`), lifecycle `state`, and per-service `services` status. Requires a ready or running application. |
-| `system.cancel` | `{"job_id": "..."}` | `job_id`, `cancelled` (whether cancellation was accepted), and the current `status` snapshot, or `null` for an unknown job. Requires a ready or running application. |
+| `system.cancel` | `{"job_id": "..."}` | `job_id`, `cancelled` (whether cancellation was accepted), `cancellation` (`requested`, `completed`, `unsupported`, or `failed`), and the current `status` snapshot, or `null` for an unknown job. Requires a ready or running application. |
 
 `system.help` actions carry `name`, `description`, `input_schema`, and
 `output_schema` flags. Jobs carry `name`, `description`, and `timeout`.
@@ -112,6 +112,7 @@ the terminal response and carry the same `request_id`; job events also carry
 | `RUNTIME_NOT_READY` | `lifecycle` | no | The application is not ready or running. |
 | `CONNECTOR_FAILURE` | `connector` | from the error | A connector or external dependency failed. |
 | `RUNTIME_EXECUTION_FAILED` | `internal` | unknown | An unexpected handler failure. |
+| `JOB_QUEUE_FULL` | `lifecycle` | yes | The bounded job queue is at capacity. |
 
 Messages and details are redacted before serialization: values under sensitive
 keys and `key=value` or authorization-header assignments become `[REDACTED]`.

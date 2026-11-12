@@ -89,8 +89,11 @@ class HttpClient:
             response = client.request(method, url, headers=headers, params=params,
                                       content=content, json=json, **options)
         except httpx.HTTPError as exc:
+            not_sent = isinstance(exc, (httpx.ConnectError, httpx.ConnectTimeout,
+                                        httpx.PoolTimeout, httpx.UnsupportedProtocol))
             raise ConnectorError(f"HTTP {method.upper()} {url} failed: {exc}",
-                                 retryable=True) from exc
+                                 retryable=True,
+                                 details={"outcome": "not_sent" if not_sent else "unknown"}) from exc
         return HttpResponse(status=response.status_code, headers=dict(response.headers),
                             body=response.content, url=str(response.url))
 

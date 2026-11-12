@@ -48,13 +48,18 @@ class ExternalCommand:
     """Runs one configured executable with structured arguments and managed cleanup."""
 
     def __init__(self, executable: str, *, search_path: str | None = None,
-                 env: Mapping[str, str] | None = None, cwd: str | None = None) -> None:
+                 env: Mapping[str, str] | None = None, cwd: str | None = None,
+                 max_concurrent: int = 0) -> None:
+        if not isinstance(max_concurrent, int) or max_concurrent < 0:
+            raise ValueError("max_concurrent must be a non-negative integer")
         self.executable = executable
         self.search_path = search_path
         self.env = dict(env or {})
         self.cwd = cwd
+        self.max_concurrent = max_concurrent
         self.path: str | None = None
         self._processes: set[asyncio.subprocess.Process] = set()
+        self._semaphore = asyncio.Semaphore(max_concurrent) if max_concurrent else None
 
     def __enter__(self) -> "ExternalCommand":
         path = shutil.which(self.executable, path=self.search_path) \
@@ -80,6 +85,16 @@ class ExternalCommand:
                   env: Mapping[str, str] | None = None,
                   on_output: Callable[[str, bytes], None] | None = None) -> CommandResult:
         """Run the executable and capture or stream its output."""
+        if self._semaphore is None:
+            return await self._run(args, timeout=timeout, input=input, cwd=cwd, env=env, on_output=on_output)
+        async with self._semaphore:
+            return await self._run(args, timeout=timeout, input=input, cwd=cwd, env=env, on_output=on_output)
+
+    async def _run(self, args: Iterable[str] = (), *, timeout: float | None = None,
+                   input: bytes | str | None = None, cwd: str | None = None,
+                   env: Mapping[str, str] | None = None,
+                   on_output: Callable[[str, bytes], None] | None = None) -> CommandResult:
+        """Run the executable without applying the concurrency limit."""
         if self.path is None:
             raise ConnectorError("The external command connector is not started", retryable=False)
         if isinstance(args, (str, bytes)):
@@ -99,7 +114,8 @@ class ExternalCommand:
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
                 cwd=cwd or self.cwd, env=command_env, **options)
         except (OSError, ValueError) as exc:
-            raise ConnectorError(f"Failed to start {self.path}: {exc}", retryable=False) from exc
+            raise ConnectorError(f"Failed to start {self.path}: {exc}", retryable=False,
+                                 details={"outcome": "not_sent"}) from exc
         self._processes.add(process)
         stdout: list[bytes] = []
         stderr: list[bytes] = []
@@ -126,7 +142,8 @@ class ExternalCommand:
                 except asyncio.TimeoutError:
                     await self._terminate(process)
                     raise ConnectorError(f"{os.path.basename(self.path)} timed out after {timeout} seconds",
-                                         retryable=True, details={"timeout": timeout}) from None
+                                         retryable=True,
+                                         details={"timeout": timeout, "outcome": "unknown"}) from None
             else:
                 await feed_and_wait()
             try:

@@ -18,7 +18,7 @@ from weakref import WeakValueDictionary
 
 from ._version import __version__
 from .diagnostics import _REQUEST, RedactionFilter, configure_logging, redact, redact_text
-from .jobs import JobManager, JobService
+from .jobs import JobManager, JobQueueFull, JobService
 
 PROTOCOL_VERSION = "1.0"
 SUPPORTED_PROTOCOL_VERSIONS = (PROTOCOL_VERSION,)
@@ -40,6 +40,7 @@ _ERROR_EXIT_CODES = {
     "PROTOCOL_UNSUPPORTED_VERSION": _EXIT_PROTOCOL_FAILED,
     "RUNTIME_NOT_READY": _EXIT_INITIALIZATION_FAILED,
     "CONNECTOR_FAILURE": _EXIT_DEPENDENCY_UNAVAILABLE,
+    "JOB_QUEUE_FULL": _EXIT_ACTION_FAILED,
 }
 _ERROR_CATEGORIES = {
     "PROTOCOL_INVALID_MESSAGE": "protocol",
@@ -51,6 +52,7 @@ _ERROR_CATEGORIES = {
     "RUNTIME_NOT_READY": "lifecycle",
     "RUNTIME_EXECUTION_FAILED": "internal",
     "CONNECTOR_FAILURE": "connector",
+    "JOB_QUEUE_FULL": "lifecycle",
 }
 _APPLICATIONS: WeakValueDictionary[str, Application] = WeakValueDictionary()
 _APPLICATIONS_LOCK = threading.Lock()
@@ -396,9 +398,25 @@ class Application:
                 job_id = payload.get("job_id")
                 if not isinstance(job_id, str) or not job_id:
                     raise ProtocolError("ACTION_VALIDATION_FAILED", "A job_id is required", details="job_id")
-                cancelled = bool(self.context.jobs.cancel(job_id))
-                result = {"job_id": job_id, "cancelled": cancelled,
-                          "status": self.context.jobs.status(job_id)}
+                current = self.context.jobs.status(job_id)
+                if current is None:
+                    result = {"job_id": job_id, "cancelled": False,
+                              "cancellation": "unsupported", "status": None}
+                else:
+                    try:
+                        cancelled = bool(self.context.jobs.cancel(job_id))
+                    except Exception:
+                        result = {"job_id": job_id, "cancelled": False,
+                                  "cancellation": "failed", "status": current}
+                    else:
+                        if cancelled:
+                            await asyncio.sleep(0)
+                            status = self.context.jobs.status(job_id)
+                            phase = "completed" if status["state"] == "cancelled" else "requested"
+                        else:
+                            status, phase = current, "unsupported"
+                        result = {"job_id": job_id, "cancelled": cancelled,
+                                  "cancellation": phase, "status": status}
             else:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
@@ -436,6 +454,8 @@ class Application:
             _LOG.error("Connector failure: %s", exc)
             return self._response(request_id, error=_error("CONNECTOR_FAILURE", str(exc) or "Connector failure",
                                                            retryable=exc.retryable, details=exc.details))
+        except JobQueueFull as exc:
+            return self._response(request_id, error=_error("JOB_QUEUE_FULL", str(exc), retryable=True))
         except Exception:
             _LOG.exception("Action execution failed")
             return self._response(request_id, error=_error("RUNTIME_EXECUTION_FAILED", "Action execution failed", retryable=None))

@@ -89,3 +89,40 @@ interruption from confirmed terminal outcomes before reporting job status.
 
 - **WHEN** the process owning a running job exits unexpectedly
 - **THEN** the recovered job is marked interrupted rather than completed or failed without evidence
+
+### Requirement: Bounded queues and backpressure
+
+Job submission SHALL enforce configurable concurrency and queue limits, and
+SHALL reject work beyond the queue with a structured retryable error instead of
+unbounded growth. (NFR-RES-002, NFR-RES-005, NFR-SCALE-003, NFR-SCALE-004)
+
+#### Scenario: The queue is full
+
+- **WHEN** the configured queue capacity is reached
+- **THEN** another submission fails with `JOB_QUEUE_FULL` in the lifecycle category and `retryable: true`
+
+#### Scenario: Concurrency is limited
+
+- **WHEN** more jobs are submitted than the configured concurrent limit
+- **THEN** at most that many jobs run at once and the rest wait in the bounded queue
+
+#### Scenario: Event output exceeds the consumer
+
+- **WHEN** a handler emits events faster than the caller reads them
+- **THEN** the synchronous stdout write provides backpressure instead of buffering without bound
+
+### Requirement: Cancellation phases
+
+Cancellation SHALL distinguish requested, completed, unsupported, and failed
+outcomes and SHALL NOT report completion before the job is terminal.
+(NFR-REL-006)
+
+#### Scenario: Cancellation is requested
+
+- **WHEN** `system.cancel` targets an active job
+- **THEN** the response reports `cancellation: "requested"` or `"completed"` with the current job status
+
+#### Scenario: Cancellation is unsupported
+
+- **WHEN** `system.cancel` targets a terminal or unknown job
+- **THEN** the response reports `cancelled: false` and `cancellation: "unsupported"`

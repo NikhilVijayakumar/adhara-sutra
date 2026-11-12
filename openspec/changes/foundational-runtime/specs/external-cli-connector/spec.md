@@ -50,3 +50,19 @@ running processes on timeout, cancellation, and application shutdown. (FR-EXT-00
 
 - **WHEN** the application stops while a command is still running
 - **THEN** the connector terminates the command's process tree
+
+### Requirement: Process limits and outcome uncertainty
+
+External execution SHALL support an explicit concurrency limit and SHALL report
+an unknown outcome when a terminated command may have produced side effects.
+(NFR-RES-005, NFR-REL-010)
+
+#### Scenario: Concurrency is limited
+
+- **WHEN** an `ExternalCommand` is configured with `max_concurrent`
+- **THEN** no more than that many runs execute at once on the instance
+
+#### Scenario: A command is terminated after a timeout
+
+- **WHEN** a command exceeds its timeout and is terminated
+- **THEN** the connector error reports `details.outcome: "unknown"`

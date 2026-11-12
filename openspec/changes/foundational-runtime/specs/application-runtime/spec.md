@@ -41,6 +41,16 @@ on shutdown. (FR-RUN-003)
 - **WHEN** a running application shuts down
 - **THEN** the runtime releases framework-managed resources according to the lifecycle policy
 
+### Requirement: Startup readiness
+
+The framework SHALL expose a readiness state only after required initialization
+succeeds. (NFR-AVAIL-001)
+
+#### Scenario: Readiness follows initialization
+
+- **WHEN** an application starts
+- **THEN** its state becomes ready only after all required services start, and remains failed when startup raises
+
 ### Requirement: Failure isolation and traceability
 
 Expected handler and connector failures SHALL be contained in structured errors,

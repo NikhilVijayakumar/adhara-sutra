@@ -39,3 +39,19 @@ documented interfaces. (FR-HTTP-006)
 
 - **WHEN** the upstream returns a non-success status
 - **THEN** the caller can inspect the response, or raise a connector error whose retryability follows the status
+
+### Requirement: Operation outcome uncertainty
+
+Transport failures SHALL distinguish requests that were never sent from those
+whose outcome is unknown, so callers do not assume a non-idempotent operation
+failed. (NFR-REL-010)
+
+#### Scenario: A request outcome is unknown
+
+- **WHEN** a transport failure occurs after the request may have been sent
+- **THEN** the connector error carries `details.outcome: "unknown"`
+
+#### Scenario: A request was never sent
+
+- **WHEN** a connection cannot be established
+- **THEN** the connector error carries `details.outcome: "not_sent"`

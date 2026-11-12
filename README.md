@@ -81,6 +81,13 @@ rate-limit statuses as retryable; transport failures and timeouts are retryable
 connector errors. The client closes when the application stops. Retries,
 authentication helpers, and streaming are not yet provided.
 
+SQLite is available as `SQLiteDatabase(path=...)`: register it as a service and
+use `execute`, `executemany`, `query`, `query_one`, and `transaction()` for
+explicit commit or rollback. Foreign keys are enabled, and one connection is
+owned by the thread that starts the application, so cross-thread use is
+rejected. Schema migrations, backup and integrity helpers, and a persistent-state
+adapter are not yet provided.
+
 The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
 spawns one persistent backend, performs the `system.hello` handshake, correlates
 responses, forwards events, and rejects pending work when the backend exits. The

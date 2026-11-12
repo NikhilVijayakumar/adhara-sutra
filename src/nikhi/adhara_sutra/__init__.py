@@ -6,6 +6,8 @@ from .application import (Application, ApplicationContext, ApplicationDefinition
 from .diagnostics import configure_logging
 from .http import HttpClient, HttpResponse
 from .jobs import JobQueueFull
+from .sqlite import SQLiteDatabase
 
 __all__ = ["Application", "ApplicationContext", "ApplicationDefinitionError", "BootstrapError", "ConnectorError",
-           "HttpClient", "HttpResponse", "JobQueueFull", "ProtocolError", "__version__", "configure_logging"]
+           "HttpClient", "HttpResponse", "JobQueueFull", "ProtocolError", "SQLiteDatabase", "__version__",
+           "configure_logging"]

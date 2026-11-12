@@ -306,12 +306,12 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-DB-001 | SQLite Connection Management | New | Not mapped |
-| FR-DB-002 | Transaction Management | New | Not mapped |
-| FR-DB-003 | Database Configuration | New | Not mapped |
+| FR-DB-001 | SQLite Connection Management | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
+| FR-DB-002 | Transaction Management | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
+| FR-DB-003 | Database Configuration | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
 | FR-DB-004 | Schema Migration Infrastructure | New | Not mapped |
 | FR-DB-005 | Persistence Abstraction | New | Not mapped |
-| FR-DB-006 | Database Concurrency Policy | New | Not mapped |
+| FR-DB-006 | Database Concurrency Policy | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
 | FR-DB-007 | Backup and Recovery Support | New | Not mapped |
 | FR-DB-008 | Persistent State Support | New | Not mapped |
 

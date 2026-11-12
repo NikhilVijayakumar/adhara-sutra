@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 
+from .diagnostics import redact
 from .discovery import ProjectProfile
 from .migration import TASK_STATUSES, MigrationPlan
 from .verification import VerificationResult
@@ -32,7 +33,7 @@ def implementation_report(profile: ProjectProfile, *, generated_at: str | None =
     counts: dict[str, int] = {}
     for finding in profile.findings:
         counts[finding.kind] = counts.get(finding.kind, 0) + 1
-    return {
+    return redact({
         "schema_version": REPORT_SCHEMA_VERSION,
         "kind": "implementation",
         "generated_at": generated_at or _now(),
@@ -48,7 +49,7 @@ def implementation_report(profile: ProjectProfile, *, generated_at: str | None =
         "dependencies": profile.dependencies,
         "findings": [finding.to_dict() for finding in profile.findings],
         "errors": [error.to_dict() for error in profile.errors],
-    }
+    })
 
 
 def render_json(report: dict[str, Any]) -> str:
@@ -58,8 +59,8 @@ def render_json(report: dict[str, Any]) -> str:
 
 def verification_report(result: VerificationResult, *, generated_at: str | None = None) -> dict[str, Any]:
     """Build the versioned, machine-readable verification report for one result."""
-    return {"schema_version": REPORT_SCHEMA_VERSION, "kind": "verification",
-            "generated_at": generated_at or _now(), **result.to_dict()}
+    return redact({"schema_version": REPORT_SCHEMA_VERSION, "kind": "verification",
+                   "generated_at": generated_at or _now(), **result.to_dict()})
 
 
 def migration_report(plan: MigrationPlan, *, statuses: dict[str, str] | None = None,
@@ -82,12 +83,12 @@ def migration_report(plan: MigrationPlan, *, statuses: dict[str, str] | None = N
         by_phase[task["phase"]] = by_phase.get(task["phase"], 0) + 1
     body = plan.to_dict()
     body.pop("tasks")
-    return {"schema_version": REPORT_SCHEMA_VERSION, "kind": "migration",
-            "generated_at": generated_at or _now(), **body,
-            "summary": {"findings": len(plan.findings), "tasks": len(tasks),
-                        "by_status": by_status,
-                        "by_phase": {phase: by_phase[phase] for phase in sorted(by_phase)}},
-            "tasks": tasks}
+    return redact({"schema_version": REPORT_SCHEMA_VERSION, "kind": "migration",
+                   "generated_at": generated_at or _now(), **body,
+                   "summary": {"findings": len(plan.findings), "tasks": len(tasks),
+                               "by_status": by_status,
+                               "by_phase": {phase: by_phase[phase] for phase in sorted(by_phase)}},
+                   "tasks": tasks})
 
 
 def render_markdown(report: dict[str, Any]) -> str:

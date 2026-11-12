@@ -24,12 +24,25 @@ arguments. (FR-SEC-003, NFR-SEC-001)
 ### Requirement: Protect sensitive diagnostics
 
 The framework SHALL protect sensitive values in logs, errors and diagnostics.
-(FR-SEC-004, NFR-SEC-005, NFR-SEC-011)
+`redact` masks sensitive mapping keys, quoted or bare assignments, and
+authorization headers; logging and protocol errors apply it before
+serialization, and generated reports apply it to findings and evidence.
+(FR-SEC-004, FR-SEC-008, NFR-SEC-005, NFR-SEC-011)
 
 #### Scenario: A request fails with credentials in its context
 
 - **WHEN** the failure is reported through diagnostics
 - **THEN** credentials are not exposed in the diagnostic output
+
+#### Scenario: A log record or error contains a sensitive assignment
+
+- **WHEN** a log message, exception text, error message, or error detail contains a password, token, secret, or API key
+- **THEN** the value is replaced with `[REDACTED]` before serialization
+
+#### Scenario: A report contains sensitive evidence
+
+- **WHEN** a generated implementation, verification, or migration report includes evidence with a credential
+- **THEN** the credential is redacted in both JSON and Markdown output
 
 ### Requirement: Restrict Electron IPC
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 from contextvars import ContextVar
 from datetime import datetime, timezone
@@ -12,6 +13,40 @@ from typing import Any, TextIO
 
 _REQUEST: ContextVar[dict[str, Any]] = ContextVar("adhara_request", default={})
 _STRUCTURED = "_adhara_structured"
+_REDACTED = "[REDACTED]"
+_SENSITIVE_WORDS = ("password", "passwd", "secret", "token", "apikey", "authorization", "credential",
+                    "privatekey", "accesskey", "cookie", "sessionid")
+_SENSITIVE_ASSIGNMENT = re.compile(
+    r"""(?i)(\b(?:password|passwd|secret|token|api[_-]?key|authorization|credential|private[_-]?key|"""
+    r"""access[_-]?key|client[_-]?secret)\b["']?\s*\]?\s*[=:]\s*)(["'])(.*?)\2""")
+_AUTH_HEADER = re.compile(r"(?i)\b(authorization\s*[:=]\s*)(?:bearer|basic|token)\s+[^\s,;]+")
+_SENSITIVE_PLAIN = re.compile(
+    r"""(?i)(\b(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret)\b\s*=\s*)"""
+    r"""([^\s&,;"']+)""")
+
+
+def _sensitive_key(key: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9]", "", key.lower())
+    return any(word in normalized for word in _SENSITIVE_WORDS)
+
+
+def redact(value: Any) -> Any:
+    """Return a copy of a value with sensitive keys and quoted assignments masked."""
+    if isinstance(value, dict):
+        return {key: _REDACTED if isinstance(key, str) and _sensitive_key(key) else redact(item)
+                for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [redact(item) for item in value]
+    if isinstance(value, str):
+        value = _SENSITIVE_ASSIGNMENT.sub(
+            lambda match: f"{match.group(1)}{match.group(2)}{_REDACTED}{match.group(2)}", value)
+        return _AUTH_HEADER.sub(lambda match: f"{match.group(1)}{_REDACTED}", value)
+    return value
+
+
+def redact_text(value: str) -> str:
+    """Redact quoted or bare sensitive assignments from free-form text."""
+    return _SENSITIVE_PLAIN.sub(lambda match: f"{match.group(1)}{_REDACTED}", redact(value))
 
 
 class RequestContextFilter(logging.Filter):
@@ -33,13 +68,13 @@ class JsonFormatter(logging.Formatter):
             "timestamp": datetime.fromtimestamp(record.created, timezone.utc).isoformat(),
             "level": record.levelname,
             "logger": record.name,
-            "message": record.getMessage(),
+            "message": redact_text(record.getMessage()),
             "request_id": getattr(record, "request_id", None),
             "action": getattr(record, "action", None),
             "job_id": getattr(record, "job_id", None),
         }
         if record.exc_info:
-            payload["exception"] = self.formatException(record.exc_info)
+            payload["exception"] = redact_text(self.formatException(record.exc_info))
         return json.dumps(payload, ensure_ascii=False)
 
 

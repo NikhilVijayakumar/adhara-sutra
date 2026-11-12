@@ -66,6 +66,11 @@ entry points. The level defaults to `ADHARA_LOG_LEVEL` (INFO when unset) and can
 be set programmatically. Each record carries `timestamp`, `level`, `logger`, and
 `message`, plus `request_id` and `action` while a request is being handled and
 `exception` for tracebacks. stdout stays reserved for protocol messages.
+Log messages, exception text, protocol error messages and details, and generated
+reports redact values under keys such as `password`, `token`, `secret`, and
+`api_key`, including quoted or bare `key=value` assignments and bearer headers,
+replacing them with `[REDACTED]`. Redaction is pattern-based, so a secret written
+in an unusual format can still pass through.
 Handlers share process state through `context.state`, share state within a
 persistent session through `context.session_state`, and get a fresh
 `context.request_state` per request. Applications define the keys and values;

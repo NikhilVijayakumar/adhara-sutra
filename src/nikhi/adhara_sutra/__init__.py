@@ -3,7 +3,7 @@
 from ._version import __version__
 from .application import (Application, ApplicationContext, ApplicationDefinitionError, BootstrapError, ConnectorError,
                           ProtocolError)
-from .diagnostics import configure_logging
+from .diagnostics import configure_logging, redact
 from .discovery import Evidence, Finding, ProjectInspector, ProjectProfile
 from .external import CommandResult, ExternalCommand
 from .filesystem import AppDirectories, PathBoundary, PathViolation
@@ -24,5 +24,5 @@ __all__ = ["AppDirectories", "Application", "ApplicationContext", "ApplicationDe
            "PathViolation", "ProjectInspector", "ProjectProfile", "ProtocolError", "REPORT_SCHEMA_VERSION",
            "RULE_CATALOG", "SQLiteDatabase", "STRATEGIES", "TASK_STATUSES", "VerificationResult", "__version__",
            "analyze_migration", "configure_logging", "default_profile", "implementation_report",
-           "load_statuses", "migration_report", "render_json", "render_markdown", "verification_report",
-           "verify"]
+           "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
+           "verification_report", "verify"]

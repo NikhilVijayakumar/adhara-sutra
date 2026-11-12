@@ -17,7 +17,7 @@ from typing import Any, Callable, TextIO
 from weakref import WeakValueDictionary
 
 from ._version import __version__
-from .diagnostics import _REQUEST, configure_logging
+from .diagnostics import _REQUEST, configure_logging, redact, redact_text
 from .jobs import JobManager, JobService
 
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
@@ -91,9 +91,9 @@ def _error(code: str, message: str, *, retryable: bool | None = False,
            details: Any = None) -> dict[str, Any]:
     """Build a protocol error with its stable category."""
     error = {"code": code, "category": _ERROR_CATEGORIES.get(code, "internal"),
-             "message": message, "retryable": retryable}
+             "message": redact_text(message), "retryable": retryable}
     if details is not None:
-        error["details"] = details
+        error["details"] = redact(details)
     return error
 
 

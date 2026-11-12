@@ -293,7 +293,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-SEC-001 | Request Validation | New | Not mapped |
+| FR-SEC-001 | Request Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-SEC-002 | Action Allowlisting | New | Not mapped |
 | FR-SEC-003 | Safe Process Execution | New | Not mapped |
 | FR-SEC-004 | Sensitive Data Redaction | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
@@ -567,7 +567,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | NFR-SEC-001 | Secure Process Execution | New | Not mapped |
 | NFR-SEC-002 | Action Authorization Boundary | New | Not mapped |
-| NFR-SEC-003 | Input Validation | Partially implemented | Not mapped |
+| NFR-SEC-003 | Input Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | NFR-SEC-004 | Filesystem Safety | New | Not mapped |
 | NFR-SEC-005 | Secret Protection | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-006 | Secure Configuration | New | Not mapped |

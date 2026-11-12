@@ -27,6 +27,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-ERR-002, error classification: every protocol error now carries a stable `category` (protocol, validation, action, lifecycle, internal) derived from its code; checked each category and confirmed the mapping is stable across requests.
 - [x] Complete and practically verify FR-ERR-003, error propagation: handler, validation, and startup failures keep their original exception as the cause and are logged with the traceback while responses stay safe; a shutdown failure no longer replaces an error already propagating.
 - [x] Complete and practically verify FR-LOG-001..004, structured diagnostics: `configure_logging()` installs a JSON stderr handler that `run()` uses, request scope is tracked with a context variable so records carry `request_id`/`action`, tracebacks are preserved, stdout stays protocol-only, and records logged outside a request have empty correlation. Job correlation follows when jobs exist.
+- [x] Complete and practically verify NFR-SEC-003 and FR-SEC-001, input validation: malformed envelopes, unsupported versions, missing or invalid identifiers and payloads, unknown actions, rejected payloads, invalid JSON, non-finite numbers, oversized or incomplete frames, and premature persistent requests are all rejected with structured errors before any handler runs; handshake negotiation only succeeds on a valid hello.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

@@ -3,12 +3,17 @@
 ### Requirement: Action routing and validation
 
 The CLI SHALL route registered actions by identifier and validate request envelopes
-and action payloads before executing handlers. (FR-CLI-001, FR-CLI-002, FR-CLI-003)
+and action payloads before executing handlers. (FR-CLI-001, FR-CLI-002, FR-CLI-003, FR-SEC-001, NFR-SEC-003)
 
 #### Scenario: Unknown action
 
 - **WHEN** a request names an unregistered action
 - **THEN** the CLI returns a standardized error without executing a handler
+
+#### Scenario: Invalid envelope
+
+- **WHEN** a request is not an object or its `kind`, `protocol_version`, `request_id`, `action`, or `payload` is missing or malformed
+- **THEN** it is rejected with a structured protocol error and no handler runs
 
 #### Scenario: Invalid payload
 

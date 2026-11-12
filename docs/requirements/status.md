@@ -495,7 +495,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-OPS-003 | Diagnostic Availability | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-OPS-004 | Safe Upgrade Behavior | New | Not mapped |
 | NFR-OPS-005 | Platform-Specific Dependency Handling | New | Not mapped |
-| NFR-OPS-006 | Controlled Resource Termination | New | Not mapped |
+| NFR-OPS-006 | Controlled Resource Termination | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | NFR-OPS-007 | Release Artifact Integrity | New | Not mapped |
 | NFR-OPS-008 | Production Configuration Separation | New | Not mapped |
 

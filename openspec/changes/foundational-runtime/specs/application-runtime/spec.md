@@ -82,3 +82,13 @@ modifying framework source code. (FR-RUN-004, FR-RUN-005)
 
 - **WHEN** an application registers an action through the public extension point
 - **THEN** it can use framework facilities without the framework importing the application's modules directly
+
+### Requirement: Controlled shutdown
+
+Application shutdown SHALL attempt controlled termination and resource cleanup
+within a configurable timeout. (NFR-OPS-006)
+
+#### Scenario: Cleanup exceeds the shutdown limit
+
+- **WHEN** job cancellation or service cleanup does not finish within `shutdown_timeout`
+- **THEN** shutdown stops waiting, marks the application failed, and does not report a clean stop

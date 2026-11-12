@@ -154,7 +154,8 @@ class Application:
     def __init__(self, name: str, version: str, *, config: dict[str, Any] | None = None,
                  validate_config: Callable[[dict[str, Any]], None] | None = None,
                  config_file: str | os.PathLike | None = None,
-                 max_concurrent_jobs: int = 4, max_queued_jobs: int = 64):
+                 max_concurrent_jobs: int = 4, max_queued_jobs: int = 64,
+                 shutdown_timeout: float = 10.0):
         if not isinstance(name, str) or not name.strip() or name != name.strip():
             raise ApplicationDefinitionError("INVALID_APPLICATION_NAME", "name", "Application name must be a non-empty string without surrounding whitespace")
         if not isinstance(version, str) or not version.strip() or version != version.strip():
@@ -167,9 +168,12 @@ class Application:
             raise ApplicationDefinitionError("INVALID_JOB_CONCURRENCY", "max_concurrent_jobs", "Job concurrency must be a positive integer")
         if not isinstance(max_queued_jobs, int) or max_queued_jobs < 0:
             raise ApplicationDefinitionError("INVALID_JOB_QUEUE", "max_queued_jobs", "Job queue limit must be a non-negative integer")
+        if not isinstance(shutdown_timeout, (int, float)) or isinstance(shutdown_timeout, bool) or shutdown_timeout <= 0:
+            raise ApplicationDefinitionError("INVALID_SHUTDOWN_TIMEOUT", "shutdown_timeout", "Shutdown timeout must be a positive number")
         self.name, self.version = name, version
         self._state: dict[str, Any] = {}
         self._max_concurrent_jobs, self._max_queued_jobs = max_concurrent_jobs, max_queued_jobs
+        self._shutdown_timeout = shutdown_timeout
         self._job_handlers: dict[str, tuple[Callable[..., Any], float | None]] = {}
         self._jobs: JobManager | None = None
         self._base_config = dict(config or {})
@@ -354,9 +358,11 @@ class Application:
             return
         self._transition("stopping")
         try:
-            if self._jobs is not None:
-                await self._jobs.shutdown()
-            await self._stack.aclose()
+            async def cleanup() -> None:
+                if self._jobs is not None:
+                    await self._jobs.shutdown()
+                await self._stack.aclose()
+            await asyncio.wait_for(cleanup(), self._shutdown_timeout)
         except Exception:
             self._transition("failed")
             self.context.services.clear()

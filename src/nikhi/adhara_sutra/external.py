@@ -49,14 +49,17 @@ class ExternalCommand:
 
     def __init__(self, executable: str, *, search_path: str | None = None,
                  env: Mapping[str, str] | None = None, cwd: str | None = None,
-                 max_concurrent: int = 0) -> None:
+                 max_concurrent: int = 0, kill_timeout: float = 5.0) -> None:
         if not isinstance(max_concurrent, int) or max_concurrent < 0:
             raise ValueError("max_concurrent must be a non-negative integer")
+        if not isinstance(kill_timeout, (int, float)) or isinstance(kill_timeout, bool) or kill_timeout <= 0:
+            raise ValueError("kill_timeout must be a positive number")
         self.executable = executable
         self.search_path = search_path
         self.env = dict(env or {})
         self.cwd = cwd
         self.max_concurrent = max_concurrent
+        self.kill_timeout = kill_timeout
         self.path: str | None = None
         self._processes: set[asyncio.subprocess.Process] = set()
         self._semaphore = asyncio.Semaphore(max_concurrent) if max_concurrent else None
@@ -194,7 +197,7 @@ class ExternalCommand:
                 except ProcessLookupError:
                     pass
         try:
-            await asyncio.wait_for(process.wait(), 5)
+            await asyncio.wait_for(process.wait(), self.kill_timeout)
         except asyncio.TimeoutError:
             if sys.platform == "win32":
                 try:

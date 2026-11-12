@@ -107,8 +107,10 @@ without bound.
 Jobs run in-process with bounded concurrency (`max_concurrent_jobs`, default 4)
 and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts apply to
 async handlers. Stopping the application cancels active jobs before services
-close, so jobs never outlive their owning process. Persistence and recovery
-across processes are not yet provided.
+close, so jobs never outlive their owning process, and shutdown waits at most
+`shutdown_timeout` seconds (default 10) for cancellation and cleanup; external
+commands accept a `kill_timeout` grace period before forced termination.
+Persistence and recovery across processes are not yet provided.
 
 Connectors are services: register them with `app.service`, resolve them with
 `context.get_service`, and replace them with a test double by registering the

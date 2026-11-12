@@ -66,3 +66,13 @@ an unknown outcome when a terminated command may have produced side effects.
 
 - **WHEN** a command exceeds its timeout and is terminated
 - **THEN** the connector error reports `details.outcome: "unknown"`
+
+### Requirement: Termination grace
+
+External execution SHALL allow the grace period before forced termination to be
+configured. (NFR-OPS-006)
+
+#### Scenario: A process ignores termination
+
+- **WHEN** a terminated process does not exit within `kill_timeout`
+- **THEN** the connector forces termination without waiting longer

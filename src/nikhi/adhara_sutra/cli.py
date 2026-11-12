@@ -11,6 +11,8 @@ from typing import Sequence
 
 from ._version import __version__
 from .application import Application
+from .discovery import ProjectInspector
+from .report import implementation_report, render_json, render_markdown
 
 
 def _load(target: str) -> Application:
@@ -45,9 +47,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     run.add_argument("--persistent", action="store_true",
                      help="serve sequential JSON-line requests until EOF")
     commands.add_parser("version", help="print the framework version")
+    inspect = commands.add_parser("inspect", help="inspect a project and report its implementation")
+    inspect.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
+    inspect.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
+    inspect.add_argument("--output", help="write the report to a file instead of stdout")
     args = parser.parse_args(argv)
     if args.command == "version":
         print(__version__)
+        return 0
+    if args.command == "inspect":
+        if not Path(args.target).is_dir():
+            print(f"adhara: not a directory: {args.target}", file=sys.stderr)
+            return 2
+        try:
+            report = implementation_report(ProjectInspector(args.target).inspect())
+        except Exception as exc:
+            print(f"adhara: cannot inspect {args.target}: {exc}", file=sys.stderr)
+            return 2
+        text = render_json(report) if args.json else render_markdown(report)
+        if args.output:
+            Path(args.output).write_text(text if text.endswith("\n") else text + "\n", encoding="utf-8")
+            print(f"wrote {args.output}")
+        else:
+            print(text)
         return 0
     if args.command != "run":
         parser.print_help()

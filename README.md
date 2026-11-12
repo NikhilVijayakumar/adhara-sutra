@@ -12,7 +12,11 @@ the application's `app`, `application`, or `create_app()` and serves the same
 protocol; `adhara version` prints the framework version. Tests can use
 `ApplicationTestClient(app)` as an async context manager to start the runtime
 and `await client.call(action, payload)` (or `.dispatch` for the full envelope)
-without the CLI transport.
+without the CLI transport. `adhara inspect [path] [--json] [--output FILE]`
+statically analyzes a project and reports its entry points, actions, jobs,
+services, integrations, dependencies, state and job access, and Electron
+boundaries. Every finding cites file and line evidence and is marked observed
+or inferred; reports carry a schema version and the Git revision when available.
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action

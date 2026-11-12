@@ -26,14 +26,14 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-REP-001 | Implementation Report | New | Not mapped |
+| FR-REP-001 | Implementation Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-002 | Verification Report | New | Not mapped |
 | FR-REP-003 | Migration Report | New | Not mapped |
-| FR-REP-004 | Markdown Output | New | Not mapped |
-| FR-REP-005 | JSON Output | New | Not mapped |
-| FR-REP-006 | Report Versioning | New | Not mapped |
-| FR-REP-007 | Source Revision Tracking | New | Not mapped |
-| FR-REP-008 | Finding Traceability | New | Not mapped |
+| FR-REP-004 | Markdown Output | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-REP-005 | JSON Output | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-REP-006 | Report Versioning | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-REP-007 | Source Revision Tracking | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-REP-008 | Finding Traceability | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-REP-009 | Actionable Recommendations | New | Not mapped |
 | FR-REP-010 | Report Refresh | New | Not mapped |
 
@@ -41,16 +41,16 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-DISC-001 | Project Inspection | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-DISC-002 | Entry Point Discovery | New | Not mapped |
-| FR-DISC-003 | Module and Dependency Discovery | New | Not mapped |
-| FR-DISC-004 | CLI Command Discovery | New | Not mapped |
-| FR-DISC-005 | Electron Integration Discovery | New | Not mapped |
-| FR-DISC-006 | External Integration Discovery | New | Not mapped |
-| FR-DISC-007 | State and Job Discovery | New | Not mapped |
-| FR-DISC-008 | Current Implementation Report | New | Not mapped |
-| FR-DISC-009 | Source Evidence | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-DISC-010 | Uncertainty Reporting | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-001 | Project Inspection | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-002 | Entry Point Discovery | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-003 | Module and Dependency Discovery | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-004 | CLI Command Discovery | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-005 | Electron Integration Discovery | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-006 | External Integration Discovery | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-007 | State and Job Discovery | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-008 | Current Implementation Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-009 | Source Evidence | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-DISC-010 | Uncertainty Reporting | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-DISC-011 | Incremental Analysis | New | Not mapped |
 
 ## [Architecture Verification Requirements](functional-architecture-verification-requirements.md)

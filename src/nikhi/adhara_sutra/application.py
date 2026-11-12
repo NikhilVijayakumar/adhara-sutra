@@ -17,6 +17,7 @@ from weakref import WeakValueDictionary
 
 from ._version import __version__
 from .diagnostics import _REQUEST, configure_logging
+from .jobs import JobManager, JobService
 
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 _LOG = logging.getLogger(__name__)
@@ -94,6 +95,7 @@ class ApplicationContext:
     state: dict[str, Any] = field(default_factory=dict)
     session_state: dict[str, Any] = field(default_factory=dict)
     request_state: dict[str, Any] = field(default_factory=dict)
+    jobs: Any = None
 
     def get_service(self, name: str) -> Any:
         """Return a registered service or raise a clear error."""
@@ -107,8 +109,11 @@ class ApplicationContext:
             return
         if not isinstance(event, str) or not _ACTION.fullmatch(event):
             raise ValueError("Invalid event name")
-        self._emit({"kind": "event", "protocol_version": "1.0",
-                    "request_id": self.metadata.get("request_id"), "event": event, "data": data})
+        envelope = {"kind": "event", "protocol_version": "1.0",
+                    "request_id": self.metadata.get("request_id"), "event": event, "data": data}
+        if "job_id" in self.metadata:
+            envelope["job_id"] = self.metadata["job_id"]
+        self._emit(envelope)
 
 
 _LIFECYCLE_STATES = {"created", "initializing", "ready", "running", "stopping", "stopped", "failed"}
@@ -127,15 +132,23 @@ class Application:
     """Register actions and serve requests for a consuming application."""
 
     def __init__(self, name: str, version: str, *, config: dict[str, Any] | None = None,
-                 validate_config: Callable[[dict[str, Any]], None] | None = None):
+                 validate_config: Callable[[dict[str, Any]], None] | None = None,
+                 max_concurrent_jobs: int = 4, max_queued_jobs: int = 64):
         if not isinstance(name, str) or not name.strip() or name != name.strip():
             raise ApplicationDefinitionError("INVALID_APPLICATION_NAME", "name", "Application name must be a non-empty string without surrounding whitespace")
         if not isinstance(version, str) or not version.strip() or version != version.strip():
             raise ApplicationDefinitionError("INVALID_APPLICATION_VERSION", "version", "Application version must be a non-empty string without surrounding whitespace")
         if config is not None and not isinstance(config, dict):
             raise ApplicationDefinitionError("INVALID_APPLICATION_CONFIG", "config", "Configuration must be a dictionary")
+        if not isinstance(max_concurrent_jobs, int) or max_concurrent_jobs < 1:
+            raise ApplicationDefinitionError("INVALID_JOB_CONCURRENCY", "max_concurrent_jobs", "Job concurrency must be a positive integer")
+        if not isinstance(max_queued_jobs, int) or max_queued_jobs < 0:
+            raise ApplicationDefinitionError("INVALID_JOB_QUEUE", "max_queued_jobs", "Job queue limit must be a non-negative integer")
         self.name, self.version = name, version
         self._state: dict[str, Any] = {}
+        self._max_concurrent_jobs, self._max_queued_jobs = max_concurrent_jobs, max_queued_jobs
+        self._job_handlers: dict[str, tuple[Callable[..., Any], float | None]] = {}
+        self._jobs: JobManager | None = None
         self.context = ApplicationContext({}, dict(config or {}), {}, state=self._state)
         if validate_config is not None and not callable(validate_config):
             raise ApplicationDefinitionError("INVALID_CONFIG_VALIDATOR", "validate_config", "Configuration validator must be callable")
@@ -183,6 +196,27 @@ class Application:
                  "input_schema": meta["validate"] is not None, "output_schema": meta["output"] is not None}
                 for name, meta in sorted(self._actions.items())]
 
+    def job(self, name: str, *, timeout: float | None = None) -> Callable:
+        """Register a background job handler (payload, context); timeout applies to async handlers."""
+        if not isinstance(name, str) or not _ACTION.fullmatch(name) or name.startswith(("system.", "protocol.")):
+            raise ValueError("Invalid or reserved job name")
+        if timeout is not None and (not isinstance(timeout, (int, float)) or timeout <= 0):
+            raise ValueError("Job timeout must be a positive number")
+
+        def register(handler: Callable[..., Any]) -> Callable[..., Any]:
+            if name in self._job_handlers:
+                raise ValueError(f"Job already registered: {name}")
+            if not callable(handler):
+                raise ValueError("Job handler must be callable")
+            self._job_handlers[name] = (handler, timeout)
+            return handler
+        return register
+
+    def list_jobs(self) -> list[dict[str, Any]]:
+        """Return registered job metadata for discovery."""
+        return [{"name": name, "description": inspect.getdoc(handler) or "", "timeout": timeout}
+                for name, (handler, timeout) in sorted(self._job_handlers.items())]
+
     def service(self, name: str, factory: Callable[[ApplicationContext], Any], *,
                 depends_on: tuple[str, ...] = ()) -> None:
         """Register a service or connector factory with its named dependencies."""
@@ -191,6 +225,13 @@ class Application:
         if not callable(factory) or not isinstance(depends_on, (list, tuple)) or any(not isinstance(dep, str) or not dep for dep in depends_on):
             raise ValueError("Factory must be callable and dependencies must be service names")
         self._services[name] = (factory, tuple(depends_on))
+
+    def _job_context(self, job_id: str, name: str, emit: Callable[[dict[str, Any]], None] | None,
+                     session_state: dict[str, Any]) -> ApplicationContext:
+        return ApplicationContext(self.context.services, self.context.config,
+                                  {"job_id": job_id, "job": name}, emit,
+                                  state=self._state, session_state=session_state, request_state={},
+                                  jobs=JobService(self._jobs, emit, session_state))
 
     async def start(self) -> None:
         self._transition("initializing")
@@ -219,8 +260,19 @@ class Application:
                 else:
                     value = self._stack.enter_context(resource)
                 self.context.services[name] = value
+            self._jobs = JobManager(self._job_handlers, self._job_context,
+                                    max_concurrent=self._max_concurrent_jobs,
+                                    max_queued=self._max_queued_jobs)
+            self.context = ApplicationContext(self.context.services, self.context.config,
+                                              self.context.metadata, state=self.context.state,
+                                              jobs=JobService(self._jobs, None, {}))
         except BaseException:
             self._transition("failed")
+            try:
+                if self._jobs is not None:
+                    await self._jobs.shutdown()
+            except Exception:
+                _LOG.exception("Job cleanup failed after startup failure")
             try:
                 await self._stack.aclose()
             except Exception:
@@ -234,6 +286,8 @@ class Application:
             return
         self._transition("stopping")
         try:
+            if self._jobs is not None:
+                await self._jobs.shutdown()
             await self._stack.aclose()
         except Exception:
             self._transition("failed")
@@ -263,7 +317,8 @@ class Application:
                 result = {"protocol_version": "1.0", "supported_protocol_versions": ["1.0"],
                           "framework_version": __version__, "name": self.name, "version": self.version}
             elif name == "system.help":
-                result = {"framework_version": __version__, "actions": self.list_actions()}
+                result = {"framework_version": __version__, "actions": self.list_actions(),
+                          "jobs": self.list_jobs()}
             else:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
@@ -282,7 +337,8 @@ class Application:
                                                      {"request_id": request_id, "action": name}, emit,
                                                      state=self._state,
                                                      session_state=session_state if session_state is not None else {},
-                                                     request_state={})
+                                                     request_state={},
+                                                     jobs=JobService(self._jobs, emit, session_state or {}) if self._jobs else None)
                 result = handler(payload, request_context)
                 if inspect.isawaitable(result):
                     result = await result

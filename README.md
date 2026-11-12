@@ -43,6 +43,17 @@ persistent session through `context.session_state`, and get a fresh
 `context.request_state` per request. Applications define the keys and values;
 service factories receive the same process state at startup.
 
+Background jobs are registered with `@app.job(name, timeout=...)` and submitted
+from a handler with `context.jobs.submit(name, payload)`, which returns an
+identifier. Job handlers receive `(payload, context)`; events they emit carry the
+`job_id`, and their log records are correlated with it. Use
+`context.jobs.status(id)`, `.list()`, `.cancel(id)`, and `.wait(id)` to inspect
+execution. Jobs run in-process with bounded concurrency (`max_concurrent_jobs`,
+default 4) and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts
+apply to async handlers. Stopping the application cancels active jobs before
+services close, so jobs never outlive their owning process. Persistence and
+recovery across processes are not yet provided.
+
 **A CLI-First Python Application Framework**
 
 *Build once. Standardize everywhere.*

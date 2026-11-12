@@ -21,6 +21,7 @@ class RequestContextFilter(logging.Filter):
         context = _REQUEST.get()
         record.request_id = context.get("request_id")
         record.action = context.get("action")
+        record.job_id = context.get("job_id")
         return True
 
 
@@ -35,6 +36,7 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
             "request_id": getattr(record, "request_id", None),
             "action": getattr(record, "action", None),
+            "job_id": getattr(record, "job_id", None),
         }
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)

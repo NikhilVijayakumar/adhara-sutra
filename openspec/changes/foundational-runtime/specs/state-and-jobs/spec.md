@@ -40,7 +40,12 @@ when the underlying operation supports it. (FR-JOB-004, FR-JOB-005, FR-JOB-006)
 ### Requirement: Job lifecycle and bounded concurrency
 
 Managed jobs SHALL follow the documented lifecycle states and bounded
-concurrency rules. (FR-JOB-001, FR-JOB-003, FR-JOB-007)
+concurrency rules. (FR-JOB-001, FR-JOB-003, FR-JOB-007, FR-JOB-008)
+
+#### Scenario: Job completes with a result
+
+- **WHEN** a registered job completes successfully
+- **THEN** its execution record reports the succeeded state and the returned result
 
 #### Scenario: Admission limit reached
 

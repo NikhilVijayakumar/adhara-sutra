@@ -112,6 +112,7 @@ class ApplicationContext:
     session_state: dict[str, Any] = field(default_factory=dict)
     request_state: dict[str, Any] = field(default_factory=dict)
     jobs: Any = None
+    state_lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False)
 
     def get_service(self, name: str) -> Any:
         """Return a registered service or raise a clear error."""
@@ -253,7 +254,8 @@ class Application:
         return ApplicationContext(self.context.services, self.context.config,
                                   {"job_id": job_id, "job": name}, emit,
                                   state=self._state, session_state=session_state, request_state={},
-                                  jobs=JobService(self._jobs, emit, session_state))
+                                  jobs=JobService(self._jobs, emit, session_state),
+                                  state_lock=self.context.state_lock)
 
     def override_config(self, values: dict[str, Any]) -> None:
         """Override configuration at runtime; overrides must precede startup."""
@@ -301,7 +303,7 @@ class Application:
                 if isinstance(validated, dict):
                     config = validated
             self.context = ApplicationContext(self.context.services, config, self.context.metadata,
-                                              state=self.context.state)
+                                              state=self.context.state, state_lock=self.context.state_lock)
             graph = {name: deps for name, (_, deps) in self._services.items()}
             missing = {dep for deps in graph.values() for dep in deps if dep not in graph}
             if missing:
@@ -323,7 +325,8 @@ class Application:
                                     max_queued=self._max_queued_jobs)
             self.context = ApplicationContext(self.context.services, self.context.config,
                                               self.context.metadata, state=self.context.state,
-                                              jobs=JobService(self._jobs, None, {}))
+                                              jobs=JobService(self._jobs, None, {}),
+                                              state_lock=self.context.state_lock)
         except BaseException:
             self._transition("failed")
             try:
@@ -410,7 +413,8 @@ class Application:
                                                      state=self._state,
                                                      session_state=session_state if session_state is not None else {},
                                                      request_state={},
-                                                     jobs=JobService(self._jobs, emit, session_state or {}) if self._jobs else None)
+                                                     jobs=JobService(self._jobs, emit, session_state or {}) if self._jobs else None,
+                                                     state_lock=self.context.state_lock)
                 result = handler(payload, request_context)
                 if inspect.isawaitable(result):
                     result = await result

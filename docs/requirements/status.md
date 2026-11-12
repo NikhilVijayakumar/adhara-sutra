@@ -325,7 +325,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-STATE-004 | State Change Notifications | New | Not mapped |
 | FR-STATE-005 | State Scope | Partially implemented | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-006 | State Persistence | New | Not mapped |
-| FR-STATE-007 | State Concurrency | New | Not mapped |
+| FR-STATE-007 | State Concurrency | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-008 | State Restoration | New | Not mapped |
 | FR-STATE-009 | State Cleanup | New | Not mapped |
 

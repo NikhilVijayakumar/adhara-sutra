@@ -78,7 +78,11 @@ in an unusual format can still pass through.
 Handlers share process state through `context.state`, share state within a
 persistent session through `context.session_state`, and get a fresh
 `context.request_state` per request. Applications define the keys and values;
-service factories receive the same process state at startup.
+service factories receive the same process state at startup. `context.state_lock`
+is one `asyncio.Lock` per application, shared by request and job contexts; use it
+to serialize compound process-state updates when jobs run concurrently. Plain
+state mappings are otherwise unsynchronized, so the application owns any other
+coordination it needs.
 
 Background jobs are registered with `@app.job(name, timeout=...)` and submitted
 from a handler with `context.jobs.submit(name, payload)`, which returns an

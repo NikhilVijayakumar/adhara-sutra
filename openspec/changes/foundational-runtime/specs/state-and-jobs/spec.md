@@ -16,6 +16,22 @@ persistent state. (FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-005)
 - **WHEN** a handler stores a value in process or session state
 - **THEN** process state is shared by every request in the process and session state only by requests in the same session
 
+### Requirement: Concurrent state access
+
+The framework SHALL provide one shared lock per application for compound
+process-state updates and SHALL document that plain state mappings are otherwise
+unsynchronized. (FR-STATE-007)
+
+#### Scenario: Concurrent jobs update process state
+
+- **WHEN** concurrent jobs read and write process state within `context.state_lock`
+- **THEN** updates are serialized and no update is lost
+
+#### Scenario: State is accessed without the lock
+
+- **WHEN** an application performs compound updates without the lock while work runs concurrently
+- **THEN** the application is responsible for its own synchronization
+
 ### Requirement: Job execution ownership
 
 Every managed job SHALL have an identifiable execution record and an execution

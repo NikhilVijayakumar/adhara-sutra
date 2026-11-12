@@ -225,12 +225,12 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-HTTP-001 | Outbound HTTP Requests | New | Not mapped |
-| FR-HTTP-002 | Connection Management | New | Not mapped |
-| FR-HTTP-003 | Timeout Policies | New | Not mapped |
+| FR-HTTP-001 | Outbound HTTP Requests | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
+| FR-HTTP-002 | Connection Management | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
+| FR-HTTP-003 | Timeout Policies | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 | FR-HTTP-004 | Retry Policies | New | Not mapped |
 | FR-HTTP-005 | Authentication Support | New | Not mapped |
-| FR-HTTP-006 | Response Processing | New | Not mapped |
+| FR-HTTP-006 | Response Processing | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 | FR-HTTP-007 | Streaming Support | New | Not mapped |
 
 ## [Job Management Requirements](functional-job-management-requirements.md)

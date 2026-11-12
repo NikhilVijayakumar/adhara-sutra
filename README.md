@@ -72,6 +72,15 @@ for an expected upstream failure: the response reports code `CONNECTOR_FAILURE`,
 category `connector`, the retryability flag, and optional details, and one-shot
 execution exits 7 while a persistent session continues.
 
+The optional HTTP connector (`pip install nikhi-adhara-sutra[http]`) wraps one
+reused `httpx` client: register `HttpClient(base_url=..., timeout=...)` as a
+service, call `get`/`post`/`put`/`patch`/`delete`/`head`, and read `status`,
+`headers`, `body`, `.text()`, or `.json()`. `raise_for_status()` raises a
+`ConnectorError` for non-success statuses, marking only server, timeout, and
+rate-limit statuses as retryable; transport failures and timeouts are retryable
+connector errors. The client closes when the application stops. Retries,
+authentication helpers, and streaming are not yet provided.
+
 The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
 spawns one persistent backend, performs the `system.hello` handshake, correlates
 responses, forwards events, and rejects pending work when the backend exits. The

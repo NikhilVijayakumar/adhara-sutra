@@ -241,6 +241,10 @@ class Application:
         return [{"name": name, "description": inspect.getdoc(handler) or "", "timeout": timeout}
                 for name, (handler, timeout) in sorted(self._job_handlers.items())]
 
+    def list_services(self) -> list[str]:
+        """Return registered service and connector names for discovery."""
+        return sorted(self._services)
+
     def service(self, name: str, factory: Callable[[ApplicationContext], Any], *,
                 depends_on: tuple[str, ...] = ()) -> None:
         """Register a service or connector factory with its named dependencies."""

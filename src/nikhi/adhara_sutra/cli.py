@@ -12,6 +12,7 @@ from typing import Sequence
 from ._version import __version__
 from .application import Application
 from .discovery import ProjectInspector
+from .doctor import application_report, environment_report, render_text
 from .migration import STRATEGIES, analyze_migration, load_statuses
 from .report import (implementation_report, migration_report, render_json, render_markdown, verification_report)
 from .verification import default_profile, verify
@@ -57,6 +58,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     run.add_argument("--persistent", action="store_true",
                      help="serve sequential JSON-line requests until EOF")
     commands.add_parser("version", help="print the framework version")
+    doctor = commands.add_parser("doctor", help="diagnose the environment and an optional application")
+    doctor.add_argument("target", nargs="?", help="optional module name or path to a Python file defining 'app'")
+    doctor.add_argument("--json", action="store_true", help="emit JSON instead of text")
+    doctor.add_argument("--output", help="write the report to a file instead of stdout")
     inspect = commands.add_parser("inspect", help="inspect a project and report its implementation")
     inspect.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
     inspect.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
@@ -78,6 +83,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "version":
         print(__version__)
         return 0
+    if args.command == "doctor":
+        report = environment_report()
+        if args.target:
+            try:
+                report = application_report(report, _load(args.target))
+            except Exception as exc:
+                print(f"adhara: cannot load {args.target}: {exc}", file=sys.stderr)
+                return 2
+        _write(render_json(report) if args.json else render_text(report), args.output)
+        return 1 if report["status"] == "fail" else 0
     if args.command == "inspect":
         if not Path(args.target).is_dir():
             print(f"adhara: not a directory: {args.target}", file=sys.stderr)

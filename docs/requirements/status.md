@@ -131,11 +131,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | FR-DEV-001 | Standard Developer Commands | New | Not mapped |
-| FR-DEV-002 | Local Diagnostics | New | Not mapped |
+| FR-DEV-002 | Local Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-DEV-003 | Examples | New | Not mapped |
 | FR-DEV-004 | Documentation Discovery | New | Not mapped |
 | FR-DEV-005 | Agent-Friendly Reports | New | Not mapped |
-| FR-DEV-006 | Framework Capability Discovery | New | Not mapped |
+| FR-DEV-006 | Framework Capability Discovery | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 
 ## [Documentation Requirements](functional-documentation-requirements.md)
 
@@ -258,7 +258,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-LOG-003 | Request Correlation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-004 | Log Destination Separation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-005 | Configurable Log Levels | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-LOG-006 | Runtime Diagnostics | New | Not mapped |
+| FR-LOG-006 | Runtime Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-007 | Diagnostic Export | New | Not mapped |
 
 ## [Packaging and Distribution Requirements](functional-packaging-and-distribution-requirements.md)
@@ -400,7 +400,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-DX-002 | Actionable Error Messages | New | Not mapped |
 | NFR-DX-003 | Consistent Command Interface | New | Not mapped |
 | NFR-DX-004 | Minimal New-Project Setup | New | Not mapped |
-| NFR-DX-005 | Discoverable Capabilities | New | Not mapped |
+| NFR-DX-005 | Discoverable Capabilities | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-DX-006 | Cross-Agent Accessibility | New | Not mapped |
 | NFR-DX-007 | Offline Core Development | New | Not mapped |
 | NFR-DX-008 | Clear Framework Boundaries | New | Not mapped |
@@ -492,7 +492,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | NFR-OPS-001 | Reproducible Builds | New | Not mapped |
 | NFR-OPS-002 | Production Packaging Validation | New | Not mapped |
-| NFR-OPS-003 | Diagnostic Availability | New | Not mapped |
+| NFR-OPS-003 | Diagnostic Availability | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-OPS-004 | Safe Upgrade Behavior | New | Not mapped |
 | NFR-OPS-005 | Platform-Specific Dependency Handling | New | Not mapped |
 | NFR-OPS-006 | Controlled Resource Termination | New | Not mapped |

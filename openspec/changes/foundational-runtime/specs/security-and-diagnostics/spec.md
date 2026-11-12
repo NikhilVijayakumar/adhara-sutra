@@ -126,3 +126,25 @@ separate from protocol output. (FR-LOG-001, FR-LOG-002, FR-LOG-003, FR-LOG-004, 
 
 - **WHEN** the environment sets `ADHARA_LOG_LEVEL` or the application configures a level
 - **THEN** records below that level are suppressed and protocol output is unchanged
+
+### Requirement: Runtime diagnostics
+
+The developer command SHALL report framework, interpreter, dependency,
+configuration, and readiness diagnostics without exposing configuration values,
+and SHALL expose registered capabilities for an optional application target.
+(FR-DEV-002, FR-DEV-006, FR-LOG-006, NFR-DX-005, NFR-OPS-003)
+
+#### Scenario: The environment is diagnosed
+
+- **WHEN** `adhara doctor` runs without an application target
+- **THEN** it reports the framework and protocol versions, the Python platform, optional connector availability, and configuration-file validity with remediation for failures
+
+#### Scenario: Configuration cannot be read
+
+- **WHEN** `ADHARA_CONFIG_FILE` names a missing or non-object file
+- **THEN** the command reports a failed configuration check with remediation and exits nonzero
+
+#### Scenario: Application capabilities are discovered
+
+- **WHEN** `adhara doctor <target>` loads an application
+- **THEN** it lists the registered actions, jobs, and services and reports readiness without printing configuration values

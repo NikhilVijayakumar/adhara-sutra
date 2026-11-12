@@ -9,9 +9,10 @@ import time
 from typing import Any, Callable
 from uuid import uuid4
 
-from .diagnostics import _REQUEST
+from .diagnostics import _REQUEST, RedactionFilter
 
 _LOG = logging.getLogger(__name__)
+_LOG.addFilter(RedactionFilter())
 _TERMINAL = {"succeeded", "failed", "cancelled"}
 
 

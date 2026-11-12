@@ -39,20 +39,48 @@ serialization, and generated reports apply it to findings and evidence.
 - **WHEN** a log message, exception text, error message, or error detail contains a password, token, secret, or API key
 - **THEN** the value is replaced with `[REDACTED]` before serialization
 
+#### Scenario: A framework log record uses the default handler
+
+- **WHEN** the framework logs a message or exception without a structured handler installed
+- **THEN** sensitive assignments are redacted before the handler formats the record
+
 #### Scenario: A report contains sensitive evidence
 
 - **WHEN** a generated implementation, verification, or migration report includes evidence with a credential
 - **THEN** the credential is redacted in both JSON and Markdown output
 
+### Requirement: Secure configuration and credentials
+
+Applications SHALL be configurable from environment variables and JSON config
+files without embedding secrets in source, and connectors SHALL accept
+credentials through those mechanisms. (FR-SEC-006, NFR-SEC-006)
+
+#### Scenario: A connector credential comes from the environment
+
+- **WHEN** an application reads a credential from `context.config` supplied by `ADHARA_CONFIG_*` and passes it to a connector
+- **THEN** the credential is used without appearing in application source or diagnostics
+
+#### Scenario: Configuration is invalid
+
+- **WHEN** configuration cannot be read or validated
+- **THEN** startup fails with a configuration error that does not disclose secret values
+
 ### Requirement: Restrict Electron IPC
 
 Electron integration SHALL expose controlled operations through the preload
-boundary. (FR-SEC-007, NFR-SEC-007, NFR-SEC-008)
+boundary. The bridge SHALL fix the backend executable and arguments at
+construction, spawn without a shell, and accept only action names and payloads
+from requests. (FR-SEC-007, NFR-SEC-007, NFR-SEC-008)
 
 #### Scenario: Renderer requests an unexposed operation
 
 - **WHEN** renderer code requests an operation outside the exposed interface
 - **THEN** it cannot invoke that operation through the bridge
+
+#### Scenario: A request payload contains a command
+
+- **WHEN** a request payload contains a command string or executable path
+- **THEN** it reaches the backend as action data and cannot change the spawned executable or arguments
 
 ### Requirement: Standard error model
 

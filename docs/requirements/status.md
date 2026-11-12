@@ -298,8 +298,8 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-SEC-003 | Safe Process Execution | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-SEC-004 | Sensitive Data Redaction | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-SEC-005 | Controlled Filesystem Access | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
-| FR-SEC-006 | Connector Credential Handling | New | Not mapped |
-| FR-SEC-007 | Electron IPC Boundary | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-SEC-006 | Connector Credential Handling | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-SEC-007 | Electron IPC Boundary | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-SEC-008 | Diagnostic Data Protection | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 
 ## [SQLite and Persistence Requirements](functional-sqlite-and-persistence-requirements.md)
@@ -570,9 +570,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-SEC-003 | Input Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | NFR-SEC-004 | Filesystem Safety | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | NFR-SEC-005 | Secret Protection | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| NFR-SEC-006 | Secure Configuration | New | Not mapped |
+| NFR-SEC-006 | Secure Configuration | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-007 | Electron Process Isolation | Partially implemented | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| NFR-SEC-008 | Controlled IPC Exposure | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| NFR-SEC-008 | Controlled IPC Exposure | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-009 | External Network Safety | New | Not mapped |
 | NFR-SEC-010 | Dependency Security | New | Not mapped |
 | NFR-SEC-011 | Safe Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |

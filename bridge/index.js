@@ -26,6 +26,10 @@ export class BridgeError extends Error {
 }
 
 export class Bridge extends EventEmitter {
+  #command;
+  #args;
+  #cwd;
+  #env;
   #child = null;
   #pending = new Map();
   #sequence = 0;
@@ -44,10 +48,10 @@ export class Bridge extends EventEmitter {
     if (!Number.isFinite(defaultTimeoutMs) || defaultTimeoutMs < 0) {
       throw new TypeError("defaultTimeoutMs must be a non-negative number");
     }
-    this.command = command;
-    this.args = [...args];
-    this.cwd = cwd;
-    this.env = { ...env };
+    this.#command = command;
+    this.#args = [...args];
+    this.#cwd = cwd;
+    this.#env = { ...env };
     this.defaultTimeoutMs = defaultTimeoutMs;
   }
 
@@ -63,9 +67,9 @@ export class Bridge extends EventEmitter {
     if (this.#child) {
       throw new BridgeError("The bridge is already running or closing", { code: "BRIDGE_NOT_STARTABLE" });
     }
-    const child = spawn(this.command, this.args, {
-      cwd: this.cwd,
-      env: { ...process.env, ...this.env },
+    const child = spawn(this.#command, this.#args, {
+      cwd: this.#cwd,
+      env: { ...process.env, ...this.#env },
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
       shell: false,

@@ -63,7 +63,9 @@ from `config_file=` or `ADHARA_CONFIG_FILE`, `ADHARA_CONFIG_<KEY>` environment
 variables (lowercased top-level keys, values parsed as JSON when possible), and
 `app.override_config({...})` before startup. Validation runs on the merged
 mapping. An unreadable, malformed, or non-object config file aborts startup with
-its path in the error.
+its path in the error. Credentials can come from `ADHARA_CONFIG_*` variables or a
+config file, so they need not be embedded in application source; connectors
+accept them as headers or environment values.
 Diagnostics are structured JSON written to stderr; `Application.run()` installs
 the handler automatically and `configure_logging()` is available for custom
 entry points. The level defaults to `ADHARA_LOG_LEVEL` (INFO when unset) and can
@@ -73,8 +75,9 @@ be set programmatically. Each record carries `timestamp`, `level`, `logger`, and
 Log messages, exception text, protocol error messages and details, and generated
 reports redact values under keys such as `password`, `token`, `secret`, and
 `api_key`, including quoted or bare `key=value` assignments and bearer headers,
-replacing them with `[REDACTED]`. Redaction is pattern-based, so a secret written
-in an unusual format can still pass through.
+replacing them with `[REDACTED]`. Framework log records are redacted before any
+handler formats them, including the default one. Redaction is pattern-based, so a
+secret written in an unusual format can still pass through.
 Handlers share process state through `context.state`, share state within a
 persistent session through `context.session_state`, and get a fresh
 `context.request_state` per request. Applications define the keys and values;
@@ -150,8 +153,8 @@ responses, forwards events, and rejects pending work when the backend exits. The
 package exposes `start()`, `request(action, payload, {timeoutMs})`,
 `cancel(jobId)`, `health()`, `help()`, and `close()`, plus `event`, `stderr`,
 `exit`, `protocolError`, and `processError` events. Its command and arguments are
-fixed at construction, so renderer input can only become an action name and
-payload. A running request cannot be cancelled because the persistent session is
+fixed at construction, held privately, and spawned without a shell, so renderer
+input can only become an action name and payload. A running request cannot be cancelled because the persistent session is
 sequential; cancellation targets managed jobs.
 
 **A CLI-First Python Application Framework**

@@ -17,7 +17,7 @@ from typing import Any, Callable, TextIO
 from weakref import WeakValueDictionary
 
 from ._version import __version__
-from .diagnostics import _REQUEST, configure_logging, redact, redact_text
+from .diagnostics import _REQUEST, RedactionFilter, configure_logging, redact, redact_text
 from .jobs import JobManager, JobService
 
 PROTOCOL_VERSION = "1.0"
@@ -25,6 +25,7 @@ SUPPORTED_PROTOCOL_VERSIONS = (PROTOCOL_VERSION,)
 
 _ACTION = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(?:\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 _LOG = logging.getLogger(__name__)
+_LOG.addFilter(RedactionFilter())
 _MAX_LINE = 1024 * 1024
 _EXIT_INVALID_INVOCATION = 2
 _EXIT_INITIALIZATION_FAILED = 3

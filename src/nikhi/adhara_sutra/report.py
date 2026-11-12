@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .discovery import ProjectProfile
+from .verification import VerificationResult
 
 REPORT_SCHEMA_VERSION = "1"
 
@@ -54,7 +55,45 @@ def render_json(report: dict[str, Any]) -> str:
     return json.dumps(report, indent=2, ensure_ascii=False)
 
 
+def verification_report(result: VerificationResult, *, generated_at: str | None = None) -> dict[str, Any]:
+    """Build the versioned, machine-readable verification report for one result."""
+    return {"schema_version": REPORT_SCHEMA_VERSION, "kind": "verification",
+            "generated_at": generated_at or _now(), **result.to_dict()}
+
+
 def render_markdown(report: dict[str, Any]) -> str:
+    """Render an implementation or verification report as human-readable Markdown."""
+    if report.get("kind") == "verification":
+        return _render_verification(report)
+    return _render_implementation(report)
+
+
+def _render_verification(report: dict[str, Any]) -> str:
+    summary = report["summary"]
+    lines = ["# Architecture verification", "",
+             f"- Schema version: {report['schema_version']}",
+             f"- Generated: {report['generated_at']}",
+             f"- Profile version: {report['profile']['version']}",
+             f"- Status: {report['status']}", "",
+             "## Summary", "",
+             "| Pass | Fail | Needs review | Not checked |",
+             "| --- | --- | --- | --- |",
+             f"| {summary['pass']} | {summary['fail']} | {summary['needs_review']} | {summary['not_checked']} |", "",
+             "## Checks", ""]
+    for check in report["checks"]:
+        lines += [f"### {check['status'].upper()} `{check['rule']}` - {check['title']}", "",
+                  f"- Severity: {check['severity']}"]
+        if check["detail"]:
+            lines.append(f"- Detail: {check['detail']}")
+        if check["remediation"]:
+            lines.append(f"- Remediation: {check['remediation']}")
+        for evidence in check["evidence"]:
+            lines.append(f"- Evidence: `{evidence['path']}:{evidence['line']}` - `{evidence['snippet']}`")
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _render_implementation(report: dict[str, Any]) -> str:
     """Render a report as human-readable Markdown."""
     source = report["source"]
     revision = source.get("revision") or "unavailable"
@@ -81,17 +120,17 @@ def render_markdown(report: dict[str, Any]) -> str:
             continue
         lines += [f"## {title}", ""]
         for item in items:
-            detail = f" — {item['detail']}" if item["detail"] else ""
+            detail = f" - {item['detail']}" if item["detail"] else ""
             lines.append(f"- `{item['name']}` ({item['confidence']}){detail}")
             for evidence in item["evidence"]:
-                lines.append(f"  - `{evidence['path']}:{evidence['line']}` — `{evidence['snippet']}`")
+                lines.append(f"  - `{evidence['path']}:{evidence['line']}` - `{evidence['snippet']}`")
         lines.append("")
     lines += ["## Dependencies", ""]
     if report["dependencies"]:
         for dependency in report["dependencies"]:
             locations = ", ".join(f"`{evidence['path']}:{evidence['line']}`"
                                   for evidence in dependency["evidence"][:3])
-            suffix = f" — {locations}" if locations else ""
+            suffix = f" - {locations}" if locations else ""
             lines.append(f"- `{dependency['name']}` ({dependency['kind']}){suffix}")
     else:
         lines.append("_None detected._")
@@ -99,9 +138,9 @@ def render_markdown(report: dict[str, Any]) -> str:
     if report["errors"]:
         lines += ["## Parse errors", ""]
         for error in report["errors"]:
-            lines.append(f"- `{error['name']}` ({error['confidence']}) — {error['detail']}")
+            lines.append(f"- `{error['name']}` ({error['confidence']}) - {error['detail']}")
             for evidence in error["evidence"]:
-                lines.append(f"  - `{evidence['path']}:{evidence['line']}` — `{evidence['snippet']}`")
+                lines.append(f"  - `{evidence['path']}:{evidence['line']}` - `{evidence['snippet']}`")
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 

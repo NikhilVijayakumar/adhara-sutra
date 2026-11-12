@@ -17,6 +17,11 @@ statically analyzes a project and reports its entry points, actions, jobs,
 services, integrations, dependencies, state and job access, and Electron
 boundaries. Every finding cites file and line evidence and is marked observed
 or inferred; reports carry a schema version and the Git revision when available.
+`adhara verify [path] [--json] [--output FILE] [--strict]` evaluates the
+versioned architecture profile against that discovery and reports each check as
+pass, fail, needs review, or not checked, with evidence and remediation. It
+exits 0 without failures, 1 with failures (or with needs-review checks under
+`--strict`), and 2 for an invalid invocation, so it can run in CI.
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action

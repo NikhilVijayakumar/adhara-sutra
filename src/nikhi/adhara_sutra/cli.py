@@ -12,7 +12,8 @@ from typing import Sequence
 from ._version import __version__
 from .application import Application
 from .discovery import ProjectInspector
-from .report import implementation_report, render_json, render_markdown
+from .report import (implementation_report, render_json, render_markdown, verification_report)
+from .verification import default_profile, verify
 
 
 def _load(target: str) -> Application:
@@ -38,6 +39,14 @@ def _load(target: str) -> Application:
     return app
 
 
+def _write(text: str, output: str | None) -> None:
+    if output:
+        Path(output).write_text(text if text.endswith("\n") else text + "\n", encoding="utf-8")
+        print(f"wrote {output}")
+    else:
+        print(text)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="adhara", description="AdharaSutra developer command")
     parser.add_argument("--version", action="version", version=__version__)
@@ -51,6 +60,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     inspect.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
     inspect.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
     inspect.add_argument("--output", help="write the report to a file instead of stdout")
+    verify_command = commands.add_parser("verify", help="verify a project against the architecture profile")
+    verify_command.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
+    verify_command.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
+    verify_command.add_argument("--output", help="write the report to a file instead of stdout")
+    verify_command.add_argument("--strict", action="store_true",
+                                help="treat checks needing review as failures")
     args = parser.parse_args(argv)
     if args.command == "version":
         print(__version__)
@@ -65,12 +80,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"adhara: cannot inspect {args.target}: {exc}", file=sys.stderr)
             return 2
         text = render_json(report) if args.json else render_markdown(report)
-        if args.output:
-            Path(args.output).write_text(text if text.endswith("\n") else text + "\n", encoding="utf-8")
-            print(f"wrote {args.output}")
-        else:
-            print(text)
+        _write(text, args.output)
         return 0
+    if args.command == "verify":
+        if not Path(args.target).is_dir():
+            print(f"adhara: not a directory: {args.target}", file=sys.stderr)
+            return 2
+        try:
+            result = verify(ProjectInspector(args.target).inspect(), default_profile())
+        except Exception as exc:
+            print(f"adhara: cannot verify {args.target}: {exc}", file=sys.stderr)
+            return 2
+        report = verification_report(result)
+        text = render_json(report) if args.json else render_markdown(report)
+        _write(text, args.output)
+        failed = result.status == "fail" or (args.strict and result.status == "needs_review")
+        return 1 if failed else 0
     if args.command != "run":
         parser.print_help()
         return 0

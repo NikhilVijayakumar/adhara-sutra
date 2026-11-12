@@ -10,6 +10,49 @@ unsupported or incomplete checks from successful checks. (FR-ARCH-001, NFR-ARCH-
 - **WHEN** a rule cannot be evaluated because its required evidence is unavailable
 - **THEN** the verifier reports the check as unresolved rather than passing it
 
+### Requirement: Versioned profiles and rule catalog
+
+Verification SHALL evaluate a versioned architecture profile against a catalog
+of stable, identified rules. (FR-ARCH-001, FR-ARCH-002, NFR-ARCH-005)
+
+#### Scenario: A rule is evaluated
+
+- **WHEN** verification runs
+- **THEN** each result names its stable rule identifier, title, and severity
+
+### Requirement: Explicit verification statuses
+
+Each check SHALL be reported as pass, fail, needs review, or not checked, and
+prerequisites that cannot be evaluated SHALL be reported as not checked rather
+than passing. (FR-ARCH-010, NFR-ARCH-003)
+
+#### Scenario: A rule has no applicable evidence
+
+- **WHEN** a framework rule is evaluated on a project with no Application
+- **THEN** the check is reported as not checked
+
+### Requirement: Deterministic CI verification
+
+Deterministic checks SHALL produce reproducible results without an LLM or
+network access, and noninteractive verification SHALL expose meaningful exit
+statuses and versioned machine-readable reports.
+(FR-ARCH-009, FR-ARCH-011, FR-ARCH-015, NFR-ARCH-001, NFR-ARCH-007, NFR-ARCH-008)
+
+#### Scenario: CI runs verification
+
+- **WHEN** `adhara verify` runs noninteractively
+- **THEN** it exits 0 without failures, 1 with failures (or needs-review under `--strict`), and 2 for an invalid invocation
+
+### Requirement: Evidence and remediation
+
+Each violation SHALL report its rule, severity, evidence, and a recommended
+remediation where possible. (FR-ARCH-012, NFR-ARCH-002)
+
+#### Scenario: A direct integration is detected
+
+- **WHEN** a project uses a direct HTTP client while using the framework
+- **THEN** the check needs review and cites the source location with the managed connector as remediation
+
 ### Requirement: Reviewable migration
 
 Migration planning SHALL produce reviewable changes and SHALL verify affected

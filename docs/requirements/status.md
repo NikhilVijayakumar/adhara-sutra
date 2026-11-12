@@ -6,7 +6,7 @@ Snapshot: 2026-11-12. Requirements and linked OpenSpec specifications remain pro
 
 The specification column identifies draft specifications that explicitly cite the requirement, including cited ranges. A link does not imply the entire requirement is specified. “Not mapped” means no explicit citation was found; it does not mean the requirement is rejected. Open questions are decisions, not implementation tasks.
 
-Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connectors, the Electron bridge, migration, and verification tooling are not present.
+Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connector implementations, the Electron bridge, migration, and verification tooling are not present.
 
 OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundational-runtime/proposal.md) and its [implementation tasks](../../openspec/changes/foundational-runtime/tasks.md). Four completed OpenSpec planning artifacts describe document readiness, not finished functionality.
 
@@ -106,14 +106,14 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-CON-001 | Connector Registry | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
-| FR-CON-002 | Connector Lifecycle | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
-| FR-CON-003 | Connector Configuration | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
-| FR-CON-004 | Standard Error Mapping | New | Not mapped |
-| FR-CON-005 | Connector Isolation | New | Not mapped |
-| FR-CON-006 | Connector Health Reporting | New | Not mapped |
-| FR-CON-007 | Connector Test Doubles | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
-| FR-CON-008 | Custom Connector Registration | New | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-001 | Connector Registry | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-002 | Connector Lifecycle | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-003 | Connector Configuration | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-004 | Standard Error Mapping | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-005 | Connector Isolation | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-006 | Connector Health Reporting | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-007 | Connector Test Doubles | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| FR-CON-008 | Custom Connector Registration | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
 
 ## [Dependency and Service Management Requirements](functional-dependency-and-service-management-requirements.md)
 
@@ -466,8 +466,8 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | NFR-OBS-001 | Structured Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-OBS-002 | Request and Job Correlation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| NFR-OBS-003 | Connector Diagnostics | New | Not mapped |
-| NFR-OBS-004 | Runtime Health | New | Not mapped |
+| NFR-OBS-003 | Connector Diagnostics | Partially implemented | Not mapped |
+| NFR-OBS-004 | Runtime Health | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
 | NFR-OBS-005 | Diagnostic Isolation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-OBS-006 | Optional Advanced Telemetry | New | Not mapped |
 

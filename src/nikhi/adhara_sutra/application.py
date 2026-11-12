@@ -27,6 +27,7 @@ _EXIT_INVALID_INVOCATION = 2
 _EXIT_INITIALIZATION_FAILED = 3
 _EXIT_ACTION_FAILED = 4
 _EXIT_CANCELLED = 6
+_EXIT_DEPENDENCY_UNAVAILABLE = 7
 _EXIT_PROTOCOL_FAILED = 8
 _EXIT_INTERNAL_FAILED = 10
 _ERROR_EXIT_CODES = {
@@ -34,6 +35,7 @@ _ERROR_EXIT_CODES = {
     "PROTOCOL_INVALID_STATE": _EXIT_PROTOCOL_FAILED,
     "PROTOCOL_UNSUPPORTED_VERSION": _EXIT_PROTOCOL_FAILED,
     "RUNTIME_NOT_READY": _EXIT_INITIALIZATION_FAILED,
+    "CONNECTOR_FAILURE": _EXIT_DEPENDENCY_UNAVAILABLE,
 }
 _ERROR_CATEGORIES = {
     "PROTOCOL_INVALID_MESSAGE": "protocol",
@@ -44,6 +46,7 @@ _ERROR_CATEGORIES = {
     "ACTION_NOT_FOUND": "action",
     "RUNTIME_NOT_READY": "lifecycle",
     "RUNTIME_EXECUTION_FAILED": "internal",
+    "CONNECTOR_FAILURE": "connector",
 }
 _APPLICATIONS: WeakValueDictionary[str, Application] = WeakValueDictionary()
 _APPLICATIONS_LOCK = threading.Lock()
@@ -73,6 +76,15 @@ class BootstrapError(RuntimeError):
     def __init__(self, code: str, message: str):
         super().__init__(message)
         self.code = code
+
+
+class ConnectorError(Exception):
+    """A connector failure that maps to the connector error category."""
+
+    def __init__(self, message: str, *, retryable: bool = True, details: Any = None):
+        super().__init__(message)
+        self.retryable = retryable
+        self.details = details
 
 
 def _error(code: str, message: str, *, retryable: bool | None = False,
@@ -362,6 +374,10 @@ class Application:
             elif name == "system.help":
                 result = {"framework_version": __version__, "actions": self.list_actions(),
                           "jobs": self.list_jobs()}
+            elif name == "system.health":
+                if self.state not in ("ready", "running"):
+                    raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
+                result = await self._health()
             else:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
@@ -394,6 +410,10 @@ class Application:
             return self._response(request_id, data=result)
         except ProtocolError as exc:
             return self._response(request_id, error=_error(exc.code, str(exc), details=exc.details))
+        except ConnectorError as exc:
+            _LOG.error("Connector failure: %s", exc)
+            return self._response(request_id, error=_error("CONNECTOR_FAILURE", str(exc) or "Connector failure",
+                                                           retryable=exc.retryable, details=exc.details))
         except Exception:
             _LOG.exception("Action execution failed")
             return self._response(request_id, error=_error("RUNTIME_EXECUTION_FAILED", "Action execution failed", retryable=None))
@@ -404,6 +424,25 @@ class Application:
     def _response(request_id: Any, *, data: Any = None, error: dict[str, Any] | None = None) -> dict[str, Any]:
         return {"kind": "response", "protocol_version": "1.0", "request_id": request_id,
                 "success": error is None, "data": data, "error": error}
+
+    async def _health(self) -> dict[str, Any]:
+        """Report services that expose a callable health check."""
+        services: dict[str, Any] = {}
+        healthy = True
+        for name, service in self.context.services.items():
+            check = getattr(service, "health", None)
+            if not callable(check):
+                continue
+            try:
+                result = check()
+                if inspect.isawaitable(result):
+                    result = await result
+                healthy = healthy and bool(result)
+                services[name] = {"status": "ok" if result else "unavailable"}
+            except Exception as exc:
+                healthy = False
+                services[name] = {"status": "unavailable", "error": str(exc) or type(exc).__name__}
+        return {"status": "ok" if healthy else "degraded", "state": self.state, "services": services}
 
     async def serve(self, *, persistent: bool = False, stdin: TextIO | None = None, stdout: TextIO | None = None) -> int:
         """Serve one request, or a sequential persistent session until EOF, and return a process exit code."""

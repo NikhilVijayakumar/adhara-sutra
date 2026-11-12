@@ -10,9 +10,9 @@ Use `--persistent` to keep the process open; the first request must call
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action
-failed, 6 an interrupt (cancellation), 8 a protocol failure, 10 an internal
-failure. Codes 5 (timeout) and 7 (dependency unavailable) are reserved for those
-capabilities. Action failures do not end a persistent session. Handlers emit
+failed, 6 an interrupt (cancellation), 7 a connector or dependency failure, 8 a
+protocol failure, 10 an internal failure. Code 5 (timeout) is reserved for that
+capability. Action failures do not end a persistent session. Handlers emit
 correlated progress events with `context.emit(event, data)`; each event is a
 newline-delimited `{"kind": "event", ...}` envelope written before the request's
 terminal response. The `system.hello` response reports the application name and
@@ -20,8 +20,8 @@ version, the framework version, and the supported protocol versions. Send
 `system.help` to list registered actions with their descriptions and schema
 hooks; an unknown action reports the available action names. Protocol
 error objects carry a stable `category` (protocol, validation, action,
-lifecycle, internal) alongside `code`, `message`, `retryable`, and optional
-`details`.
+lifecycle, connector, internal) alongside `code`, `message`, `retryable`, and
+optional `details`.
 Application names are unique among live `Application` objects in a process.
 Invalid definitions raise `ApplicationDefinitionError`, a `ValueError` with
 `code` and `field` attributes; a name can be reused after its object is released.
@@ -59,6 +59,16 @@ default 4) and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts
 apply to async handlers. Stopping the application cancels active jobs before
 services close, so jobs never outlive their owning process. Persistence and
 recovery across processes are not yet provided.
+
+Connectors are services: register them with `app.service`, resolve them with
+`context.get_service`, and replace them with a test double by registering the
+double in place of the live factory. A service with a callable `health()`
+(synchronous or asynchronous, truthy when available) is reported by
+`system.health` after startup as `{"status": "ok"|"degraded", "state": ...,
+"services": {...}}`. Raise `ConnectorError(message, retryable=..., details=...)`
+for an expected upstream failure: the response reports code `CONNECTOR_FAILURE`,
+category `connector`, the retryability flag, and optional details, and one-shot
+execution exits 7 while a persistent session continues.
 
 **A CLI-First Python Application Framework**
 

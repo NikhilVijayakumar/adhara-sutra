@@ -1,5 +1,26 @@
 ## ADDED Requirements
 
+### Requirement: Action allowlisting
+
+The router SHALL execute only actions registered with the application and SHALL
+report unknown actions without invoking a handler. (FR-SEC-002, NFR-SEC-002)
+
+#### Scenario: An unregistered action is requested
+
+- **WHEN** a request names an action that was not registered
+- **THEN** the response is an `ACTION_NOT_FOUND` error listing the available actions and no handler runs
+
+### Requirement: Safe process execution
+
+External command execution SHALL keep the executable and its arguments separate,
+SHALL NOT invoke a shell, and SHALL reject a command string or non-string
+arguments. (FR-SEC-003, NFR-SEC-001)
+
+#### Scenario: An argument contains shell syntax
+
+- **WHEN** an argument contains shell metacharacters
+- **THEN** it is passed to the program verbatim and no shell interprets it
+
 ### Requirement: Protect sensitive diagnostics
 
 The framework SHALL protect sensitive values in logs, errors and diagnostics.

@@ -112,13 +112,24 @@ adapter are not yet provided.
 
 External commands run through `ExternalCommand(executable, search_path=...)`:
 `await run(args, timeout=..., input=..., cwd=..., env=..., on_output=...)`
-passes a structured argument array without a shell, streams stdout and stderr
+passes a structured argument array without a shell (a command string or
+non-string argument is rejected), streams stdout and stderr
 lines to `on_output(stream, chunk)`, and returns `CommandResult` with the exit
 status, captured output, and duration. `raise_for_status()` raises a
 non-retryable `ConnectorError` for a non-zero exit. Timeouts and cancellation
 terminate the process tree and report retryable errors; stopping the application
 also terminates any command still running. Output parsers and interactive
 process sessions are not yet provided.
+
+`AppDirectories.for_app(name)` resolves application data, configuration, cache,
+log, and temporary directories using platform conventions (or a `base` directory
+for a portable layout); `ensure()` creates them and `temporary()` yields an
+application-scoped temporary directory that is removed on exit, including on
+error. `PathBoundary(*roots)` resolves framework-managed paths against configured
+roots and rejects traversal, escaping symbolic links, and sibling-prefix paths
+with `PathViolation`; `open()` applies the same check to reads and writes.
+Large-artifact references and generic file-operation helpers are not yet
+provided.
 
 The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
 spawns one persistent backend, performs the `system.hello` handshake, correlates

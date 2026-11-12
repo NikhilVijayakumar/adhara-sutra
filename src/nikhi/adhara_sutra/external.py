@@ -82,6 +82,12 @@ class ExternalCommand:
         """Run the executable and capture or stream its output."""
         if self.path is None:
             raise ConnectorError("The external command connector is not started", retryable=False)
+        if isinstance(args, (str, bytes)):
+            raise ConnectorError("External command arguments must be a sequence, not a command string",
+                                 retryable=False)
+        args = tuple(args)
+        if not all(isinstance(argument, str) for argument in args):
+            raise ConnectorError("External command arguments must be strings", retryable=False)
         command_env = {**os.environ, **self.env, **(env or {})}
         options: dict[str, Any] = {}
         if sys.platform != "win32":

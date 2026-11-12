@@ -215,9 +215,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-FS-001 | Application Data Directories | New | Not mapped |
-| FR-FS-002 | Path Validation | New | Not mapped |
-| FR-FS-003 | Temporary File Management | New | Not mapped |
+| FR-FS-001 | Application Data Directories | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
+| FR-FS-002 | Path Validation | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
+| FR-FS-003 | Temporary File Management | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-FS-004 | File Operation Utilities | New | Not mapped |
 | FR-FS-005 | Large Artifact Handling | New | Not mapped |
 
@@ -294,10 +294,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | FR-SEC-001 | Request Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-SEC-002 | Action Allowlisting | New | Not mapped |
-| FR-SEC-003 | Safe Process Execution | New | Not mapped |
+| FR-SEC-002 | Action Allowlisting | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| FR-SEC-003 | Safe Process Execution | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-SEC-004 | Sensitive Data Redaction | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-SEC-005 | Controlled Filesystem Access | New | Not mapped |
+| FR-SEC-005 | Controlled Filesystem Access | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-SEC-006 | Connector Credential Handling | New | Not mapped |
 | FR-SEC-007 | Electron IPC Boundary | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-SEC-008 | Diagnostic Data Protection | New | Not mapped |
@@ -565,10 +565,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-SEC-001 | Secure Process Execution | New | Not mapped |
-| NFR-SEC-002 | Action Authorization Boundary | New | Not mapped |
+| NFR-SEC-001 | Secure Process Execution | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| NFR-SEC-002 | Action Authorization Boundary | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-003 | Input Validation | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| NFR-SEC-004 | Filesystem Safety | New | Not mapped |
+| NFR-SEC-004 | Filesystem Safety | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | NFR-SEC-005 | Secret Protection | New | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-006 | Secure Configuration | New | Not mapped |
 | NFR-SEC-007 | Electron Process Isolation | Partially implemented | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |

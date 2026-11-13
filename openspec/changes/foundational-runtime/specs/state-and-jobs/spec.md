@@ -4,12 +4,18 @@
 
 The framework SHALL provide state facilities while applications define their own
 state schemas and values. It SHALL distinguish request, session, process and
-persistent state. (FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-005)
+persistent state. (FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-005,
+FR-STATE-009)
 
 #### Scenario: Request scope ends
 
 - **WHEN** a request ends
-- **THEN** its request-scoped state follows the documented cleanup policy
+- **THEN** its request-scoped state is discarded and the next request starts with a fresh mapping
+
+#### Scenario: Session scope ends
+
+- **WHEN** a persistent session ends
+- **THEN** its session-scoped state is released, while process state remains until the application stops and persistent state changes only through explicit writes or deletes
 
 #### Scenario: Process and session state
 

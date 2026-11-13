@@ -1,6 +1,10 @@
+import gc
+import io
+import json
 import shutil
 import tempfile
 import unittest
+import weakref
 from contextlib import nullcontext
 from pathlib import Path
 from uuid import uuid4
@@ -108,3 +112,53 @@ class PersistentStateApplicationTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(await client.call("state.get", {"key": "theme"}), {"value": "dark"})
             async with ApplicationTestClient(self.create_app(path)) as client:
                 self.assertEqual(await client.call("state.get", {"key": "theme"}), {"value": "dark"})
+
+
+class SessionCleanupTests(unittest.IsolatedAsyncioTestCase):
+    async def test_session_state_is_shared_then_released_and_request_state_is_fresh(self):
+        app = Application(f"cleanup_{uuid4().hex}", "1.0")
+        references = {}
+
+        class Marker:
+            pass
+
+        @app.action("session.remember")
+        def remember(payload, context):
+            marker = Marker()
+            references["weak"] = weakref.ref(marker)
+            references["strong"] = marker
+            context.session_state["marker"] = marker
+            return {"session": sorted(context.session_state)}
+
+        @app.action("session.keys")
+        def keys(payload, context):
+            return {"session": sorted(context.session_state)}
+
+        @app.action("request.keys")
+        def request_keys(payload, context):
+            seen = sorted(context.request_state)
+            context.request_state["seen"] = True
+            return {"request": seen}
+
+        def envelope(action, request_id):
+            return {"kind": "request", "protocol_version": "1.0", "request_id": request_id,
+                    "action": action, "payload": {}}
+
+        lines = [envelope("system.hello", "req-1"),
+                 envelope("session.remember", "req-2"),
+                 envelope("session.keys", "req-3"),
+                 envelope("request.keys", "req-4"),
+                 envelope("request.keys", "req-5")]
+        stdin = io.StringIO("".join(json.dumps(line) + "\n" for line in lines))
+        stdout = io.StringIO()
+        self.assertEqual(await app.serve(persistent=True, stdin=stdin, stdout=stdout), 0)
+        responses = {response["request_id"]: response
+                     for response in (json.loads(line) for line in stdout.getvalue().splitlines())}
+        self.assertEqual(responses["req-2"]["data"]["session"], ["marker"])
+        self.assertEqual(responses["req-3"]["data"]["session"], ["marker"])
+        self.assertEqual(responses["req-4"]["data"]["request"], [])
+        self.assertEqual(responses["req-5"]["data"]["request"], [])
+        del references["strong"]
+        gc.collect()
+        self.assertIsNone(references["weak"]())
+

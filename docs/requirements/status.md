@@ -327,7 +327,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-STATE-006 | State Persistence | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-007 | State Concurrency | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-008 | State Restoration | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-STATE-009 | State Cleanup | New | Not mapped |
+| FR-STATE-009 | State Cleanup | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 
 ## [Testing Infrastructure Requirements](functional-testing-infrastructure-requirements.md)
 

@@ -94,7 +94,9 @@ handler formats them, including the default one. Redaction is pattern-based, so 
 secret written in an unusual format can still pass through.
 Handlers share process state through `context.state`, share state within a
 persistent session through `context.session_state`, and get a fresh
-`context.request_state` per request. Applications define the keys and values;
+`context.request_state` per request. Request state is discarded when the request
+ends, session state when the persistent session ends, and process state lives
+until the application stops. Applications define the keys and values;
 service factories receive the same process state at startup. `context.state_lock`
 is one `asyncio.Lock` per application, shared by request and job contexts; use it
 to serialize compound process-state updates when jobs run concurrently. Plain

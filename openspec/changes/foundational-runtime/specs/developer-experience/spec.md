@@ -4,7 +4,7 @@
 
 The framework SHALL provide a consistent noninteractive developer CLI for
 creating, running, inspecting, verifying, migrating, diagnosing, reporting, and
-version reporting. (FR-DEV-001)
+version reporting. (FR-DEV-001, NFR-DX-001, NFR-DX-002, NFR-DX-003, NFR-DX-004)
 
 #### Scenario: Discovering the commands
 
@@ -16,10 +16,20 @@ version reporting. (FR-DEV-001)
 - **WHEN** a command is given a missing or non-directory target
 - **THEN** it reports the problem and exits with the invalid-invocation status
 
+#### Scenario: A command fails
+
+- **WHEN** a command fails because of a configuration, target, or dependency problem
+- **THEN** the message identifies the failure and, where a fix exists, the remediation
+
 #### Scenario: Emitting a report
 
 - **WHEN** the report-producing commands run with `--json` or `--output FILE`
 - **THEN** the report can be consumed by tooling or written to a file
+
+#### Scenario: A generated starter application runs
+
+- **WHEN** a developer generates a project and follows its documented setup
+- **THEN** the generated application starts and answers its registered action
 
 ### Requirement: Documentation entry points
 
@@ -92,7 +102,7 @@ versioned, machine-readable context for coding agents: rule identifiers,
 evidence locations, remediation, and migration tasks with verification and
 rollback guidance. Reports that analyze a project SHALL identify the inspected
 source and its revision where supported, so stale analysis can be detected.
-(FR-DEV-005, NFR-DOC-004, NFR-DOC-005, NFR-DOC-006)
+(FR-DEV-005, NFR-DOC-004, NFR-DOC-005, NFR-DOC-006, NFR-DX-006)
 
 #### Scenario: An agent reads a verification report
 
@@ -113,3 +123,20 @@ source and its revision where supported, so stale analysis can be detected.
 
 - **WHEN** a report is rendered as JSON
 - **THEN** it parses back to the same structured report without loss
+
+### Requirement: Offline core development and framework boundaries
+
+Core framework development and deterministic verification SHALL not require
+continuous external network access once dependencies are installed, and
+documented interfaces and architecture rules SHALL distinguish framework-owned
+infrastructure from consuming application business logic. (NFR-DX-007, NFR-DX-008)
+
+#### Scenario: Optional connector packages are absent
+
+- **WHEN** the framework is imported and core commands run without the optional connector packages installed
+- **THEN** core development and deterministic verification still work
+
+#### Scenario: Assigning responsibility
+
+- **WHEN** a developer consults the documentation and architecture rules
+- **THEN** framework-owned infrastructure and application business logic have documented, distinguishable boundaries

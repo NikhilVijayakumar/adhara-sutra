@@ -95,6 +95,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-TEST-009: added a representative Python runtime fixture (`bridge/test/fixture_app.py`) and a Node integration test (`bridge/test/bridge.test.js`) driving the shared bridge through start, request, help, error propagation, and close, plus a guarded Python runner test; spec/status updated.
 - [x] Complete and practically verify NFR-REL-003, NFR-SEC-007, and NFR-AVAIL-002..006: added startup-failure cleanup and recovery-failure diagnostics tests, bridge construction constraints for fixed-command/no-shell process isolation, and spec citations/scenarios for degraded optional dependencies, crash/interruption recovery, backup/integrity recovery, and recovery diagnostics; statuses updated.
 - [x] Complete and practically verify NFR-COMP-004/006/007/008: made the public API surface explicit and testable, documented the deprecation policy, added migration compatibility risks for profile/framework changes, and added `load_report` for supported report schemas with explicit rejection of unsupported versions; tests/spec/status updated.
+- [x] Complete and practically verify NFR-DX-001/002/003/004/006/007/008: added a runnable generated-application test, documented command/error/remediation, structure, offline, cross-agent, and boundary expectations in the developer-experience spec; statuses updated.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

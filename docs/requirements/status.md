@@ -396,14 +396,14 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-DX-001 | Predictable Project Structure | New | Not mapped |
-| NFR-DX-002 | Actionable Error Messages | New | Not mapped |
-| NFR-DX-003 | Consistent Command Interface | New | Not mapped |
-| NFR-DX-004 | Minimal New-Project Setup | New | Not mapped |
+| NFR-DX-001 | Predictable Project Structure | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DX-002 | Actionable Error Messages | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DX-003 | Consistent Command Interface | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DX-004 | Minimal New-Project Setup | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | NFR-DX-005 | Discoverable Capabilities | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| NFR-DX-006 | Cross-Agent Accessibility | New | Not mapped |
-| NFR-DX-007 | Offline Core Development | New | Not mapped |
-| NFR-DX-008 | Clear Framework Boundaries | New | Not mapped |
+| NFR-DX-006 | Cross-Agent Accessibility | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DX-007 | Offline Core Development | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DX-008 | Clear Framework Boundaries | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 
 ## [Documentation Quality Requirements](non-functional-documentation-quality-requirements.md)
 

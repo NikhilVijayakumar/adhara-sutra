@@ -221,19 +221,24 @@ analysis. (FR-MIG-006, FR-MIG-007, FR-MIG-008, NFR-MIG-001, NFR-MIG-002, NFR-MIG
 
 Migration reports SHALL list completed, deferred, and unresolved tasks and
 findings, record the analyzed source revision, and require deterministic
-verification before completion is claimed.
+verification and supplied regression-test evidence before completion is claimed.
 (FR-MIG-010, FR-MIG-013, FR-MIG-015, FR-REP-002, FR-REP-003, FR-REP-009, FR-REP-010,
 NFR-MIG-007, NFR-MIG-008, NFR-MIG-009)
 
 #### Scenario: Recording progress
 
-- **WHEN** a status file maps planned task ids to recorded statuses
-- **THEN** the report reflects those statuses and still requires verification evidence before claiming completion
+- **WHEN** a status file maps planned task and finding ids to recorded statuses
+- **THEN** the report reflects task and finding statuses and still requires verification and behavioral-test evidence before claiming completion
 
 #### Scenario: Source changes after analysis
 
-- **WHEN** the working tree changes after a plan is generated
-- **THEN** the plan's recorded revision identifies that the analysis may be stale
+- **WHEN** the working tree no longer matches the source analyzed for a plan
+- **THEN** the recorded revision/dirty state identifies the analysis as stale and source-matching can be required before relying on it
+
+#### Scenario: Evaluating completion
+
+- **WHEN** behavioral-test evidence is supplied for a migration plan
+- **THEN** completion is reported only when architecture verification passes, no tasks or findings remain unfinished, and the supplied test evidence passed for the analyzed source revision; otherwise the report states it is incomplete or not evidenced
 
 ### Requirement: Migration status tracking
 

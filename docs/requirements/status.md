@@ -189,10 +189,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-MIG-007 | CLI Compatibility Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-008 | Persistence Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-009 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-MIG-010 | Migration Status Tracking | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-010 | Migration Status Tracking | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-011 | Safe Automated Transformations | New | Not mapped |
 | FR-MIG-012 | Reviewable Changes | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-MIG-013 | Migration Verification | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-013 | Migration Verification | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-014 | Rollback Planning | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-015 | Migration Completion Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
@@ -455,9 +455,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-MIG-004 | Data Integrity | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-005 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-006 | Rollback Readiness | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| NFR-MIG-007 | Source Revision Awareness | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-007 | Source Revision Awareness | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-008 | Agent Report Accuracy | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| NFR-MIG-009 | Migration Completion Evidence | Partially implemented | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-MIG-009 | Migration Completion Evidence | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-010 | Business Logic Modification Control | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [Observability Requirements](non-functional-observability-requirements.md)

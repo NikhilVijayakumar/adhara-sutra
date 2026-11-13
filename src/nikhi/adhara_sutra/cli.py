@@ -13,7 +13,7 @@ from ._version import __version__
 from .application import Application
 from .discovery import ProjectInspector
 from .doctor import application_report, environment_report, render_text
-from .migration import STRATEGIES, analyze_migration, load_statuses
+from .migration import STRATEGIES, analyze_migration, load_statuses, load_test_evidence
 from .report import (implementation_report, migration_report, render_json, render_markdown, verification_report)
 from .scaffolding import PROFILES, generate
 from .verification import Baseline, apply_baseline, default_profile, verify
@@ -89,7 +89,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     migrate.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
     migrate.add_argument("--strategy", choices=STRATEGIES, default="incremental",
                          help="migration strategy (default: incremental)")
-    migrate.add_argument("--status", help="JSON file mapping task ids to recorded statuses")
+    migrate.add_argument("--status", help="JSON file mapping task/finding ids to recorded statuses")
+    migrate.add_argument("--evidence", help="JSON file with behavioral/regression test evidence for completion")
+    migrate.add_argument("--check-source", action="store_true",
+                         help="fail if the analyzed source does not match the current working tree")
     migrate.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
     migrate.add_argument("--output", help="write the report to a file instead of stdout")
     args = parser.parse_args(argv)
@@ -158,13 +161,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
         try:
             project = ProjectInspector(args.target).inspect()
-            plan = analyze_migration(project, verify(project), strategy=args.strategy)
-            report = migration_report(plan, statuses=load_statuses(args.status) if args.status else None)
+            result = verify(project)
+            plan = analyze_migration(project, result, strategy=args.strategy)
+            if args.check_source and not plan.source_matches(project):
+                print("adhara: migration source does not match the current working tree", file=sys.stderr)
+                return 1
+            statuses = load_statuses(args.status) if args.status else None
+            evidence = load_test_evidence(args.evidence) if args.evidence else None
+            report = migration_report(plan, statuses=statuses, verification=result if evidence is not None else None,
+                                      test_evidence=evidence)
         except Exception as exc:
             print(f"adhara: cannot plan migration for {args.target}: {exc}", file=sys.stderr)
             return 2
         _write(render_json(report) if args.json else render_markdown(report), args.output)
-        return 0
+        if report.get("completion_evaluation", {}).get("complete"):
+            return 0
+        return 0 if evidence is None else 1
     if args.command != "run":
         parser.print_help()
         return 0

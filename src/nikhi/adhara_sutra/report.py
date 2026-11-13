@@ -8,7 +8,7 @@ from typing import Any
 
 from .diagnostics import redact
 from .discovery import ProjectProfile
-from .migration import TASK_STATUSES, MigrationPlan
+from .migration import TASK_STATUSES, MigrationPlan, evaluate_migration_completion
 from .verification import VerificationResult
 
 REPORT_SCHEMA_VERSION = "1"
@@ -67,32 +67,57 @@ def verification_report(result: VerificationResult, *, source: dict[str, Any] | 
     return redact(report)
 
 
-def migration_report(plan: MigrationPlan, *, statuses: dict[str, str] | None = None,
-                     generated_at: str | None = None) -> dict[str, Any]:
+def migration_report(plan: MigrationPlan, *, statuses: dict[str, Any] | None = None,
+                     generated_at: str | None = None, verification: Any = None,
+                     test_evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build the versioned, machine-readable migration report for one plan."""
-    statuses = statuses or {}
-    known = {task.id for task in plan.tasks}
-    unknown = sorted(set(statuses) - known)
-    if unknown:
-        raise ValueError(f"unknown migration task id(s): {', '.join(unknown)}")
+    if statuses is None:
+        task_statuses, finding_statuses = {}, {}
+    elif "tasks" in statuses or "findings" in statuses:
+        task_statuses = dict(statuses.get("tasks", {}))
+        finding_statuses = dict(statuses.get("findings", {}))
+    else:
+        task_statuses, finding_statuses = dict(statuses), {}
+    known_tasks = {task.id for task in plan.tasks}
+    unknown_tasks = sorted(set(task_statuses) - known_tasks)
+    if unknown_tasks:
+        raise ValueError(f"unknown migration task id(s): {', '.join(unknown_tasks)}")
+    known_findings = {finding.id for finding in plan.findings}
+    unknown_findings = sorted(set(finding_statuses) - known_findings)
+    if unknown_findings:
+        raise ValueError(f"unknown migration finding id(s): {', '.join(unknown_findings)}")
     tasks = []
     for task in plan.tasks:
         item = task.to_dict()
-        item["status"] = statuses.get(task.id, task.status)
+        item["status"] = task_statuses.get(task.id, task.status)
         tasks.append(item)
+    findings = []
+    for finding in plan.findings:
+        item = finding.to_dict()
+        item["status"] = finding_statuses.get(finding.id, "pending")
+        findings.append(item)
     by_status = {status: 0 for status in TASK_STATUSES}
+    findings_by_status = {status: 0 for status in TASK_STATUSES}
     by_phase: dict[str, int] = {}
     for task in tasks:
         by_status[task["status"]] += 1
         by_phase[task["phase"]] = by_phase.get(task["phase"], 0) + 1
+    for finding in findings:
+        findings_by_status[finding["status"]] += 1
     body = plan.to_dict()
     body.pop("tasks")
-    return redact({"schema_version": REPORT_SCHEMA_VERSION, "kind": "migration",
-                   "generated_at": generated_at or _now(), **body,
-                   "summary": {"findings": len(plan.findings), "tasks": len(tasks),
-                               "by_status": by_status,
-                               "by_phase": {phase: by_phase[phase] for phase in sorted(by_phase)}},
-                   "tasks": tasks})
+    body.pop("findings")
+    report = {"schema_version": REPORT_SCHEMA_VERSION, "kind": "migration",
+              "generated_at": generated_at or _now(), **body,
+              "summary": {"findings": len(plan.findings), "tasks": len(tasks),
+                          "by_status": by_status, "findings_by_status": findings_by_status,
+                          "by_phase": {phase: by_phase[phase] for phase in sorted(by_phase)}},
+              "findings": findings, "tasks": tasks}
+    if verification is not None or test_evidence is not None:
+        report["completion_evaluation"] = evaluate_migration_completion(
+            plan, verification, statuses={"tasks": task_statuses, "findings": finding_statuses},
+            test_evidence=test_evidence)
+    return redact(report)
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -123,6 +148,19 @@ def _render_migration(report: dict[str, Any]) -> str:
              f"| {summary['findings']} | {summary['tasks']} | {by_status['pending']} | "
              f"{by_status['in_progress']} | {by_status['done']} | {by_status['deferred']} | "
              f"{by_status['blocked']} |", ""]
+    if "findings_by_status" in summary:
+        fbs = summary["findings_by_status"]
+        lines += ["Finding statuses:", "",
+                  f"- pending: {fbs['pending']}, in_progress: {fbs['in_progress']}, done: {fbs['done']}, "
+                  f"deferred: {fbs['deferred']}, blocked: {fbs['blocked']}", ""]
+    evaluation = report.get("completion_evaluation")
+    if evaluation:
+        lines += ["## Completion evaluation", "",
+                  f"- Status: {evaluation['status']}",
+                  f"- Complete: {'yes' if evaluation.get('complete') else 'no'}"]
+        for reason in evaluation.get("reasons", []):
+            lines.append(f"- Reason: {reason}")
+        lines.append("")
     if summary["by_phase"]:
         lines += ["Tasks by phase:", ""]
         lines += [f"- {phase}: {count}" for phase, count in summary["by_phase"].items()]
@@ -133,7 +171,8 @@ def _render_migration(report: dict[str, Any]) -> str:
     for finding in report["findings"]:
         lines += [f"### `{finding['id']}` - {finding['title']}", "",
                   f"- Severity: {finding['severity']}",
-                  f"- Confidence: {finding['confidence']}"]
+                  f"- Confidence: {finding['confidence']}",
+                  f"- Status: {finding.get('status', 'pending')}"]
         if finding["rule"]:
             lines.append(f"- Rule: `{finding['rule']}`")
         if finding["detail"]:

@@ -12,6 +12,7 @@ from .verification import FAIL, NEEDS_REVIEW, VerificationResult
 
 STRATEGIES = ("adapter-first", "incremental", "rebuild")
 TASK_STATUSES = ("pending", "in_progress", "done", "deferred", "blocked")
+COMPLETION_STATUSES = ("complete", "incomplete", "not_evidenced")
 
 _PHASE_BY_RULE = {
     "ARCH-STRUCT-001": "structure",
@@ -131,6 +132,17 @@ class MigrationPlan:
                 "tasks": [task.to_dict() for task in self.tasks],
                 "completion": list(self.completion), "rollback": list(self.rollback)}
 
+    def source_matches(self, project: ProjectProfile | dict[str, Any]) -> bool:
+        """Return whether the plan's analyzed source matches the given project state."""
+        if isinstance(project, dict):
+            current = project
+        else:
+            current = {"root": project.root, "revision": project.revision, "dirty": project.dirty}
+        for key in ("root", "revision", "dirty"):
+            if self.source.get(key) != current.get(key):
+                return False
+        return True
+
 
 def analyze_migration(project: ProjectProfile, verification: VerificationResult,
                       *, strategy: str = "incremental") -> MigrationPlan:
@@ -166,17 +178,92 @@ def analyze_migration(project: ProjectProfile, verification: VerificationResult,
     )
 
 
-def load_statuses(path: str | Path) -> dict[str, str]:
-    """Load a JSON object mapping task ids to recorded migration statuses."""
+def load_statuses(path: str | Path) -> dict[str, dict[str, str]]:
+    """Load recorded migration statuses for tasks and findings.
+
+    Accepts either ``{"tasks": {...}, "findings": {...}}`` or a legacy flat
+    object mapping task ids to statuses.
+    """
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(data, dict):
-        raise ValueError("the status file must contain a JSON object mapping task ids to statuses")
-    statuses = {str(key): str(value) for key, value in data.items()}
-    invalid = sorted({value for value in statuses.values() if value not in TASK_STATUSES})
+        raise ValueError("the status file must contain a JSON object mapping ids to statuses")
+    structured = "tasks" in data or "findings" in data
+    if structured:
+        if not all(isinstance(data.get(key, {}), dict) for key in ("tasks", "findings")):
+            raise ValueError("the status file must map 'tasks' and 'findings' to objects")
+        tasks = {str(k): str(v) for k, v in data.get("tasks", {}).items()}
+        findings = {str(k): str(v) for k, v in data.get("findings", {}).items()}
+    else:
+        tasks = {str(key): str(value) for key, value in data.items()}
+        findings = {}
+    invalid = sorted({value for value in [*tasks.values(), *findings.values()] if value not in TASK_STATUSES})
     if invalid:
         raise ValueError(f"invalid task status(es): {', '.join(invalid)}; "
                          f"expected one of {', '.join(TASK_STATUSES)}")
-    return statuses
+    return {"tasks": tasks, "findings": findings}
+
+
+def load_test_evidence(path: str | Path) -> dict[str, Any]:
+    """Load migration test/behavioral evidence from a JSON file."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("the evidence file must contain a JSON object")
+    return data
+
+
+def evaluate_migration_completion(plan: MigrationPlan, verification: VerificationResult, *,
+                                  statuses: dict[str, Any] | None = None,
+                                  test_evidence: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Evaluate completion from deterministic verification and supplied evidence.
+
+    Completion is never claimed without strict verification and behavioral test
+    evidence tied to the analyzed source revision.
+    """
+    statuses = _normalize_statuses(statuses)
+    task_statuses = statuses["tasks"]
+    finding_statuses = statuses["findings"]
+    reasons: list[str] = []
+    incomplete: list[str] = []
+    if verification.status != "pass":
+        reasons.append(f"architecture verification is {verification.status}, not pass")
+        incomplete.append("verification")
+    unresolved = [f.id for f in plan.findings
+                  if finding_statuses.get(f.id, "pending") in ("pending", "in_progress", "blocked")]
+    if unresolved:
+        reasons.append(f"unresolved findings remain: {', '.join(unresolved)}")
+        incomplete.append("findings")
+    unfinished = [t.id for t in plan.tasks
+                  if task_statuses.get(t.id, t.status) in ("pending", "in_progress", "blocked")]
+    if unfinished:
+        reasons.append(f"unfinished tasks remain: {', '.join(unfinished)}")
+        incomplete.append("tasks")
+    tests = (test_evidence or {}).get("tests") if isinstance(test_evidence, dict) else None
+    evidenced = False
+    if not isinstance(tests, dict):
+        reasons.append("behavioral/regression test evidence has not been supplied")
+    else:
+        revision = tests.get("revision")
+        status = str(tests.get("status", ""))
+        if status != "passed":
+            reasons.append(f"test evidence status is {status or 'missing'}, not passed")
+        elif revision not in (plan.source.get("revision"),):
+            reasons.append("test evidence revision does not match the analyzed source revision")
+        else:
+            evidenced = True
+    if not reasons:
+        return {"status": "complete", "complete": True, "reasons": [],
+                "evidenced": True, "incomplete": [], "tests": tests}
+    status = "incomplete" if incomplete else "not_evidenced"
+    return {"status": status, "complete": False, "reasons": reasons,
+            "evidenced": evidenced and not incomplete, "incomplete": incomplete, "tests": tests}
+
+
+def _normalize_statuses(statuses: dict[str, Any] | None) -> dict[str, dict[str, str]]:
+    if statuses is None:
+        return {"tasks": {}, "findings": {}}
+    if "tasks" in statuses or "findings" in statuses:
+        return {"tasks": dict(statuses.get("tasks", {})), "findings": dict(statuses.get("findings", {}))}
+    return {"tasks": dict(statuses), "findings": {}}
 
 
 def _findings(project: ProjectProfile, verification: VerificationResult) -> list[MigrationFinding]:

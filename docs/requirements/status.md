@@ -191,7 +191,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-MIG-009 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-010 | Migration Status Tracking | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-011 | Safe Automated Transformations | New | Not mapped |
-| FR-MIG-012 | Reviewable Changes | New | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-MIG-012 | Reviewable Changes | Out of Scope | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) — library evaluates/reviews migration; users apply changes themselves (no automated transformation/apply). |
 | FR-MIG-013 | Migration Verification | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-014 | Rollback Planning | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-015 | Migration Completion Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |

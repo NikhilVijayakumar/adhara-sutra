@@ -20,7 +20,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-RUN-004 | Application Extension Points | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | FR-RUN-005 | Application Context | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | FR-RUN-006 | Runtime Execution Modes | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-RUN-007 | Graceful Shutdown | Partially implemented | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| FR-RUN-007 | Graceful Shutdown | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 
 ## [Architecture and Migration Reporting Requirements](functional-architecture-and-migration-reporting-requirements.md)
 
@@ -84,7 +84,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-CLI-004 | Structured Output | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-005 | One-Shot CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-006 | Persistent CLI Execution | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
-| FR-CLI-007 | Standard Exit Codes | Partially implemented | Not mapped |
+| FR-CLI-007 | Standard Exit Codes | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-008 | CLI Help and Discovery | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-009 | CLI Version Information | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-CLI-010 | Standard Input Support | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
@@ -534,7 +534,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-REL-004 | External Dependency Failure Handling | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
 | NFR-REL-005 | Process Failure Detection | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | NFR-REL-006 | Cancellation Consistency | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| NFR-REL-007 | Idempotent Cleanup | Partially implemented | Not mapped |
+| NFR-REL-007 | Idempotent Cleanup | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | NFR-REL-008 | Error Traceability | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | NFR-REL-009 | Communication Failure Recovery | New | Not mapped |
 | NFR-REL-010 | External Operation Uncertainty | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |

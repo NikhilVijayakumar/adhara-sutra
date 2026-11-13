@@ -39,12 +39,25 @@ required initialization fails. (FR-RUN-002, NFR-REL-003)
 ### Requirement: Coordinate shutdown
 
 The runtime SHALL stop admitting ordinary new work during shutdown and release
-managed resources according to documented policies. (FR-RUN-003, FR-RUN-007)
+managed resources according to documented policies. (FR-RUN-003, FR-RUN-007, NFR-REL-007)
 
 #### Scenario: Shutdown is requested again
 
 - **WHEN** shutdown is requested while shutdown is already in progress
 - **THEN** the runtime does not perform unsafe duplicate cleanup
+- **AND** repeating shutdown after it completes leaves managed resources in their released state
+
+#### Scenario: Shutdown races active work
+
+- **WHEN** shutdown starts while background jobs and managed subprocesses are running
+- **THEN** the jobs are cancelled and reported as cancelled
+- **AND** the subprocesses are terminated and their release runs once
+
+#### Scenario: Shutdown fails
+
+- **WHEN** releasing a managed resource raises during shutdown
+- **THEN** the failure is raised to the caller and the runtime is marked failed
+- **AND** a later shutdown request does not retry unsafe cleanup
 
 #### Scenario: The process is interrupted
 

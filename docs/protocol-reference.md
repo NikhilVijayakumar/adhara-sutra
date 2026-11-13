@@ -111,6 +111,7 @@ the terminal response and carry the same `request_id`; job events also carry
 | `ACTION_NOT_FOUND` | `action` | no | Unknown action; `details.available_actions` lists registered names. |
 | `RUNTIME_NOT_READY` | `lifecycle` | no | The application is not ready or running. |
 | `CONNECTOR_FAILURE` | `connector` | from the error | A connector or external dependency failed. |
+| `CONNECTOR_TIMEOUT` | `connector` | yes | A connector operation timed out; one-shot execution exits `5`. |
 | `RUNTIME_EXECUTION_FAILED` | `internal` | unknown | An unexpected handler failure. |
 | `JOB_QUEUE_FULL` | `lifecycle` | yes | The bounded job queue is at capacity. |
 
@@ -150,7 +151,7 @@ the bridge's protocol version.
 | `2` | No request was received, or an invalid invocation. |
 | `3` | Initialization failed. |
 | `4` | An action failed. |
-| `5` | Reserved for timeout handling. |
+| `5` | A connector operation timed out. |
 | `6` | Interrupt or cancellation. |
 | `7` | A connector or dependency failed. |
 | `8` | A protocol failure. |

@@ -40,9 +40,9 @@ data, and changes no source files. A status file maps task ids to `pending`,
 `Application.run()` returns the process exit code, so entry points should
 `raise SystemExit(app.run(...))`: 0 success (or a cleanly ended persistent
 session), 2 no request was received, 3 initialization failed, 4 an action
-failed, 6 an interrupt (cancellation), 7 a connector or dependency failure, 8 a
-protocol failure, 10 an internal failure. Code 5 (timeout) is reserved for that
-capability. Action failures do not end a persistent session. Handlers emit
+failed, 5 a connector operation timed out, 6 an interrupt (cancellation), 7 a
+connector or dependency failure, 8 a protocol failure, 10 an internal failure.
+Action failures do not end a persistent session. Handlers emit
 correlated progress events with `context.emit(event, data)`; each event is a
 newline-delimited `{"kind": "event", ...}` envelope written before the request's
 terminal response. The `system.hello` response reports the application name and
@@ -126,12 +126,15 @@ double in place of the live factory. A service with a callable `health()`
 "services": {...}}`. Raise `ConnectorError(message, retryable=..., details=...)`
 for an expected upstream failure: the response reports code `CONNECTOR_FAILURE`,
 category `connector`, the retryability flag, and optional details, and one-shot
-execution exits 7 while a persistent session continues.
+execution exits 7 while a persistent session continues. Raise it with
+`code="CONNECTOR_TIMEOUT"` for a timeout so the response reports
+`CONNECTOR_TIMEOUT` and one-shot execution exits 5; built-in command and HTTP
+timeouts already do.
 
 Applications can map exceptions raised by action handlers with
 `app.map_error(DomainError, code="ACTION_VALIDATION_FAILED", message="Invalid request")`
 before startup. Supported codes are `ACTION_VALIDATION_FAILED`, `ACTION_NOT_FOUND`,
-`CONNECTOR_FAILURE`, and `RUNTIME_EXECUTION_FAILED`; `retryable` defaults to
+`CONNECTOR_FAILURE`, `CONNECTOR_TIMEOUT`, and `RUNTIME_EXECUTION_FAILED`; `retryable` defaults to
 false. The most specific registered exception class wins. The public response
 uses the configured message, while diagnostics retain the original exception.
 

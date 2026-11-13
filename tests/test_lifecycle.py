@@ -119,3 +119,41 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(TimeoutError):
             await app.stop()
         self.assertEqual(app.state, "failed")
+
+    async def test_shutdown_cancels_jobs_and_terminates_subprocesses(self):
+        app = application("shutdown")
+
+        @app.job("long")
+        async def long(payload, context):
+            await asyncio.sleep(30)
+
+        app.service("command", lambda context: ExternalCommand(sys.executable))
+        await app.start()
+        job_id = app.context.jobs.submit("long")
+        await asyncio.sleep(0.01)
+        command = app.context.get_service("command")
+        running = asyncio.create_task(command.run(["-c", "import time; time.sleep(30)"]))
+        await asyncio.sleep(0.1)
+        await app.stop()
+        self.assertEqual(app.context.jobs.status(job_id)["state"], "cancelled")
+        result = await asyncio.wait_for(running, 5)
+        self.assertNotEqual(result.exit_code, 0)
+        await app.stop()
+        self.assertEqual(app.context.jobs.status(job_id)["state"], "cancelled")
+
+    async def test_shutdown_failure_is_reported_and_retry_is_harmless(self):
+        class Broken:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                raise RuntimeError("cleanup failed")
+
+        app = application("broken")
+        app.service("broken", lambda context: Broken())
+        await app.start()
+        with self.assertRaises(RuntimeError):
+            await app.stop()
+        self.assertEqual(app.state, "failed")
+        await app.stop()
+        self.assertEqual(app.state, "failed")

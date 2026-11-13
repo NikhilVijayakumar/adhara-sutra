@@ -41,6 +41,7 @@ _ERROR_EXIT_CODES = {
     "PROTOCOL_UNSUPPORTED_VERSION": _EXIT_PROTOCOL_FAILED,
     "RUNTIME_NOT_READY": _EXIT_INITIALIZATION_FAILED,
     "CONNECTOR_FAILURE": _EXIT_DEPENDENCY_UNAVAILABLE,
+    "CONNECTOR_TIMEOUT": 5,
     "JOB_QUEUE_FULL": _EXIT_ACTION_FAILED,
 }
 _ERROR_CATEGORIES = {
@@ -53,6 +54,7 @@ _ERROR_CATEGORIES = {
     "RUNTIME_NOT_READY": "lifecycle",
     "RUNTIME_EXECUTION_FAILED": "internal",
     "CONNECTOR_FAILURE": "connector",
+    "CONNECTOR_TIMEOUT": "connector",
     "JOB_QUEUE_FULL": "lifecycle",
 }
 _APPLICATIONS: WeakValueDictionary[str, Application] = WeakValueDictionary()
@@ -86,12 +88,18 @@ class BootstrapError(RuntimeError):
 
 
 class ConnectorError(Exception):
-    """A connector failure that maps to the connector error category."""
+    """A connector failure that maps to the connector error category.
 
-    def __init__(self, message: str, *, retryable: bool = True, details: Any = None):
+    ``code`` selects the protocol error code; use ``CONNECTOR_TIMEOUT`` for
+    timeouts so one-shot execution reports the timeout exit code.
+    """
+
+    def __init__(self, message: str, *, retryable: bool = True, details: Any = None,
+                 code: str = "CONNECTOR_FAILURE"):
         super().__init__(message)
         self.retryable = retryable
         self.details = details
+        self.code = code
 
 
 def _error(code: str, message: str, *, retryable: bool | None = False,
@@ -238,7 +246,7 @@ class Application:
         if exception_type in self._error_mappings:
             raise ValueError("Exception type is already mapped")
         if code not in {"ACTION_VALIDATION_FAILED", "ACTION_NOT_FOUND", "CONNECTOR_FAILURE",
-                        "RUNTIME_EXECUTION_FAILED"}:
+                        "CONNECTOR_TIMEOUT", "RUNTIME_EXECUTION_FAILED"}:
             raise ValueError("Unsupported domain error code")
         if not isinstance(message, str) or not message.strip() or not isinstance(retryable, bool):
             raise ValueError("A non-empty message and boolean retryable flag are required")
@@ -485,7 +493,7 @@ class Application:
             return self._response(request_id, error=_error(exc.code, str(exc), details=exc.details))
         except ConnectorError as exc:
             _LOG.error("Connector failure: %s", exc)
-            return self._response(request_id, error=_error("CONNECTOR_FAILURE", str(exc) or "Connector failure",
+            return self._response(request_id, error=_error(exc.code, str(exc) or "Connector failure",
                                                            retryable=exc.retryable, details=exc.details))
         except JobQueueFull as exc:
             return self._response(request_id, error=_error("JOB_QUEUE_FULL", str(exc), retryable=True))

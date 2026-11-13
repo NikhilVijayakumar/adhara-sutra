@@ -144,7 +144,8 @@ class HttpClient:
                 not_sent = isinstance(exc, (httpx.ConnectError, httpx.ConnectTimeout,
                                             httpx.PoolTimeout, httpx.UnsupportedProtocol))
                 raise ConnectorError(f"HTTP {method.upper()} {url} failed: {exc}",
-                                     retryable=transient,
+                                     retryable=transient, code="CONNECTOR_TIMEOUT"
+                                     if isinstance(exc, httpx.TimeoutException) else "CONNECTOR_FAILURE",
                                      details={"outcome": "not_sent" if not_sent else "unknown"}) from exc
             if (response.status_code in (408, 429, 500, 502, 503, 504)
                     and attempt < retries):
@@ -179,7 +180,8 @@ class HttpClient:
             transient = isinstance(exc, (httpx.NetworkError, httpx.TimeoutException,
                                          httpx.RemoteProtocolError))
             raise ConnectorError(f"HTTP {method.upper()} {url} failed: {exc}",
-                                 retryable=transient,
+                                 retryable=transient, code="CONNECTOR_TIMEOUT"
+                                 if isinstance(exc, httpx.TimeoutException) else "CONNECTOR_FAILURE",
                                  details={"outcome": "not_sent" if not_sent else "unknown"}) from exc
         try:
             yield HttpStreamResponse(response, httpx)

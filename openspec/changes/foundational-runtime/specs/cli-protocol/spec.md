@@ -70,6 +70,29 @@ request, distinguishable from terminal responses. (FR-CLI-006, FR-ELC-005)
 - **THEN** the event is not written
 - **AND** the request fails with a structured error
 
+### Requirement: Standard process exit codes
+
+The CLI SHALL exit with consistent, documented codes that distinguish success,
+invalid invocation, initialization or configuration failure, action failure,
+timeouts, cancellation, dependency failure, protocol failure, and internal
+failure. Persistent sessions SHALL keep a zero exit status when individual
+actions fail. (FR-CLI-007, FR-RUN-006)
+
+#### Scenario: A one-shot action succeeds
+
+- **WHEN** a one-shot request produces a successful response
+- **THEN** the process exits `0`
+
+#### Scenario: A one-shot action times out
+
+- **WHEN** a one-shot action fails because a connector operation timed out
+- **THEN** the response reports the timeout error and the process exits `5`
+
+#### Scenario: A persistent session action fails
+
+- **WHEN** an action fails during a persistent session and the process later ends cleanly
+- **THEN** the failure is reported in its response and the process exits `0`
+
 ### Requirement: Version information
 
 The runtime SHALL expose application, framework, and supported protocol

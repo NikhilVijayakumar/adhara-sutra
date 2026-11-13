@@ -164,7 +164,7 @@ class ExternalCommand:
                 except asyncio.TimeoutError:
                     await self._terminate(process)
                     raise ConnectorError(f"{os.path.basename(self.path)} timed out after {timeout} seconds",
-                                         retryable=True,
+                                         retryable=True, code="CONNECTOR_TIMEOUT",
                                          details={"timeout": timeout, "outcome": "unknown"}) from None
             else:
                 await feed_and_wait()

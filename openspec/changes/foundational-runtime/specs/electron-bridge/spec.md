@@ -45,6 +45,7 @@ explicit outcome. (FR-ELC-006)
 
 - **WHEN** the frontend requests cancellation of a managed job
 - **THEN** the bridge reports whether cancellation was accepted and the job's current status
+- **AND** an accepted cancellation does not by itself claim that an external dependency stopped
 
 #### Scenario: Cancellation is unsupported
 

@@ -158,7 +158,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-ELC-003 | Standard Request Envelope | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-004 | Standard Response Envelope | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
 | FR-ELC-005 | Event Streaming | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
-| FR-ELC-006 | Cancellation | Partially implemented | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
+| FR-ELC-006 | Cancellation | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-ELC-007 | Connection and Process Failure Handling | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-ELC-008 | Correlation and Ordering | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | FR-ELC-009 | Protocol Compatibility | Completed | [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md), [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |

@@ -28,8 +28,8 @@ generated structure. (FR-SCAF-002, FR-SCAF-003)
 ### Requirement: Bootstrap, connectors, tests, and documentation
 
 Generated applications SHALL include a working framework bootstrap, the selected
-connectors, example tests, and minimal documentation. (FR-SCAF-004, FR-SCAF-005,
-FR-SCAF-006, FR-SCAF-007)
+connectors, example tests, and initial documentation. (FR-SCAF-004, FR-SCAF-005,
+FR-SCAF-006, FR-SCAF-007, FR-DOC-002)
 
 #### Scenario: Connectors are selected
 

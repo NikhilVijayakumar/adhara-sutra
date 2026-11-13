@@ -241,7 +241,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-JOB-002 | Job Identifiers | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-003 | Job Lifecycle | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-004 | Progress Reporting | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-JOB-005 | Cancellation | Partially implemented | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| FR-JOB-005 | Cancellation | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-006 | Timeout Management | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-007 | Concurrency Management | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-008 | Job Results | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
@@ -334,7 +334,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | FR-TEST-001 | Framework Testing Utilities | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-TEST-002 | CLI Contract Tests | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-TEST-002 | CLI Contract Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-003 | Action Handler Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-004 | Connector Test Doubles | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-005 | Process Execution Tests | New | Not mapped |

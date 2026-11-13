@@ -5,6 +5,11 @@
 The framework SHALL support CLI contract tests and connector test doubles.
 (FR-TEST-002, FR-TEST-004)
 
+#### Scenario: Run the shipped protocol contract tests
+
+- **WHEN** an application's test suite subclasses the shipped CLI contract test case and returns its application from `create_application()`
+- **THEN** the inherited executable tests check the handshake, help metadata, structured error envelopes, health, and unsupported cancellation against that application
+
 #### Scenario: Test a connector without the live service
 
 - **WHEN** a test substitutes a connector test double

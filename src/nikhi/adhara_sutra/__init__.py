@@ -16,11 +16,11 @@ from .report import (REPORT_SCHEMA_VERSION, implementation_report, migration_rep
                      verification_report)
 from .sqlite import SQLiteDatabase
 from .state import ObservableState
-from .testing import ApplicationTestClient
+from .testing import ApplicationTestClient, CLIContractTests
 from .verification import (ArchitectureProfile, Check, RULE_CATALOG, VerificationResult, default_profile, verify)
 
 __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext", "ApplicationDefinitionError",
-           "ApplicationTestClient", "ArchitectureProfile", "BootstrapError", "Check", "CommandResult",
+           "ApplicationTestClient", "ArchitectureProfile", "BootstrapError", "Check", "CLIContractTests", "CommandResult",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",
            "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary",
            "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",

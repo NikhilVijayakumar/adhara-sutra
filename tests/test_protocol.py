@@ -1,5 +1,6 @@
 """Executable protocol contract tests (FR-TEST-002, NFR-TEST-003)."""
 
+import asyncio
 import unittest
 from uuid import uuid4
 
@@ -35,6 +36,10 @@ class ProtocolContractTests(unittest.IsolatedAsyncioTestCase):
         @self.app.action("bad_output", output=self._bad_output)
         def bad_output(payload, context):
             return {}
+
+        @self.app.job("wait")
+        async def wait(payload, context):
+            await asyncio.sleep(30)
 
         await self.app.start()
 
@@ -126,3 +131,17 @@ class ProtocolContractTests(unittest.IsolatedAsyncioTestCase):
         unknown = await self.app.dispatch(envelope("system.cancel", {"job_id": "missing"}))
         self.assertEqual(unknown["data"], {"job_id": "missing", "cancelled": False,
                                            "cancellation": "unsupported", "status": None})
+
+    async def test_cancel_reports_phase_and_status_for_active_and_terminal_jobs(self):
+        job_id = self.app.context.jobs.submit("wait")
+        await asyncio.sleep(0)
+        data = (await self.app.dispatch(envelope("system.cancel", {"job_id": job_id})))["data"]
+        self.assertTrue(data["cancelled"])
+        self.assertIn(data["cancellation"], ("requested", "completed"))
+        if data["cancellation"] == "completed":
+            self.assertEqual(data["status"]["state"], "cancelled")
+        self.assertEqual((await self.app.context.jobs.wait(job_id))["state"], "cancelled")
+        again = (await self.app.dispatch(envelope("system.cancel", {"job_id": job_id})))["data"]
+        self.assertFalse(again["cancelled"])
+        self.assertEqual(again["cancellation"], "unsupported")
+        self.assertEqual(again["status"]["state"], "cancelled")

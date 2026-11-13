@@ -20,7 +20,10 @@ exports the same constant and refuses a backend that does not support it. Report
 formats carry independent `schema_version` and profile versions. Tests can use
 `ApplicationTestClient(app)` as an async context manager to start the runtime
 and `await client.call(action, payload)` (or `.dispatch` for the full envelope)
-without the CLI transport. `adhara inspect [path] [--json] [--output FILE]`
+without the CLI transport. Subclass the shipped `CLIContractTests` case and
+implement `create_application()` to run the framework's executable protocol
+contract tests (handshake, help, error envelopes, health, cancellation) against
+your application. `adhara inspect [path] [--json] [--output FILE]`
 statically analyzes a project and reports its entry points, actions, jobs,
 services, integrations, dependencies, state and job access, and Electron
 boundaries. Every finding cites file and line evidence and is marked observed

@@ -259,7 +259,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-LOG-004 | Log Destination Separation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-005 | Configurable Log Levels | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-LOG-006 | Runtime Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-LOG-007 | Diagnostic Export | New | Not mapped |
+| FR-LOG-007 | Diagnostic Export | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 
 ## [Packaging and Distribution Requirements](functional-packaging-and-distribution-requirements.md)
 

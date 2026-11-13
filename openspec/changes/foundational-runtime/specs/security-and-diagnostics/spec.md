@@ -65,6 +65,16 @@ credentials through those mechanisms. (FR-SEC-006, NFR-SEC-006)
 - **WHEN** configuration cannot be read or validated
 - **THEN** startup fails with a configuration error that does not disclose secret values
 
+### Requirement: Diagnostic export
+
+The framework SHALL support exporting sanitized diagnostic reports for the
+environment and runtime. (FR-LOG-007)
+
+#### Scenario: Exporting diagnostics
+
+- **WHEN** a developer runs `adhara doctor` with `--json` or `--output FILE`
+- **THEN** a structured or text diagnostic report is written containing framework, platform, and check information without exposing secret values
+
 ### Requirement: Restrict Electron IPC
 
 Electron integration SHALL expose controlled operations through the preload

@@ -134,7 +134,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"adhara: not a directory: {args.target}", file=sys.stderr)
             return 2
         try:
-            result = verify(ProjectInspector(args.target).inspect(), default_profile())
+            project = ProjectInspector(args.target).inspect()
+            result = verify(project, default_profile())
             if args.write_baseline:
                 baseline = Baseline.capture(result)
                 baseline.save(args.write_baseline)
@@ -145,7 +146,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         except Exception as exc:
             print(f"adhara: cannot verify {args.target}: {exc}", file=sys.stderr)
             return 2
-        report = verification_report(result)
+        report = verification_report(result, source={"root": project.root, "revision": project.revision,
+                                                     "dirty": project.dirty})
         text = render_json(report) if args.json else render_markdown(report)
         _write(text, args.output)
         failed = result.status == "fail" or (args.strict and result.status == "needs_review")

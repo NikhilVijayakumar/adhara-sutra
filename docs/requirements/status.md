@@ -412,9 +412,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-DOC-001 | Documentation Completeness | New | Not mapped |
 | NFR-DOC-002 | Documentation Consistency | New | Not mapped |
 | NFR-DOC-003 | Documentation Traceability | New | Not mapped |
-| NFR-DOC-004 | Machine-Readable Reports | New | Not mapped |
-| NFR-DOC-005 | Source References | New | Not mapped |
-| NFR-DOC-006 | Documentation Freshness | New | Not mapped |
+| NFR-DOC-004 | Machine-Readable Reports | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DOC-005 | Source References | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DOC-006 | Documentation Freshness | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | NFR-DOC-007 | Documentation Validation | New | Not mapped |
 | NFR-DOC-008 | Documentation Ownership | New | Not mapped |
 

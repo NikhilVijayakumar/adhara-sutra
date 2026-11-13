@@ -42,6 +42,8 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(report["kind"], "implementation")
         self.assertEqual(report["generated_at"], "fixed")
         self.assertIn("root", report["source"])
+        self.assertIn("revision", report["source"])
+        self.assertIn("dirty", report["source"])
         finding = next(item for item in report["findings"]
                        if item["kind"] == "integration" and item["name"] == "HTTP")
         self.assertEqual(finding["confidence"], "inferred")
@@ -50,10 +52,15 @@ class ReportTests(unittest.TestCase):
         self.assertIn("`HTTP` (inferred)", render_markdown(report))
 
     def test_verification_report_carries_rules_evidence_and_remediation(self):
-        result = verify(self.inspect())
-        report = verification_report(result, generated_at="fixed")
+        project = self.inspect()
+        result = verify(project)
+        report = verification_report(result, source={"root": project.root, "revision": project.revision,
+                                                     "dirty": project.dirty}, generated_at="fixed")
         self.assertEqual(report["kind"], "verification")
         self.assertEqual(report["schema_version"], "1")
+        self.assertEqual(report["source"]["root"], project.root)
+        self.assertIn("revision", report["source"])
+        self.assertIn("dirty", report["source"])
         self.assertEqual(set(report["summary"]), {"pass", "fail", "needs_review", "not_checked"})
         check = next(item for item in report["checks"] if item["rule"] == "ARCH-CONN-001")
         self.assertEqual(check["status"], "needs_review")
@@ -61,6 +68,7 @@ class ReportTests(unittest.TestCase):
         self.assertTrue(check["remediation"])
         self.assertFalse(check["acknowledged"])
         self.assertEqual(json.loads(render_json(report)), report)
+        self.assertIn(f"Source: `{project.root}`", render_markdown(report))
 
     def test_migration_report_lists_verifiable_tasks(self):
         project = self.inspect()
@@ -69,7 +77,10 @@ class ReportTests(unittest.TestCase):
         task = plan.tasks[0]
         report = migration_report(plan, statuses={task.id: "in_progress"}, generated_at="fixed")
         self.assertEqual(report["kind"], "migration")
+        self.assertEqual(report["schema_version"], "1")
         self.assertEqual(report["source"]["root"], project.root)
+        self.assertIn("revision", report["source"])
+        self.assertIn("dirty", report["source"])
         self.assertTrue(report["constraints"])
         self.assertTrue(report["completion"])
         self.assertTrue(report["rollback"])

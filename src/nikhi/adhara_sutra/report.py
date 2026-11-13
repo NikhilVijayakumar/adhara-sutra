@@ -57,10 +57,14 @@ def render_json(report: dict[str, Any]) -> str:
     return json.dumps(report, indent=2, ensure_ascii=False)
 
 
-def verification_report(result: VerificationResult, *, generated_at: str | None = None) -> dict[str, Any]:
+def verification_report(result: VerificationResult, *, source: dict[str, Any] | None = None,
+                        generated_at: str | None = None) -> dict[str, Any]:
     """Build the versioned, machine-readable verification report for one result."""
-    return redact({"schema_version": REPORT_SCHEMA_VERSION, "kind": "verification",
-                   "generated_at": generated_at or _now(), **result.to_dict()})
+    report = {"schema_version": REPORT_SCHEMA_VERSION, "kind": "verification",
+              "generated_at": generated_at or _now(), **result.to_dict()}
+    if source is not None:
+        report["source"] = source
+    return redact(report)
 
 
 def migration_report(plan: MigrationPlan, *, statuses: dict[str, str] | None = None,
@@ -164,9 +168,14 @@ def _render_verification(report: dict[str, Any]) -> str:
     summary = report["summary"]
     lines = ["# Architecture verification", "",
              f"- Schema version: {report['schema_version']}",
-             f"- Generated: {report['generated_at']}",
-             f"- Profile version: {report['profile']['version']}",
-             f"- Status: {report['status']}", "",
+             f"- Generated: {report['generated_at']}"]
+    source = report.get("source")
+    if source:
+        revision = source.get("revision") or "unavailable"
+        dirty = " (uncommitted changes)" if source.get("dirty") else ""
+        lines.append(f"- Source: `{source['root']}` at `{revision}`{dirty}")
+    lines += [f"- Profile version: {report['profile']['version']}",
+              f"- Status: {report['status']}", "",
              "## Summary", "",
              "| Pass | Fail | Needs review | Not checked |",
              "| --- | --- | --- | --- |",

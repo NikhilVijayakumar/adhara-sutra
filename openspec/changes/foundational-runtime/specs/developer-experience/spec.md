@@ -52,8 +52,9 @@ patterns and SHALL exercise them in its own test suite. (FR-DEV-003)
 Implementation, verification, and migration reports SHALL expose stable,
 versioned, machine-readable context for coding agents: rule identifiers,
 evidence locations, remediation, and migration tasks with verification and
-rollback guidance; implementation and migration reports SHALL also identify the
-inspected source. (FR-DEV-005)
+rollback guidance. Reports that analyze a project SHALL identify the inspected
+source and its revision where supported, so stale analysis can be detected.
+(FR-DEV-005, NFR-DOC-004, NFR-DOC-005, NFR-DOC-006)
 
 #### Scenario: An agent reads a verification report
 
@@ -64,6 +65,11 @@ inspected source. (FR-DEV-005)
 
 - **WHEN** a migration report is produced
 - **THEN** each task carries an identifier, phase, status, verification, and rollback guidance, and recorded statuses appear in the summary
+
+#### Scenario: A report identifies its source
+
+- **WHEN** an implementation, verification, or migration report is produced for a project
+- **THEN** it carries a schema version and identifies the analyzed source, including its revision and dirty state when supported
 
 #### Scenario: Reports remain machine-readable
 

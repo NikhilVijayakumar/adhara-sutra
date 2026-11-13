@@ -371,10 +371,16 @@ class Application:
             store = self._job_store
             if isinstance(store, str):
                 store = self.context.services.get(store)
-            self._jobs = JobManager(self._job_handlers, self._job_context,
-                                    max_concurrent=self._max_concurrent_jobs,
-                                    max_queued=self._max_queued_jobs,
-                                    store=store, recover_on_start=self._recover_jobs)
+            try:
+                self._jobs = JobManager(self._job_handlers, self._job_context,
+                                        max_concurrent=self._max_concurrent_jobs,
+                                        max_queued=self._max_queued_jobs,
+                                        store=store, recover_on_start=self._recover_jobs)
+            except Exception as exc:
+                raise BootstrapError(
+                    "RECOVERY_FAILED",
+                    "Job recovery failed while reading the job store; restore it from a "
+                    "verified backup or start with a fresh store, then retry") from exc
             self.context = ApplicationContext(self.context.services, self.context.config,
                                               self.context.metadata, state=self.context.state,
                                               jobs=JobService(self._jobs, None, {}),

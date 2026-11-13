@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from nikhi.adhara_sutra import Application, SQLiteDatabase, SQLiteJobStore
+from nikhi.adhara_sutra.application import BootstrapError
 
 
 class JobPersistenceTests(unittest.IsolatedAsyncioTestCase):
@@ -65,6 +66,23 @@ class JobPersistenceTests(unittest.IsolatedAsyncioTestCase):
                 self.assertFalse(app.context.jobs.cancel("orphan"))
             finally:
                 await app.stop()
+
+    async def test_recovery_failure_reports_resource_and_recovery_actions(self):
+        class BrokenStore:
+            def load_all(self):
+                raise RuntimeError("database image is malformed")
+
+            def save(self, record):
+                raise AssertionError("save must not be reached")
+
+        app = Application("broken_store", "1.0", job_store=BrokenStore(), recover_jobs=True)
+        with self.assertRaises(BootstrapError) as caught:
+            await app.start()
+        self.assertEqual(caught.exception.code, "RECOVERY_FAILED")
+        self.assertIn("job store", str(caught.exception))
+        self.assertIn("backup", str(caught.exception))
+        self.assertIsInstance(caught.exception.__cause__, RuntimeError)
+        self.assertEqual(app.state, "failed")
 
     async def test_no_store_preserves_default_behavior(self):
         app = Application("plain", "1.0")

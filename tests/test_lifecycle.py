@@ -105,6 +105,28 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
                 await command.run(["-c", "import time; time.sleep(5)"], timeout=0.1)
         self.assertEqual(caught.exception.details["outcome"], "unknown")
 
+    async def test_startup_failure_cleans_up_initialized_resources(self):
+        closed = []
+
+        class Resource:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                closed.append(True)
+
+        def failing(context):
+            raise RuntimeError("startup failed")
+
+        app = application("partial")
+        app.service("first", lambda context: Resource())
+        app.service("second", failing, depends_on=("first",))
+        with self.assertRaises(RuntimeError):
+            await app.start()
+        self.assertEqual(closed, [True])
+        self.assertEqual(app.state, "failed")
+        self.assertEqual(app.context.services, {})
+
     async def test_shutdown_honors_the_configured_timeout(self):
         class Slow:
             async def __aenter__(self):

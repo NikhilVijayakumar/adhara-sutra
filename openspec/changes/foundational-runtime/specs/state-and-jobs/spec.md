@@ -128,7 +128,7 @@ concurrency rules. (FR-JOB-001, FR-JOB-003, FR-JOB-007, FR-JOB-008)
 After an owning process exits unexpectedly, recovery SHALL distinguish
 interruption from confirmed terminal outcomes before reporting job status and
 SHALL NOT re-execute interrupted jobs automatically.
-(FR-JOB-011)
+(FR-JOB-011, NFR-AVAIL-003, NFR-AVAIL-005)
 
 #### Scenario: Owner process crashes mid-execution
 

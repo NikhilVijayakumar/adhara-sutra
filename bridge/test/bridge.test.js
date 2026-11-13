@@ -20,6 +20,11 @@ const env = {
   PYTHONPATH: [path.join(root, "src"), here].join(path.delimiter),
 };
 
+test("bridge fixes the backend command at construction", () => {
+  assert.throws(() => new Bridge({ command: "" }), TypeError);
+  assert.throws(() => new Bridge({ command: "python", args: ["-c", 1] }), TypeError);
+});
+
 test("bridge drives a representative Python runtime fixture", async () => {
   const bridge = new Bridge({
     command: python,

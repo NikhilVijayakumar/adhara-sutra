@@ -373,11 +373,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
 | NFR-AVAIL-001 | Startup Readiness | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
-| NFR-AVAIL-002 | Optional Dependency Degradation | New | Not mapped |
-| NFR-AVAIL-003 | Job Recovery Semantics | New | Not mapped |
-| NFR-AVAIL-004 | Persistent Data Recovery | New | Not mapped |
-| NFR-AVAIL-005 | Crash Recovery | New | Not mapped |
-| NFR-AVAIL-006 | Recovery Diagnostics | New | Not mapped |
+| NFR-AVAIL-002 | Optional Dependency Degradation | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md), [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| NFR-AVAIL-003 | Job Recovery Semantics | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| NFR-AVAIL-004 | Persistent Data Recovery | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
+| NFR-AVAIL-005 | Crash Recovery | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md), [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| NFR-AVAIL-006 | Recovery Diagnostics | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 
 ## [Compatibility and Versioning Requirements](non-functional-compatibility-and-versioning-requirements.md)
 
@@ -530,7 +530,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | NFR-REL-001 | Predictable Execution | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 | NFR-REL-002 | Failure Isolation | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
-| NFR-REL-003 | Partial Initialization Recovery | Partially implemented | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| NFR-REL-003 | Partial Initialization Recovery | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | NFR-REL-004 | External Dependency Failure Handling | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
 | NFR-REL-005 | Process Failure Detection | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
 | NFR-REL-006 | Cancellation Consistency | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
@@ -571,7 +571,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-SEC-004 | Filesystem Safety | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | NFR-SEC-005 | Secret Protection | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-006 | Secure Configuration | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| NFR-SEC-007 | Electron Process Isolation | Partially implemented | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| NFR-SEC-007 | Electron Process Isolation | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-008 | Controlled IPC Exposure | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | NFR-SEC-009 | External Network Safety | New | Not mapped |
 | NFR-SEC-010 | Dependency Security | New | Not mapped |

@@ -29,7 +29,12 @@ precedence before validation. (FR-CFG-002, FR-CFG-004, FR-CFG-006, FR-CFG-007)
 ### Requirement: Clean up failed initialization
 
 The runtime SHALL clean up successfully initialized resources after a later
-required initialization fails. (FR-RUN-002, NFR-REL-003)
+required initialization fails. (FR-RUN-002, NFR-REL-003, NFR-AVAIL-006)
+
+#### Scenario: A later required initialization fails
+
+- **WHEN** one service starts and a later required service or recovery step fails
+- **THEN** the started service is released, startup fails without reporting readiness, and the error names the affected resource and its recovery actions
 
 #### Scenario: Cleanup also fails
 

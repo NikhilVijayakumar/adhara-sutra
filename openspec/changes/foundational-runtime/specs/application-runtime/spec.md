@@ -56,12 +56,17 @@ succeeds. (NFR-AVAIL-001)
 Expected handler and connector failures SHALL be contained in structured errors,
 SHALL NOT terminate a healthy application, and SHALL remain traceable through
 request correlation. Managed resources SHALL be released when the application
-stops. (NFR-REL-001, NFR-REL-002, NFR-REL-008, NFR-RES-003)
+stops. (NFR-REL-001, NFR-REL-002, NFR-REL-008, NFR-RES-003, NFR-AVAIL-002)
 
 #### Scenario: A handler fails
 
 - **WHEN** one handler raises an expected exception
 - **THEN** the request returns a structured error, the application keeps serving, and other requests succeed
+
+#### Scenario: An optional dependency is unavailable
+
+- **WHEN** an action depends on a dependency that is unavailable
+- **THEN** its request reports a connector error while unrelated actions keep working and health reports degraded
 
 #### Scenario: A request fails
 

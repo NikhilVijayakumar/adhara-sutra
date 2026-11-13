@@ -59,7 +59,7 @@ SQLite connection and transaction facilities. (FR-DB-005)
 ### Requirement: Backup, integrity checking, and recovery
 
 The connector SHALL provide facilities for consistent backups, integrity
-checking, and restoring a verified backup. (FR-DB-007)
+checking, and restoring a verified backup. (FR-DB-007, NFR-AVAIL-004)
 
 #### Scenario: Backing up an idle database
 

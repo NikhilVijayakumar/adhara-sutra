@@ -91,13 +91,20 @@ and dispatch registered actions without Electron or the CLI transport.
 Public releases SHALL follow Semantic Versioning, the CLI protocol SHALL carry a
 version independent of the application version, and machine-readable reports
 SHALL carry their own schema versions. The framework and bridge SHALL advertise
-the protocol versions they support and reject incompatible peers.
-(FR-PKG-008, NFR-COMP-001, NFR-COMP-002, NFR-COMP-003, NFR-COMP-005)
+the protocol versions they support and reject incompatible peers. Public API
+changes and deprecations SHALL be documented, and supported report schemas SHALL
+be readable. (FR-PKG-008, NFR-COMP-001, NFR-COMP-002, NFR-COMP-003,
+NFR-COMP-004, NFR-COMP-005, NFR-COMP-006, NFR-COMP-008)
 
 #### Scenario: Discovering compatible versions
 
 - **WHEN** a client calls `system.hello`
 - **THEN** the response reports the framework version, the current protocol version, and every supported protocol version, independent of the application version
+
+#### Scenario: Reading a historical report
+
+- **WHEN** a consumer loads a machine-readable report
+- **THEN** a supported schema version is accepted and an unsupported version is rejected with an explicit error
 
 #### Scenario: An incompatible bridge backend
 

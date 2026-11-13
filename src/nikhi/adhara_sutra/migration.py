@@ -125,6 +125,7 @@ class MigrationPlan:
     completion: tuple[str, ...]
     rollback: tuple[str, ...]
     regression_tests: tuple[str, ...] = ()
+    compatibility_risks: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {"profile": {"version": self.profile_version}, "source": self.source,
@@ -132,7 +133,8 @@ class MigrationPlan:
                 "findings": [finding.to_dict() for finding in self.findings],
                 "tasks": [task.to_dict() for task in self.tasks],
                 "completion": list(self.completion), "rollback": list(self.rollback),
-                "regression_tests": list(self.regression_tests)}
+                "regression_tests": list(self.regression_tests),
+                "compatibility_risks": list(self.compatibility_risks)}
 
     def source_matches(self, project: ProjectProfile | dict[str, Any]) -> bool:
         """Return whether the plan's analyzed source matches the given project state."""
@@ -178,6 +180,7 @@ def analyze_migration(project: ProjectProfile, verification: VerificationResult,
             "Tasks marked irreversible require a reviewed backup and recovery procedure.",
         ),
         regression_tests=_regression_tests(project),
+        compatibility_risks=_compatibility_risks(verification),
     )
 
 
@@ -368,6 +371,19 @@ def _phase_order(strategy: str) -> tuple[str, ...]:
                 "state-jobs", "contracts", "persistence", "verification")
     return ("baseline", "structure", "dependencies", "runtime", "entry-points", "integrations",
             "state-jobs", "contracts", "persistence", "verification")
+
+
+def _compatibility_risks(verification: VerificationResult) -> tuple[str, ...]:
+    """Name compatibility risks a framework upgrade or profile change can introduce (NFR-COMP-007)."""
+    risks = [
+        f"The plan targets architecture profile version {verification.profile_version}; "
+        "re-run verification after changing the profile or upgrading the framework.",
+        "Report schemas are versioned independently of the application version; consumers "
+        "must check schema_version and accept additive fields.",
+    ]
+    risks.extend(f"Architecture check {check.rule} fails: {check.detail or check.title}"
+                 for check in verification.checks if check.status == "fail")
+    return tuple(risks)
 
 
 def _regression_tests(project: ProjectProfile) -> tuple[str, ...]:

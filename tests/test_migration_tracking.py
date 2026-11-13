@@ -77,6 +77,12 @@ class MigrationTrackingTests(unittest.TestCase):
                                 findings=project.findings, imports=project.imports, errors=project.errors)
         self.assertFalse(plan.source_matches(changed))
 
+    def test_plan_records_compatibility_risks(self):
+        project, result, plan = self.fixture()
+        self.assertTrue(any(plan.profile_version in risk for risk in plan.compatibility_risks))
+        self.assertTrue(any("schema_version" in risk for risk in plan.compatibility_risks))
+        self.assertIn("Compatibility risks", render_markdown(migration_report(plan, generated_at="fixed")))
+
     def test_plan_identifies_behavioral_regression_tests(self):
         project, result, plan = self.fixture()
         self.assertTrue(any("Action `ping`" in test for test in plan.regression_tests))

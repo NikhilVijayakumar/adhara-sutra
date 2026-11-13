@@ -34,6 +34,20 @@ configured path and separately installed tools through `PATH`.
 resolution `source` without starting the process, so startup checks can report
 missing tools with actionable errors.
 
+## Public API
+
+`nikhi.adhara_sutra.__all__` is the public surface. Anything not listed there is
+internal and may change without notice. Breaking changes to a listed name are
+called out in the release notes with the replacement and removal conditions.
+
+## Deprecation policy
+
+Deprecated public functionality keeps working for the current major release.
+Each deprecation names its replacement, the release that introduced it, and the
+release that will remove it; removal happens no earlier than the next major
+release. Deprecation warnings are emitted where a runtime warning is practical,
+and the documentation is updated before removal.
+
 ## Compatibility and upgrades
 
 - Releases follow Semantic Versioning; the CLI protocol version is independent

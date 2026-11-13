@@ -21,6 +21,14 @@ class DocumentationValidationTests(unittest.TestCase):
         for document in sorted((ROOT / "docs").glob("*.md")) + [ROOT / "README.md"]:
             self.assertEqual(validate_documentation(document), [], document.name)
 
+    def test_packaging_guide_covers_compatibility(self):
+        problems = validate_documentation(
+            ROOT / "docs" / "packaging.md",
+            required_sections=("Supported platforms", "Locating the Python backend",
+                               "External executables", "Public API", "Deprecation policy",
+                               "Compatibility and upgrades"))
+        self.assertEqual(problems, [])
+
     def test_missing_sections_and_broken_links_are_reported(self):
         with tempfile.TemporaryDirectory() as directory:
             document = Path(directory) / "guide.md"

@@ -37,6 +37,15 @@ class RuntimeDiscoveryTests(unittest.TestCase):
         self.assertTrue(Path(resolved).is_file())
 
 
+class PublicApiTests(unittest.TestCase):
+    def test_public_api_is_unique_and_resolvable(self):
+        import nikhi.adhara_sutra as package
+
+        self.assertEqual(len(package.__all__), len(set(package.__all__)))
+        for name in package.__all__:
+            self.assertTrue(hasattr(package, name), name)
+
+
 class ExternalExecutableDiagnosticsTests(unittest.TestCase):
     def test_diagnose_resolves_configured_path(self):
         report = ExternalCommand(sys.executable).diagnose()

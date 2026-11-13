@@ -386,11 +386,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-COMP-001 | Semantic Versioning Policy | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | NFR-COMP-002 | Protocol Versioning | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | NFR-COMP-003 | Schema Versioning | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| NFR-COMP-004 | Public API Compatibility | New | Not mapped |
+| NFR-COMP-004 | Public API Compatibility | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | NFR-COMP-005 | Electron Bridge Compatibility | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| NFR-COMP-006 | Deprecation Policy | New | Not mapped |
-| NFR-COMP-007 | Migration Compatibility | New | Not mapped |
-| NFR-COMP-008 | Historical Report Compatibility | New | Not mapped |
+| NFR-COMP-006 | Deprecation Policy | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| NFR-COMP-007 | Migration Compatibility | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-COMP-008 | Historical Report Compatibility | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 
 ## [Developer Experience Requirements](non-functional-developer-experience-requirements.md)
 

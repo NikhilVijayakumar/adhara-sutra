@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from nikhi.adhara_sutra import (ProjectInspector, analyze_migration, implementation_report,
-                                migration_report, render_json, render_markdown, verify,
+                                load_report, migration_report, render_json, render_markdown, verify,
                                 verification_report)
 
 APP = '''\
@@ -69,6 +69,19 @@ class ReportTests(unittest.TestCase):
         self.assertFalse(check["acknowledged"])
         self.assertEqual(json.loads(render_json(report)), report)
         self.assertIn(f"Source: `{project.root}`", render_markdown(report))
+
+    def test_reports_can_be_loaded_with_schema_checks(self):
+        project = self.inspect()
+        report = migration_report(analyze_migration(project, verify(project)), generated_at="fixed")
+        self.assertEqual(load_report(report), report)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            path.write_text(render_json(report), encoding="utf-8")
+            self.assertEqual(load_report(path)["kind"], "migration")
+        with self.assertRaises(ValueError):
+            load_report({"kind": "migration"})
+        with self.assertRaises(ValueError):
+            load_report({"schema_version": "99", "kind": "migration"})
 
     def test_migration_report_lists_verifiable_tasks(self):
         project = self.inspect()

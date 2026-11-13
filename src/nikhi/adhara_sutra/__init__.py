@@ -13,7 +13,8 @@ from .jobs import JobQueueFull, SQLiteJobStore
 from .migration import (STRATEGIES, TASK_STATUSES, MigrationFinding, MigrationPlan, MigrationTask,
                         analyze_migration, load_statuses)
 from .persistent_state import SQLiteState
-from .report import (REPORT_SCHEMA_VERSION, implementation_report, migration_report, render_json, render_markdown,
+from .report import (REPORT_SCHEMA_VERSION, implementation_report, load_report, migration_report,
+                     render_json, render_markdown,
                      verification_report)
 from .runtime import RuntimeDiscoveryError, locate_backend, supported_platforms
 from .sqlite import SQLiteDatabase
@@ -28,10 +29,10 @@ __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext
            "ApplicationTestClient", "ArchitectureProfile", "Baseline", "BaselineEntry", "BootstrapError", "Check",
            "CLIContractTests", "CommandResult", "ExternalSession",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",
-           "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary", "SQLiteJobStore",
+           "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary",
            "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",
            "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "SQLiteDatabase", "SQLiteJobStore", "SQLiteState", "STRATEGIES",
            "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "WebSocketClient", "__version__",
            "analyze_migration", "apply_baseline", "configure_logging", "default_profile", "implementation_report",
-           "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
+           "load_report", "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
            "RuntimeDiscoveryError", "locate_backend", "supported_platforms", "validate_documentation", "verification_report", "verify"]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from .diagnostics import redact
@@ -120,6 +121,27 @@ def migration_report(plan: MigrationPlan, *, statuses: dict[str, Any] | None = N
     return redact(report)
 
 
+def load_report(document: str | Path | dict[str, Any]) -> dict[str, Any]:
+    """Read one machine-readable report, accepting supported schemas (NFR-COMP-008)."""
+    if isinstance(document, dict):
+        report = document
+    else:
+        try:
+            report = json.loads(Path(document).read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise ValueError(f"Report cannot be read: {document}: {exc}") from exc
+    if not isinstance(report, dict):
+        raise ValueError("Report must be a JSON object")
+    version = report.get("schema_version")
+    if not isinstance(version, str) or not version:
+        raise ValueError("Report is missing schema_version")
+    if version.split(".")[0] != REPORT_SCHEMA_VERSION.split(".")[0]:
+        raise ValueError(f"Unsupported report schema version: {version}")
+    if report.get("kind") not in {"implementation", "verification", "migration"}:
+        raise ValueError(f"Unknown report kind: {report.get('kind')!r}")
+    return report
+
+
 def render_markdown(report: dict[str, Any]) -> str:
     """Render an implementation, verification, or migration report as Markdown."""
     kind = report.get("kind")
@@ -196,7 +218,8 @@ def _render_migration(report: dict[str, Any]) -> str:
             lines.append(f"- Rollback: {task['rollback']}")
         lines.append("")
     for title, key in (("Constraints", "constraints"), ("Completion criteria", "completion"),
-                       ("Behavioral regression tests", "regression_tests"), ("Rollback", "rollback")):
+                       ("Behavioral regression tests", "regression_tests"),
+                       ("Compatibility risks", "compatibility_risks"), ("Rollback", "rollback")):
         lines += [f"## {title}", ""]
         lines += [f"- {item}" for item in report[key]]
         lines.append("")

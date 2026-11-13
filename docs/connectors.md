@@ -80,6 +80,12 @@ available.
   missing artifacts clearly; applications own access control, retention, and
   cleanup.
 
+## WebSocket (`WebSocketClient`)
+
+- **Configuration:** `WebSocketClient(url, *, open_timeout=10.0, close_timeout=10.0, max_reconnects=0, reconnect_delay=0.0)` (module `nikhi.adhara_sutra.websocket`, optional extra `nikhi-adhara-sutra[websocket]`).
+- **Lifecycle:** async context-managed. `async with` (or `await client.connect()` / `await client.close()`) establishes and tears down the outbound connection; `health()`/`connected` reflect whether a connection is open.
+- **Error behavior:** missing `websockets`, use outside async management, or an unconnected client raises a non-retryable `ConnectorError` (`connector: websocket`). Connection, send, and receive failures map to retryable connector errors (`CONNECTOR_TIMEOUT` for timeouts). Received messages can be validated/parsed via `receive(validate=...)` or `messages(validate=...)`; validation failures raise a non-retryable `CONNECTOR_VALIDATION` error. With `max_reconnects > 0`, receive failures attempt controlled reconnection before surfacing an error.
+
 ## Persistent state (`SQLiteState`)
 
 - **Configuration:** `SQLiteState(database, namespace)` (module

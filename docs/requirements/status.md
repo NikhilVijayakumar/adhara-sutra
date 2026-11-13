@@ -347,11 +347,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-WS-001 | WebSocket Client Connections | New | Not mapped |
-| FR-WS-002 | Event Reception | New | Not mapped |
-| FR-WS-003 | Connection Lifecycle | New | Not mapped |
-| FR-WS-004 | Reconnection Policies | New | Not mapped |
-| FR-WS-005 | Message Validation | New | Not mapped |
+| FR-WS-001 | WebSocket Client Connections | Completed | [websocket-connector](../../openspec/changes/foundational-runtime/specs/websocket-connector/spec.md) |
+| FR-WS-002 | Event Reception | Completed | [websocket-connector](../../openspec/changes/foundational-runtime/specs/websocket-connector/spec.md) |
+| FR-WS-003 | Connection Lifecycle | Completed | [websocket-connector](../../openspec/changes/foundational-runtime/specs/websocket-connector/spec.md) |
+| FR-WS-004 | Reconnection Policies | Completed | [websocket-connector](../../openspec/changes/foundational-runtime/specs/websocket-connector/spec.md) |
+| FR-WS-005 | Message Validation | Completed | [websocket-connector](../../openspec/changes/foundational-runtime/specs/websocket-connector/spec.md) |
 
 ## [Architecture Verification Quality Requirements](non-functional-architecture-verification-quality-requirements.md)
 

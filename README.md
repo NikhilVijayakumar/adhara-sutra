@@ -217,7 +217,10 @@ passes a structured argument array without a shell (a command string or
 non-string argument is rejected), streams stdout and stderr
 lines to `on_output(stream, chunk)`, and returns `CommandResult` with the exit
 status, captured output, and duration. `raise_for_status()` raises a
-non-retryable `ConnectorError` for a non-zero exit. Timeouts and cancellation
+non-retryable `ConnectorError` for a non-zero exit; the exit status and
+connector identity are carried in `details` (`exit_code`, `connector: external`),
+so an existing tool's conventions and output format do not change the CLI or
+Electron protocol. Timeouts and cancellation
 terminate the process tree and report retryable errors; stopping the application
 also terminates any command still running. Register an output parser with
 `command.register_parser(name, parser)` and call `command.parse(name, result)`

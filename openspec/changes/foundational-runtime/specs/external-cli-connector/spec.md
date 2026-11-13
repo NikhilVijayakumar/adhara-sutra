@@ -76,6 +76,22 @@ configured. (NFR-OPS-006)
 
 - **WHEN** a terminated process does not exit within `kill_timeout`
 - **THEN** the connector forces termination without waiting longer
+### Requirement: Compatibility with existing external tools
+
+The connector SHALL preserve each executable's own argument conventions, exit
+status, and output format without changing the CLI or Electron protocol.
+(FR-EXT-009)
+
+#### Scenario: A non-zero exit status
+
+- **WHEN** a command exits with a non-standard non-zero status
+- **THEN** the result reports that status, `raise_for_status()` raises a non-retryable connector error with `details.exit_code`, and the protocol envelope keeps the connector category and stable code
+
+#### Scenario: A different output format
+
+- **WHEN** a command prints a tool-specific or non-JSON format
+- **THEN** the captured text is preserved and an application parser can interpret it
+
 ### Requirement: Output parsing extensions
 
 Applications SHALL be able to register named parsers and apply them to captured

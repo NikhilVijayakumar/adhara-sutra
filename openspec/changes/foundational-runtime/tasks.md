@@ -92,6 +92,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-TEST-008: migration plans now include `regression_tests` identifying behavioral tests that must keep passing (actions, jobs, CLI, Electron IPC, HTTP/external/SQLite integrations, state), rendered in JSON/Markdown reports; tests/spec/status updated.
 - [x] Complete and practically verify FR-DOC-001/006/007 and NFR-DOC-001/002/007/008: added `docs/migration.md` (workflows, limitations, compatibility, recovery), `docs/README.md` (authoritative locations/owners), and `validate_documentation` for required sections and resolvable local links; README/index links and tests added.
 - [x] Complete and practically verify FR-PKG-005/006/007/009: added `runtime.locate_backend`/`supported_platforms` for packaged desktop backend discovery (env override, bundled interpreters, platform names, running interpreter) and `ExternalCommand.diagnose()` for executable resolution; documented packaging, compatibility, and upgrade guidance in `docs/packaging.md`; tests/spec/status updated.
+- [x] Complete and practically verify FR-TEST-009: added a representative Python runtime fixture (`bridge/test/fixture_app.py`) and a Node integration test (`bridge/test/bridge.test.js`) driving the shared bridge through start, request, help, error propagation, and close, plus a guarded Python runner test; spec/status updated.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

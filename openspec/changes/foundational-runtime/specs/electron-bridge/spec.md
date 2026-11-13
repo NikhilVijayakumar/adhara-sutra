@@ -73,6 +73,11 @@ error propagation. (FR-ELC-010, FR-PKG-004)
 - **WHEN** an Electron application installs the bridge package
 - **THEN** it can start the backend, send requests, receive events, cancel jobs, and close the backend without writing protocol code
 
+#### Scenario: Testing the bridge against a Python fixture
+
+- **WHEN** the shared bridge integration tests run
+- **THEN** they drive a representative Python runtime fixture through start, request, help, error propagation, and close (FR-TEST-009)
+
 ### Requirement: Electron security boundary
 
 The bridge SHALL prevent renderer-provided input from selecting the executable,

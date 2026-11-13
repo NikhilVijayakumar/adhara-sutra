@@ -51,6 +51,16 @@ code. (FR-HTTP-005)
 - **WHEN** an application supplies a username and password or a bearer authorization header
 - **THEN** the connector sends the corresponding authorization on requests
 
+### Requirement: Streaming responses
+
+The connector SHALL support incremental consumption of HTTP response bodies
+and release the response when its context exits. (FR-HTTP-007)
+
+#### Scenario: A caller stops reading early
+
+- **WHEN** a caller leaves the streaming context before consuming the entire body
+- **THEN** the response is closed and its resources are released
+
 ### Requirement: Operation outcome uncertainty
 
 Transport failures SHALL distinguish requests that were never sent from those

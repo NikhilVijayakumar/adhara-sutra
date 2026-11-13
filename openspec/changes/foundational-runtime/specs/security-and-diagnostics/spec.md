@@ -102,6 +102,26 @@ model and serialized through the protocol error envelope. (FR-ERR-001, FR-ERR-00
 - **WHEN** an error is returned for a protocol, validation, action, lifecycle, or internal failure
 - **THEN** its `category` identifies the failure kind and stays stable for that error code across requests
 
+### Requirement: Application-specific error mapping
+
+Applications SHALL be able to map domain exceptions raised by action handlers
+into supported framework error codes with a safe public message. (FR-ERR-006)
+
+#### Scenario: A mapped domain error is raised
+
+- **WHEN** a handler raises an exception with a registered mapping
+- **THEN** the response reports the configured code, category, message, and retryability without internal details
+
+#### Scenario: Several mappings could apply
+
+- **WHEN** an exception matches mappings for both its class and a base class
+- **THEN** the most specific registered class wins
+
+#### Scenario: Mapping is invalid
+
+- **WHEN** an unsupported code, empty message, duplicate type, or non-exception type is registered
+- **THEN** registration fails, and mappings cannot be added after startup
+
 ### Requirement: Structured diagnostics with correlation
 
 Logging SHALL be structured, correlated across requests and jobs, and kept

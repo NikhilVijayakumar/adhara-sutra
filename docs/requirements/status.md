@@ -174,7 +174,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-ERR-003 | Error Propagation | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-ERR-004 | Error Serialization | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 | FR-ERR-005 | Sensitive Information Protection | Completed | Not mapped |
-| FR-ERR-006 | Application-Specific Error Mapping | New | Not mapped |
+| FR-ERR-006 | Application-Specific Error Mapping | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 
 ## [Existing Application Migration Requirements](functional-existing-application-migration-requirements.md)
 
@@ -207,7 +207,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-EXT-005 | Streaming Output | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 | FR-EXT-006 | Timeout and Cancellation | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 | FR-EXT-007 | Process Cleanup | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
-| FR-EXT-008 | Output Parsing Extensions | New | Not mapped |
+| FR-EXT-008 | Output Parsing Extensions | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 | FR-EXT-009 | External CLI Compatibility | New | Not mapped |
 | FR-EXT-010 | Interactive External Processes | New | Not mapped |
 
@@ -219,7 +219,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-FS-002 | Path Validation | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-FS-003 | Temporary File Management | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 | FR-FS-004 | File Operation Utilities | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
-| FR-FS-005 | Large Artifact Handling | New | Not mapped |
+| FR-FS-005 | Large Artifact Handling | Completed | [filesystem](../../openspec/changes/foundational-runtime/specs/filesystem/spec.md) |
 
 ## [HTTP Connector Requirements](functional-http-connector-requirements.md)
 
@@ -228,10 +228,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-HTTP-001 | Outbound HTTP Requests | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 | FR-HTTP-002 | Connection Management | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 | FR-HTTP-003 | Timeout Policies | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
-| FR-HTTP-004 | Retry Policies | New | Not mapped |
+| FR-HTTP-004 | Retry Policies | Completed | Not mapped |
 | FR-HTTP-005 | Authentication Support | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 | FR-HTTP-006 | Response Processing | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
-| FR-HTTP-007 | Streaming Support | New | Not mapped |
+| FR-HTTP-007 | Streaming Support | Completed | [http-connector](../../openspec/changes/foundational-runtime/specs/http-connector/spec.md) |
 
 ## [Job Management Requirements](functional-job-management-requirements.md)
 
@@ -309,11 +309,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-DB-001 | SQLite Connection Management | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
 | FR-DB-002 | Transaction Management | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
 | FR-DB-003 | Database Configuration | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
-| FR-DB-004 | Schema Migration Infrastructure | New | Not mapped |
-| FR-DB-005 | Persistence Abstraction | New | Not mapped |
+| FR-DB-004 | Schema Migration Infrastructure | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
+| FR-DB-005 | Persistence Abstraction | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
 | FR-DB-006 | Database Concurrency Policy | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
-| FR-DB-007 | Backup and Recovery Support | New | Not mapped |
-| FR-DB-008 | Persistent State Support | New | Not mapped |
+| FR-DB-007 | Backup and Recovery Support | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
+| FR-DB-008 | Persistent State Support | Completed | [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
 
 ## [State Management Requirements](functional-state-management-requirements.md)
 
@@ -322,11 +322,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-STATE-001 | Central State Facilities | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-002 | Application-Defined State | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-003 | State Access | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-STATE-004 | State Change Notifications | New | Not mapped |
-| FR-STATE-005 | State Scope | Partially implemented | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-STATE-006 | State Persistence | New | Not mapped |
+| FR-STATE-004 | State Change Notifications | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| FR-STATE-005 | State Scope | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| FR-STATE-006 | State Persistence | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-007 | State Concurrency | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-STATE-008 | State Restoration | New | Not mapped |
+| FR-STATE-008 | State Restoration | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-STATE-009 | State Cleanup | New | Not mapped |
 
 ## [Testing Infrastructure Requirements](functional-testing-infrastructure-requirements.md)

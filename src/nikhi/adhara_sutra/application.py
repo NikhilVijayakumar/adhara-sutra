@@ -19,6 +19,7 @@ from weakref import WeakValueDictionary
 from ._version import __version__
 from .diagnostics import _REQUEST, RedactionFilter, configure_logging, redact, redact_text
 from .jobs import JobManager, JobQueueFull, JobService
+from .state import ObservableState
 
 PROTOCOL_VERSION = "1.0"
 SUPPORTED_PROTOCOL_VERSIONS = (PROTOCOL_VERSION,)
@@ -171,7 +172,7 @@ class Application:
         if not isinstance(shutdown_timeout, (int, float)) or isinstance(shutdown_timeout, bool) or shutdown_timeout <= 0:
             raise ApplicationDefinitionError("INVALID_SHUTDOWN_TIMEOUT", "shutdown_timeout", "Shutdown timeout must be a positive number")
         self.name, self.version = name, version
-        self._state: dict[str, Any] = {}
+        self._state = ObservableState()
         self._max_concurrent_jobs, self._max_queued_jobs = max_concurrent_jobs, max_queued_jobs
         self._shutdown_timeout = shutdown_timeout
         self._job_handlers: dict[str, tuple[Callable[..., Any], float | None]] = {}
@@ -185,6 +186,7 @@ class Application:
         self._validate_config = validate_config
         self.state = "created"
         self._actions: dict[str, dict[str, Any]] = {}
+        self._error_mappings: dict[type[Exception], tuple[str, str, bool]] = {}
         self._services: dict[str, tuple[Callable[..., Any], tuple[str, ...]]] = {}
         self._stack = AsyncExitStack()
         self._lifecycle_handlers: list[Callable[[str, str], Any]] = []
@@ -225,6 +227,22 @@ class Application:
         return [{"name": name, "description": inspect.getdoc(meta["handler"]) or "",
                  "input_schema": meta["validate"] is not None, "output_schema": meta["output"] is not None}
                 for name, meta in sorted(self._actions.items())]
+
+    def map_error(self, exception_type: type[Exception], *, code: str,
+                  message: str, retryable: bool = False) -> None:
+        """Map a domain exception from an action to a safe, supported protocol error."""
+        if self.state != "created":
+            raise ValueError("Error mappings must be registered before startup")
+        if not isinstance(exception_type, type) or not issubclass(exception_type, Exception):
+            raise TypeError("exception_type must be an Exception subclass")
+        if exception_type in self._error_mappings:
+            raise ValueError("Exception type is already mapped")
+        if code not in {"ACTION_VALIDATION_FAILED", "ACTION_NOT_FOUND", "CONNECTOR_FAILURE",
+                        "RUNTIME_EXECUTION_FAILED"}:
+            raise ValueError("Unsupported domain error code")
+        if not isinstance(message, str) or not message.strip() or not isinstance(retryable, bool):
+            raise ValueError("A non-empty message and boolean retryable flag are required")
+        self._error_mappings[exception_type] = (code, message, retryable)
 
     def job(self, name: str, *, timeout: float | None = None) -> Callable:
         """Register a background job handler (payload, context); timeout applies to async handlers."""
@@ -444,9 +462,18 @@ class Application:
                                                      request_state={},
                                                      jobs=JobService(self._jobs, emit, session_state or {}) if self._jobs else None,
                                                      state_lock=self.context.state_lock)
-                result = handler(payload, request_context)
-                if inspect.isawaitable(result):
-                    result = await result
+                try:
+                    result = handler(payload, request_context)
+                    if inspect.isawaitable(result):
+                        result = await result
+                except Exception as exc:
+                    mapping = next((self._error_mappings[cls] for cls in type(exc).__mro__
+                                    if cls in self._error_mappings), None)
+                    if mapping is None:
+                        raise
+                    code, message, retryable = mapping
+                    _LOG.exception("Mapped application error")
+                    return self._response(request_id, error=_error(code, message, retryable=retryable))
                 if output is not None:
                     try:
                         result = output(result)

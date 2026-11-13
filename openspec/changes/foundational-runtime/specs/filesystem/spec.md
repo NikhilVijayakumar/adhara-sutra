@@ -56,3 +56,24 @@ path boundary. (FR-FS-004)
 
 - **WHEN** a write resolves outside all configured roots
 - **THEN** it fails with a path violation before creating the file
+
+### Requirement: Managed artifact references
+
+The framework SHALL store large binary artifacts in a managed directory and
+return JSON-compatible references instead of embedding binary payloads in
+protocol responses. (FR-FS-005)
+
+#### Scenario: Storing and reading an artifact
+
+- **WHEN** an application writes a binary stream to the artifact store
+- **THEN** it receives an opaque identifier, size, and media type, and can read the content back by identifier
+
+#### Scenario: A reference is invalid
+
+- **WHEN** an identifier is malformed or unsafe
+- **THEN** the store rejects it before touching the filesystem
+
+#### Scenario: Storing fails partway
+
+- **WHEN** reading the source stream raises during an incremental write
+- **THEN** the partial artifact is removed and the error reaches the caller

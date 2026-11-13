@@ -63,6 +63,25 @@ class ExternalCommand:
         self.path: str | None = None
         self._processes: set[asyncio.subprocess.Process] = set()
         self._semaphore = asyncio.Semaphore(max_concurrent) if max_concurrent else None
+        self._parsers: dict[str, Callable[[CommandResult], Any]] = {}
+
+    def register_parser(self, name: str, parser: Callable[[CommandResult], Any]) -> None:
+        """Register an application-supplied parser for a captured command result."""
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("parser name must be a non-empty string")
+        if not callable(parser):
+            raise TypeError("parser must be callable")
+        if name in self._parsers:
+            raise ValueError(f"parser already registered: {name}")
+        self._parsers[name] = parser
+
+    def parse(self, name: str, result: CommandResult) -> Any:
+        """Apply a registered parser to a result, including non-zero exit results."""
+        try:
+            parser = self._parsers[name]
+        except KeyError:
+            raise ValueError(f"unknown parser: {name}") from None
+        return parser(result)
 
     def __enter__(self) -> "ExternalCommand":
         path = shutil.which(self.executable, path=self.search_path) \

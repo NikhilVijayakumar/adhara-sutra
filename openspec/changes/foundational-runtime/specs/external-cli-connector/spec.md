@@ -76,3 +76,12 @@ configured. (NFR-OPS-006)
 
 - **WHEN** a terminated process does not exit within `kill_timeout`
 - **THEN** the connector forces termination without waiting longer
+### Requirement: Output parsing extensions
+
+Applications SHALL be able to register named parsers and apply them to captured
+external command results. (FR-EXT-008)
+
+#### Scenario: Parsing an external command result
+
+- **WHEN** an application applies a registered parser to a captured result
+- **THEN** the parser receives the result including output and exit status, and its return value is available to the application

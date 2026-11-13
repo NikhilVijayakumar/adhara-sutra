@@ -92,7 +92,13 @@ is one `asyncio.Lock` per application, shared by request and job contexts; use i
 to serialize compound process-state updates when jobs run concurrently. Plain
 state mappings are otherwise unsynchronized, so the application owns any other
 coordination it needs. Independent `Application` instances do not share state,
-configuration, jobs, or services.
+configuration, jobs, or services. Subscribe to process-state changes with
+`unsubscribe = context.state.subscribe(listener, key="name")`; omit `key` to
+observe all keys. Synchronous listeners receive `(operation, key, value)`, with
+`operation` equal to `"set"` or `"delete"`; deletions include the removed value.
+Notifications follow top-level mutations, not in-place edits of nested values.
+Listener failures are logged and do not undo changes. Call `unsubscribe()` when
+the subscription is no longer needed.
 
 Background jobs are registered with `@app.job(name, timeout=...)` and submitted
 from a handler with `context.jobs.submit(name, payload)`, which returns an
@@ -122,24 +128,59 @@ for an expected upstream failure: the response reports code `CONNECTOR_FAILURE`,
 category `connector`, the retryability flag, and optional details, and one-shot
 execution exits 7 while a persistent session continues.
 
+Applications can map exceptions raised by action handlers with
+`app.map_error(DomainError, code="ACTION_VALIDATION_FAILED", message="Invalid request")`
+before startup. Supported codes are `ACTION_VALIDATION_FAILED`, `ACTION_NOT_FOUND`,
+`CONNECTOR_FAILURE`, and `RUNTIME_EXECUTION_FAILED`; `retryable` defaults to
+false. The most specific registered exception class wins. The public response
+uses the configured message, while diagnostics retain the original exception.
+
 The optional HTTP connector (`pip install nikhi-adhara-sutra[http]`) wraps one
 reused `httpx` client: register `HttpClient(base_url=..., timeout=...)` as a
 service, call `get`/`post`/`put`/`patch`/`delete`/`head`, and read `status`,
 `headers`, `body`, `.text()`, or `.json()`. `raise_for_status()` raises a
 `ConnectorError` for non-success statuses, marking only server, timeout, and
-rate-limit statuses as retryable; transport failures and timeouts are retryable
-connector errors. The client closes when the application stops. For Basic
+rate-limit statuses as retryable; transient network failures and timeouts are
+retryable connector errors. The client closes when the application stops. For Basic
 authentication pass `auth=(username, password)`; for bearer tokens pass an
 `Authorization` header. Obtain credentials from environment variables or the
 application's configuration rather than embedding them in source code. Use HTTPS
-to protect credentials in transit. Retries and streaming are not yet provided.
+to protect credentials in transit. Set `max_retries` (default 0) and
+`retry_delay` in seconds (default 0) to retry transient network failures and
+HTTP 408, 429, 500, 502, 503, or 504 responses. Automatic retries apply only to
+GET, HEAD, and OPTIONS; the final response or error is returned after exhaustion.
+The delay is fixed and applies between attempts. For incremental response bodies,
+use `with client.stream("GET", url) as response:` and iterate over
+`response.iter_bytes()`. The stream exposes `status`, `headers`, `url`, `ok`,
+and `raise_for_status()`; leaving the context closes the response even if it was
+only partly consumed. Streaming requests are not automatically retried.
 
 SQLite is available as `SQLiteDatabase(path=...)`: register it as a service and
 use `execute`, `executemany`, `query`, `query_one`, and `transaction()` for
 explicit commit or rollback. Foreign keys are enabled, and one connection is
 owned by the thread that starts the application, so cross-thread use is
-rejected. Schema migrations, backup and integrity helpers, and a persistent-state
-adapter are not yet provided.
+rejected. `db.migrate([(1, create_schema), (2, upgrade_schema)])` applies
+application-defined migration callables in strictly increasing positive version
+order, recording versions in `adhara_schema_migrations`. Supply the complete
+history on every run; mismatched history is rejected. Pending migrations and
+their records commit together or roll back together. Callables receive `db` and
+must not manage transactions themselves. Run migrations outside a transaction.
+`db.integrity_check()` returns SQLite's integrity messages (`["ok"]` for a
+healthy database), and `db.backup(path)` creates a consistent backup at a new
+file path without overwriting an existing file. To recover, stop applications
+using the database, preserve the damaged files, restore a verified backup to
+the database path, and check its integrity before resuming service.
+
+For explicitly persisted state, register `SQLiteState(db, namespace)` as a
+service dependent on the database (wrap it with `contextlib.nullcontext` in
+the service factory). It is a mutable mapping with string keys and JSON values,
+stored separately per namespace. Retrieved values are snapshots: assign changed
+values back to persist them. Operations use the database's thread ownership and
+transaction policy; use `db.transaction()` for grouped changes. Persistent
+state is separate from `context.state` and remains available after restart.
+Applications can build their own repositories on
+the managed connection; [the repository example](examples/sqlite_repository.py)
+shows dependency ordering, parameterized statements, and transactions.
 
 External commands run through `ExternalCommand(executable, search_path=...)`:
 `await run(args, timeout=..., input=..., cwd=..., env=..., on_output=...)`
@@ -149,7 +190,10 @@ lines to `on_output(stream, chunk)`, and returns `CommandResult` with the exit
 status, captured output, and duration. `raise_for_status()` raises a
 non-retryable `ConnectorError` for a non-zero exit. Timeouts and cancellation
 terminate the process tree and report retryable errors; stopping the application
-also terminates any command still running. Output parsers and interactive
+also terminates any command still running. Register an output parser with
+`command.register_parser(name, parser)` and call `command.parse(name, result)`
+on a `CommandResult`; the parser receives the captured output and exit status,
+and its return value or exception passes through to the caller. Interactive
 process sessions are not yet provided.
 
 `AppDirectories.for_app(name)` resolves application data, configuration, cache,
@@ -161,8 +205,12 @@ roots and rejects traversal, escaping symbolic links, and sibling-prefix paths
 with `PathViolation`; `open()`, `read_text()`, `write_text()`, `read_json()`,
 and `write_json()` apply the same check. Text and JSON use UTF-8 by default;
 write helpers require the parent directory to exist and propagate errors.
-Large-artifact references are not yet provided. Path checks resolve symbolic
-links at the time of the check and do not protect against concurrent path changes.
+`ArtifactStore(directory).put(binary_stream, media_type=...)` copies data in
+chunks and returns a JSON-compatible reference containing an opaque artifact ID,
+size, and media type. Use `store.open(id)` to read it and `store.delete(id)` to
+remove it. Applications own access control, retention, and cleanup, and should
+keep the store directory private. Path checks resolve symbolic links at the time
+of the check and do not protect against concurrent path changes.
 
 The Electron/Node main-process bridge lives in [bridge/](bridge/README.md). It
 spawns one persistent backend, performs the `system.hello` handshake, correlates

@@ -7,10 +7,11 @@ import json
 import shutil
 import sys
 import tempfile
+import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, BinaryIO, Iterator, Mapping
 
 
 class PathViolation(ValueError):
@@ -107,3 +108,57 @@ class PathBoundary:
     def write_json(self, path: str | os.PathLike, value: Any, *, encoding: str = "utf-8") -> int:
         """Encode and write JSON within the boundary."""
         return self.write_text(path, json.dumps(value, ensure_ascii=False, allow_nan=False), encoding=encoding)
+
+
+class ArtifactStore:
+    """Store large binary artifacts under opaque identifiers in a managed directory."""
+
+    def __init__(self, directory: str | os.PathLike) -> None:
+        self.directory = Path(directory).expanduser().resolve()
+        self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+
+    @staticmethod
+    def _validate_id(artifact_id: str) -> str:
+        if not isinstance(artifact_id, str) or len(artifact_id) != 32:
+            raise ValueError("Invalid artifact identifier")
+        try:
+            parsed = uuid.UUID(hex=artifact_id)
+        except ValueError:
+            raise ValueError("Invalid artifact identifier") from None
+        if parsed.hex != artifact_id:
+            raise ValueError("Invalid artifact identifier")
+        return artifact_id
+
+    def put(self, source: BinaryIO, *, media_type: str = "application/octet-stream") -> dict[str, Any]:
+        """Copy a binary stream incrementally and return a JSON-compatible reference."""
+        if not isinstance(media_type, str) or not media_type.strip():
+            raise ValueError("media_type must be a non-empty string")
+        artifact_id = uuid.uuid4().hex
+        path = self.directory / artifact_id
+        size = 0
+        with path.open("xb") as output:
+            try:
+                while True:
+                    chunk = source.read(1024 * 1024)
+                    if not isinstance(chunk, bytes):
+                        raise TypeError("artifact source must be a binary stream")
+                    if not chunk:
+                        break
+                    output.write(chunk)
+                    size += len(chunk)
+            except BaseException:
+                output.close()
+                path.unlink(missing_ok=True)
+                raise
+        return {"artifact_id": artifact_id, "size_bytes": size, "media_type": media_type}
+
+    def open(self, artifact_id: str) -> BinaryIO:
+        """Open an artifact for binary reading; the caller must close the file."""
+        path = self.directory / self._validate_id(artifact_id)
+        if path.is_symlink():
+            raise PathViolation("Artifact must not be a symbolic link")
+        return path.open("rb")
+
+    def delete(self, artifact_id: str) -> None:
+        """Delete an artifact when the application no longer needs it."""
+        (self.directory / self._validate_id(artifact_id)).unlink()

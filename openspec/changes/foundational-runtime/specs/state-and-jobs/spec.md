@@ -16,6 +16,37 @@ persistent state. (FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-005)
 - **WHEN** a handler stores a value in process or session state
 - **THEN** process state is shared by every request in the process and session state only by requests in the same session
 
+### Requirement: State change notifications
+
+Applications SHALL be able to subscribe to top-level process-state changes for
+one key or all keys and unsubscribe when no longer interested. (FR-STATE-004)
+
+#### Scenario: A subscribed value changes
+
+- **WHEN** a watched process-state key is set or deleted
+- **THEN** synchronous listeners receive the operation, key, and value, and deletion includes the removed value
+
+#### Scenario: A listener fails
+
+- **WHEN** a listener raises an exception
+- **THEN** the failure is logged and the state change still applies
+
+#### Scenario: A nested value is edited in place
+
+- **WHEN** a nested value is mutated without assigning its key again
+- **THEN** no notification is emitted because only top-level mutations are observed
+
+### Requirement: Persistent state scope
+
+Applications SHALL be able to configure persistent state storage, and that state
+SHALL be recoverable after restart subject to the selected persistence policy.
+(FR-STATE-006, FR-STATE-008)
+
+#### Scenario: Persistent state is restored
+
+- **WHEN** an application configures a persistent state adapter and restarts
+- **THEN** previously stored values are available and remain separate from process state
+
 ### Requirement: Concurrent state access
 
 The framework SHALL provide one shared lock per application for compound

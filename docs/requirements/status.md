@@ -4,7 +4,7 @@ Snapshot: 2026-11-12. Requirements and linked OpenSpec specifications remain pro
 
 **In progress**: the single active requirement. **New**: no implementation of the requirement has been identified. **Partially implemented**: related code exists, but the requirement or its verification is incomplete; this does not mean it is being actively worked on. **Completed**: the requirement has been implemented and checked against its stated acceptance criteria. Status is per requirement, not per OpenSpec artifact.
 
-The specification column identifies draft specifications that explicitly cite the requirement, including cited ranges. A link does not imply the entire requirement is specified. “Not mapped” means no explicit citation was found; it does not mean the requirement is rejected. Open questions are decisions, not implementation tasks.
+The specification column identifies draft specifications that explicitly cite the requirement, including cited ranges. A link does not imply the entire requirement is specified. “Not mapped” means no explicit citation was found; it does not mean the requirement is rejected. Open questions are decisions, not implementation tasks; **Resolved** records the decision in [docs/decisions.md](../../docs/decisions.md).
 
 Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [Electron bridge](../../bridge/index.js); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connector implementations, migration, and verification tooling are not present.
 
@@ -475,16 +475,16 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-OQ-001 | Python Runtime Packaging | Open question | Not mapped |
-| NFR-OQ-002 | Persistent Process Model | Open question | Not mapped |
-| NFR-OQ-003 | Job Execution Isolation | Open question | Not mapped |
-| NFR-OQ-004 | State Persistence | Open question | Not mapped |
-| NFR-OQ-005 | Connector Reliability | Open question | Not mapped |
-| NFR-OQ-006 | Architecture Verification Scope | Open question | Not mapped |
+| NFR-OQ-001 | Python Runtime Packaging | Resolved | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| NFR-OQ-002 | Persistent Process Model | Resolved | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md), [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| NFR-OQ-003 | Job Execution Isolation | Resolved | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| NFR-OQ-004 | State Persistence | Resolved | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md), [sqlite-connector](../../openspec/changes/foundational-runtime/specs/sqlite-connector/spec.md) |
+| NFR-OQ-005 | Connector Reliability | Resolved | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md), [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
+| NFR-OQ-006 | Architecture Verification Scope | Resolved | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-OQ-007 | Migration Automation | Out of Scope | Not mapped — automated source transformation is not part of this library. |
 | NFR-OQ-008 | Performance Baseline | Open question | Not mapped |
-| NFR-OQ-009 | Release Compatibility | Open question | Not mapped |
-| NFR-OQ-010 | Framework Packaging | Open question | Not mapped |
+| NFR-OQ-009 | Release Compatibility | Resolved | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md), [cli-protocol](../../openspec/changes/foundational-runtime/specs/cli-protocol/spec.md) |
+| NFR-OQ-010 | Framework Packaging | Resolved | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 
 ## [Operational and Packaging Requirements](non-functional-operational-and-packaging-requirements.md)
 

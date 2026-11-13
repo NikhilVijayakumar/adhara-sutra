@@ -1,5 +1,37 @@
 ## ADDED Requirements
 
+### Requirement: Consistent developer commands
+
+The framework SHALL provide a consistent noninteractive developer CLI for
+creating, running, inspecting, verifying, migrating, diagnosing, reporting, and
+version reporting. (FR-DEV-001)
+
+#### Scenario: Discovering the commands
+
+- **WHEN** the developer runs the command with no subcommand
+- **THEN** it lists the supported operations
+
+#### Scenario: An invalid target
+
+- **WHEN** a command is given a missing or non-directory target
+- **THEN** it reports the problem and exits with the invalid-invocation status
+
+#### Scenario: Emitting a report
+
+- **WHEN** the report-producing commands run with `--json` or `--output FILE`
+- **THEN** the report can be consumed by tooling or written to a file
+
+### Requirement: Documentation entry points
+
+The README SHALL link developers to the relevant framework documentation:
+requirements, the architecture rule reference, the protocol reference, OpenSpec
+changes, and the knowledge index, with resolvable internal links. (FR-DEV-004)
+
+#### Scenario: Locating capability documentation
+
+- **WHEN** a developer opens the README
+- **THEN** it links to the requirements, architecture rules, protocol reference, OpenSpec changes, and knowledge index, and those targets exist
+
 ### Requirement: Working examples
 
 The framework SHALL ship representative, runnable examples of common integration

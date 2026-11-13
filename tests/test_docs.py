@@ -25,6 +25,19 @@ class RuleReferenceTests(unittest.TestCase):
         for identifier in identifiers:
             self.assertRegex(identifier, r"^ARCH-[A-Z]+-\d{3}$")
 
+    def test_readme_links_to_the_documentation_entry_points(self):
+        text = (ROOT / "README.md").read_text(encoding="utf-8")
+        for target in ("docs/requirements/README.md", "docs/architecture-rules.md",
+                       "docs/protocol-reference.md", "openspec/README.md", "knowledge/index.md"):
+            self.assertIn(f"]({target})", text)
+
+    def test_readme_internal_links_resolve(self):
+        text = (ROOT / "README.md").read_text(encoding="utf-8")
+        for target in re.findall(r"\]\(([^)]+)\)", text):
+            if target.startswith(("http", "#", "mailto:")):
+                continue
+            self.assertTrue((ROOT / target.split("#")[0]).exists(), target)
+
 
 if __name__ == "__main__":
     unittest.main()

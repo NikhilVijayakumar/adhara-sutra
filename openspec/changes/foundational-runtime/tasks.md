@@ -89,6 +89,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-WS-001..005: added managed async outbound `WebSocketClient` (optional `websocket` extra on `websockets`) with connect/close/health, send/receive/stream-style consumption, message validation, and controlled reconnection policy; connector errors carry connector identity/timeout/validation details. Added guarded integration tests (skipped when `websockets` unavailable), websocket-connector spec, connector reference, and exports. Marked FR-WS-001..005 complete.
 - [x] Complete and practically verify FR-EXT-010: added managed interactive `ExternalSession` via `ExternalCommand.open_session(...)` with stdin writes, incremental stdout/stderr reception, wait/close, and process cleanup; updated spec/docs/status with tests.
 - [x] Complete and practically verify FR-DISC-011: added `AnalysisCache` and `ProjectInspector(..., cache=...)` so unchanged files are not re-parsed while changed files are refreshed and stale entries pruned; added tests, spec scenario, and status mapping.
+- [x] Complete and practically verify FR-TEST-008: migration plans now include `regression_tests` identifying behavioral tests that must keep passing (actions, jobs, CLI, Electron IPC, HTTP/external/SQLite integrations, state), rendered in JSON/Markdown reports; tests/spec/status updated.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

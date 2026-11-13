@@ -124,13 +124,15 @@ class MigrationPlan:
     tasks: list[MigrationTask]
     completion: tuple[str, ...]
     rollback: tuple[str, ...]
+    regression_tests: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {"profile": {"version": self.profile_version}, "source": self.source,
                 "strategy": self.strategy, "constraints": list(self.constraints),
                 "findings": [finding.to_dict() for finding in self.findings],
                 "tasks": [task.to_dict() for task in self.tasks],
-                "completion": list(self.completion), "rollback": list(self.rollback)}
+                "completion": list(self.completion), "rollback": list(self.rollback),
+                "regression_tests": list(self.regression_tests)}
 
     def source_matches(self, project: ProjectProfile | dict[str, Any]) -> bool:
         """Return whether the plan's analyzed source matches the given project state."""
@@ -175,6 +177,7 @@ def analyze_migration(project: ProjectProfile, verification: VerificationResult,
             "Restore the database backup and the previous application version when persistence changes.",
             "Tasks marked irreversible require a reviewed backup and recovery procedure.",
         ),
+        regression_tests=_regression_tests(project),
     )
 
 
@@ -365,6 +368,31 @@ def _phase_order(strategy: str) -> tuple[str, ...]:
                 "state-jobs", "contracts", "persistence", "verification")
     return ("baseline", "structure", "dependencies", "runtime", "entry-points", "integrations",
             "state-jobs", "contracts", "persistence", "verification")
+
+
+def _regression_tests(project: ProjectProfile) -> tuple[str, ...]:
+    """Name the behavioral tests a migration must preserve (FR-TEST-008)."""
+    tests: list[str] = []
+    for finding in project.by_kind("action"):
+        tests.append(f"Action `{finding.name}` preserves its accepted payloads and observable results.")
+    for finding in project.by_kind("job"):
+        tests.append(f"Job `{finding.name}` preserves its results, progress, and failure behavior.")
+    if project.by_kind("cli") or _scripts(project):
+        tests.append("Existing CLI commands preserve names, arguments, exit codes, and output.")
+    if project.by_kind("electron-process") or project.by_kind("electron-ipc"):
+        tests.append("Electron IPC channels preserve names, payloads, and process boundaries.")
+    for integration, test in (
+            ("HTTP", "Existing HTTP calls preserve endpoints, payloads, and error handling."),
+            ("external CLI", "Existing external commands preserve arguments, output, and exit behavior."),
+            ("SQLite", "Existing database schema, queries, and write paths preserve stored data.")):
+        if any(finding.name == integration and not _is_framework_path(finding)
+               for finding in project.by_kind("integration")):
+            tests.append(test)
+    if project.by_kind("state"):
+        tests.append("Existing state behavior preserves request, session, process, and persistent scope.")
+    if not tests:
+        tests.append("Capture the current application behavior with regression tests before changing it.")
+    return tuple(tests)
 
 
 def _scripts(project: ProjectProfile) -> list[Finding]:

@@ -340,7 +340,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-TEST-005 | Process Execution Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-006 | State and Job Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-007 | Architecture Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-TEST-008 | Migration Regression Tests | New | Not mapped |
+| FR-TEST-008 | Migration Regression Tests | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-TEST-009 | Electron Integration Tests | New | Not mapped |
 
 ## [WebSocket Connector Requirements](functional-websocket-connector-requirements.md)

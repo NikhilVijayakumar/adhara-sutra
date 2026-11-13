@@ -196,7 +196,7 @@ def _render_migration(report: dict[str, Any]) -> str:
             lines.append(f"- Rollback: {task['rollback']}")
         lines.append("")
     for title, key in (("Constraints", "constraints"), ("Completion criteria", "completion"),
-                       ("Rollback", "rollback")):
+                       ("Behavioral regression tests", "regression_tests"), ("Rollback", "rollback")):
         lines += [f"## {title}", ""]
         lines += [f"- {item}" for item in report[key]]
         lines.append("")

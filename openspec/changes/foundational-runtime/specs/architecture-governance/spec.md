@@ -204,12 +204,14 @@ Scaffolding SHALL NOT silently overwrite application-owned files.
 Migration analysis SHALL combine discovered implementation facts with
 architecture verification results, identify gaps, and produce a structured,
 deterministic plan of independently verifiable tasks for a selected strategy.
-(FR-MIG-001..005, FR-MIG-009, FR-MIG-014, NFR-MIG-005, NFR-MIG-006)
+The plan SHALL also identify the behavioral regression tests needed to preserve
+existing application functionality. (FR-MIG-001..005, FR-MIG-009, FR-MIG-014,
+FR-TEST-008, NFR-MIG-005, NFR-MIG-006)
 
 #### Scenario: Planning an existing application
 
 - **WHEN** migration analysis runs on an existing project
-- **THEN** it reports actionable findings with evidence and a plan of tasks, each naming its verification and rollback
+- **THEN** it reports actionable findings with evidence, a plan of tasks each naming its verification and rollback, and the behavioral regression tests that must keep passing
 
 ### Requirement: Migration preservation constraints
 

@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from nikhi.adhara_sutra import ProjectInspector, analyze_migration, migration_report, verify
+from nikhi.adhara_sutra import ProjectInspector, analyze_migration, migration_report, render_markdown, verify
 from nikhi.adhara_sutra.migration import (
     evaluate_migration_completion,
     load_statuses,
@@ -76,6 +76,14 @@ class MigrationTrackingTests(unittest.TestCase):
                                 files=project.files, modules=project.modules, dependencies=project.dependencies,
                                 findings=project.findings, imports=project.imports, errors=project.errors)
         self.assertFalse(plan.source_matches(changed))
+
+    def test_plan_identifies_behavioral_regression_tests(self):
+        project, result, plan = self.fixture()
+        self.assertTrue(any("Action `ping`" in test for test in plan.regression_tests))
+        self.assertTrue(any("HTTP" in test for test in plan.regression_tests))
+        report = migration_report(plan, generated_at="fixed")
+        self.assertEqual(report["regression_tests"], list(plan.regression_tests))
+        self.assertIn("Behavioral regression tests", render_markdown(report))
 
     def test_completion_is_not_evidenced_without_tests(self):
         project, result, plan = self.fixture()

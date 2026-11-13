@@ -28,8 +28,16 @@ class RuleReferenceTests(unittest.TestCase):
     def test_readme_links_to_the_documentation_entry_points(self):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         for target in ("docs/requirements/README.md", "docs/architecture-rules.md",
-                       "docs/protocol-reference.md", "openspec/README.md", "knowledge/index.md"):
+                       "docs/connectors.md", "docs/protocol-reference.md",
+                       "openspec/README.md", "knowledge/index.md"):
             self.assertIn(f"]({target})", text)
+
+    def test_connector_reference_documents_each_category(self):
+        text = (ROOT / "docs" / "connectors.md").read_text(encoding="utf-8").lower()
+        for category in ("http", "external cli", "sqlite", "filesystem", "persistent state"):
+            self.assertIn(category, text)
+        for heading in ("configuration", "lifecycle", "error behavior"):
+            self.assertGreaterEqual(text.count(heading), 4)
 
     def test_readme_internal_links_resolve(self):
         text = (ROOT / "README.md").read_text(encoding="utf-8")

@@ -24,13 +24,24 @@ version reporting. (FR-DEV-001)
 ### Requirement: Documentation entry points
 
 The README SHALL link developers to the relevant framework documentation:
-requirements, the architecture rule reference, the protocol reference, OpenSpec
-changes, and the knowledge index, with resolvable internal links. (FR-DEV-004)
+requirements, the architecture rule reference, the connector reference, the
+protocol reference, OpenSpec changes, and the knowledge index, with resolvable
+internal links. (FR-DEV-004)
 
 #### Scenario: Locating capability documentation
 
 - **WHEN** a developer opens the README
-- **THEN** it links to the requirements, architecture rules, protocol reference, OpenSpec changes, and knowledge index, and those targets exist
+- **THEN** it links to the requirements, architecture rules, connector reference, protocol reference, OpenSpec changes, and knowledge index, and those targets exist
+
+### Requirement: Connector reference
+
+Every public connector category SHALL have documented configuration, lifecycle,
+and error behavior. (FR-DOC-004)
+
+#### Scenario: Reading connector documentation
+
+- **WHEN** a developer consults the connector reference
+- **THEN** it documents configuration, lifecycle, and error behavior for each public connector category (HTTP, external CLI, SQLite, filesystem and artifacts, and persistent state)
 
 ### Requirement: Working examples
 

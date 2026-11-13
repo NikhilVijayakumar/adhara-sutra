@@ -144,7 +144,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-DOC-001 | Framework Documentation | New | Not mapped |
 | FR-DOC-002 | Application Documentation Templates | New | Not mapped |
 | FR-DOC-003 | Protocol Reference | Completed | [protocol-reference](../protocol-reference.md) |
-| FR-DOC-004 | Connector Reference | New | Not mapped |
+| FR-DOC-004 | Connector Reference | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | FR-DOC-005 | Architecture Rule Reference | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-DOC-006 | Migration Documentation | New | Not mapped |
 | FR-DOC-007 | Documentation Validation | New | Not mapped |

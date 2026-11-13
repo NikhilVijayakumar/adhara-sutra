@@ -422,13 +422,13 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-EXT-001 | Connector Extensibility | New | Not mapped |
-| NFR-EXT-002 | Application Extension Points | New | Not mapped |
-| NFR-EXT-003 | Optional Plugin Isolation | New | Not mapped |
-| NFR-EXT-004 | Architecture Profile Extensibility | New | Not mapped |
-| NFR-EXT-005 | Verification Rule Extensibility | New | Not mapped |
-| NFR-EXT-006 | Migration Analyzer Extensibility | New | Not mapped |
-| NFR-EXT-007 | Backward-Compatible Extension | New | Not mapped |
+| NFR-EXT-001 | Connector Extensibility | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| NFR-EXT-002 | Application Extension Points | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
+| NFR-EXT-003 | Optional Plugin Isolation | Completed | [connector-framework](../../openspec/changes/foundational-runtime/specs/connector-framework/spec.md) |
+| NFR-EXT-004 | Architecture Profile Extensibility | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-EXT-005 | Verification Rule Extensibility | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-EXT-006 | Migration Analyzer Extensibility | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| NFR-EXT-007 | Backward-Compatible Extension | Completed | [application-runtime](../../openspec/changes/foundational-runtime/specs/application-runtime/spec.md) |
 
 ## [Maintainability Requirements](non-functional-maintainability-requirements.md)
 

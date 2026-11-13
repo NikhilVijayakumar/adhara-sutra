@@ -28,12 +28,17 @@ core framework source. (FR-CON-007, FR-CON-008)
 ### Requirement: Connector isolation
 
 Applications SHALL be able to use one connector without installing unrelated
-integration dependencies. (FR-CON-005)
+integration dependencies. (FR-CON-005, NFR-EXT-003)
 
 #### Scenario: Only one connector is installed
 
 - **WHEN** an application installs a single connector
 - **THEN** the framework and the application remain usable without additional integration packages
+
+#### Scenario: An optional connector package is unavailable
+
+- **WHEN** an optional connector's third-party package is not installed and the application does not use that connector
+- **THEN** startup and unrelated application functionality continue to work
 
 ### Requirement: Connector health and failure mapping
 

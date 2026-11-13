@@ -5,7 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from nikhi.adhara_sutra import ProjectInspector, analyze_migration, migration_report, render_markdown, verify
+from nikhi.adhara_sutra import (MigrationFinding, ProjectInspector, analyze_migration,
+                                migration_report, render_markdown, verify)
 from nikhi.adhara_sutra.migration import (
     evaluate_migration_completion,
     load_statuses,
@@ -41,6 +42,27 @@ class MigrationTrackingTests(unittest.TestCase):
         project = ProjectInspector(root).inspect()
         result = verify(project)
         return project, result, analyze_migration(project, result)
+
+    def test_custom_analyzers_extend_migration_findings(self):
+        project, result, _ = self.fixture()
+
+        def analyzer(project, verification):
+            return [MigrationFinding(
+                id="MIG-TOOL-001", title="Adopt the custom CLI library", severity="warning",
+                confidence="observed", detail="A custom CLI layout was detected.",
+                recommendation="Route the custom CLI through actions.")]
+
+        plan = analyze_migration(project, result, analyzers=[analyzer])
+        finding = next(item for item in plan.findings if item.id == "MIG-TOOL-001")
+        self.assertEqual(finding.title, "Adopt the custom CLI library")
+        self.assertTrue(any(task.findings == ("MIG-TOOL-001",) for task in plan.tasks))
+        report = migration_report(plan, generated_at="fixed")
+        self.assertTrue(any(item["id"] == "MIG-TOOL-001" for item in report["findings"]))
+
+    def test_custom_analyzers_must_return_migration_findings(self):
+        project, result, _ = self.fixture()
+        with self.assertRaises(TypeError):
+            analyze_migration(project, result, analyzers=[lambda project, verification: ["nope"]])
 
     def test_statuses_support_tasks_and_findings(self):
         project, result, plan = self.fixture()

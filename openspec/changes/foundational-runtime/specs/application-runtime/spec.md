@@ -81,12 +81,19 @@ stops. (NFR-REL-001, NFR-REL-002, NFR-REL-008, NFR-RES-003, NFR-AVAIL-002)
 ### Requirement: Application extension points
 
 Applications SHALL be able to register business actions and services without
-modifying framework source code. (FR-RUN-004, FR-RUN-005)
+modifying framework source code. Registration SHALL be additive: a new optional
+extension does not require changes to existing business handlers.
+(FR-RUN-004, FR-RUN-005, NFR-EXT-002, NFR-EXT-007)
 
 #### Scenario: Register a business action
 
 - **WHEN** an application registers an action through the public extension point
 - **THEN** it can use framework facilities without the framework importing the application's modules directly
+
+#### Scenario: A new extension is added
+
+- **WHEN** an application registers an additional action, job, service, or connector
+- **THEN** existing business handlers keep working without modification
 
 ### Requirement: Controlled shutdown
 

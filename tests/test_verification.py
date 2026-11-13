@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from nikhi.adhara_sutra import ArchitectureProfile, ProjectInspector, verify
+from nikhi.adhara_sutra import ArchitectureProfile, ProjectInspector, Rule, check_for, verify
 from nikhi.adhara_sutra.verification import FAIL, NEEDS_REVIEW, NOT_CHECKED, PASS
 
 APP = '''\
@@ -110,6 +110,29 @@ class VerificationTests(unittest.TestCase):
         first = json.dumps(verify(project).to_dict(), sort_keys=True)
         second = json.dumps(verify(project).to_dict(), sort_keys=True)
         self.assertEqual(first, second)
+
+    def test_custom_rules_extend_verification(self):
+        rule = Rule("APP-DOC-001", "Project README", "warning", "The project documents itself.")
+
+        def evaluate(project, profile):
+            if "README.md" in project.files:
+                return check_for(rule, PASS, detail="README.md is present")
+            return check_for(rule, FAIL, detail="README.md is missing", remediation="Add README.md")
+
+        project = self.make_project(**{"pyproject.toml": "", "app.py": APP})
+        check = next(item for item in verify(project, rules=[(rule, evaluate)]).checks
+                     if item.rule == "APP-DOC-001")
+        self.assertEqual((check.status, check.title, check.remediation),
+                         (FAIL, "Project README", "Add README.md"))
+        documented = self.make_project(**{"pyproject.toml": "", "app.py": APP, "README.md": ""})
+        self.assertEqual(self.statuses(verify(documented, rules=[(rule, evaluate)]))["APP-DOC-001"], PASS)
+
+    def test_custom_rule_must_return_its_own_check(self):
+        rule = Rule("APP-DOC-002", "Custom rule", "warning", "x")
+        other = Rule("APP-DOC-003", "Other rule", "warning", "x")
+        project = self.make_project(**{"app.py": APP})
+        with self.assertRaises(ValueError):
+            verify(project, rules=[(rule, lambda project, profile: check_for(other, PASS))])
 
     def test_parse_errors_are_reported(self):
         project = self.make_project(**{"pyproject.toml": "", "broken.py": "def ("})

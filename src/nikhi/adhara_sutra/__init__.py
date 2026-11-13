@@ -10,8 +10,8 @@ from .external import CommandResult, ExternalCommand, ExternalSession
 from .filesystem import AppDirectories, ArtifactStore, PathBoundary, PathViolation
 from .http import HttpClient, HttpResponse, HttpStreamResponse
 from .jobs import JobQueueFull, SQLiteJobStore
-from .migration import (STRATEGIES, TASK_STATUSES, MigrationFinding, MigrationPlan, MigrationTask,
-                        analyze_migration, load_statuses)
+from .migration import (STRATEGIES, TASK_STATUSES, MigrationAnalyzer, MigrationFinding, MigrationPlan,
+                        MigrationTask, analyze_migration, load_statuses)
 from .persistent_state import SQLiteState
 from .report import (REPORT_SCHEMA_VERSION, implementation_report, load_report, migration_report,
                      render_json, render_markdown,
@@ -21,18 +21,19 @@ from .sqlite import SQLiteDatabase
 from .websocket import WebSocketClient
 from .state import ObservableState
 from .testing import ApplicationTestClient, CLIContractTests
-from .verification import (ArchitectureProfile, Baseline, BaselineEntry, Check, RULE_CATALOG,
-                           VerificationResult, apply_baseline, default_profile, verify)
+from .verification import (ArchitectureProfile, Baseline, BaselineEntry, Check, Rule, RuleEvaluator,
+                           RULE_CATALOG, VerificationResult, apply_baseline, check_for, default_profile,
+                           verify)
 
 __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext", "ApplicationDefinitionError",
            "AnalysisCache",
            "ApplicationTestClient", "ArchitectureProfile", "Baseline", "BaselineEntry", "BootstrapError", "Check",
            "CLIContractTests", "CommandResult", "ExternalSession",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",
-           "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary",
+           "JobQueueFull", "MigrationAnalyzer", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary",
            "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",
-           "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "SQLiteDatabase", "SQLiteJobStore", "SQLiteState", "STRATEGIES",
+           "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "Rule", "RuleEvaluator", "SQLiteDatabase", "SQLiteJobStore", "SQLiteState", "STRATEGIES",
            "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "WebSocketClient", "__version__",
-           "analyze_migration", "apply_baseline", "configure_logging", "default_profile", "implementation_report",
+           "analyze_migration", "apply_baseline", "check_for", "configure_logging", "default_profile", "implementation_report",
            "load_report", "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
            "RuntimeDiscoveryError", "locate_backend", "supported_platforms", "validate_documentation", "verification_report", "verify"]

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Iterable
 
 from .discovery import Evidence, Finding, ProjectProfile
 
@@ -97,6 +97,17 @@ class Check:
                 "severity": self.severity, "detail": self.detail,
                 "evidence": [asdict(item) for item in self.evidence],
                 "remediation": self.remediation, "acknowledged": self.acknowledged}
+
+
+RuleEvaluator = Callable[[ProjectProfile, ArchitectureProfile], Check]
+
+
+def check_for(rule: Rule, status: str, *, detail: str = "",
+              evidence: tuple[Evidence, ...] = (), remediation: str = "") -> Check:
+    """Build a check for a custom rule; status must be one of the documented statuses."""
+    if status not in _STATUSES:
+        raise ValueError(f"unknown check status: {status}")
+    return Check(rule.id, rule.title, status, rule.severity, detail, evidence, remediation)
 
 
 @dataclass
@@ -221,8 +232,9 @@ def apply_baseline(result: VerificationResult, baseline: Baseline) -> Verificati
         for check in result.checks])
 
 
-def verify(project: ProjectProfile, profile: ArchitectureProfile | None = None) -> VerificationResult:
-    """Evaluate the rule catalog against one inspected project."""
+def verify(project: ProjectProfile, profile: ArchitectureProfile | None = None, *,
+           rules: Iterable[tuple[Rule, RuleEvaluator]] = ()) -> VerificationResult:
+    """Evaluate the rule catalog and any custom rules against one inspected project."""
     profile = profile or default_profile()
     checks = [
         _required_files(project, profile),
@@ -242,6 +254,11 @@ def verify(project: ProjectProfile, profile: ArchitectureProfile | None = None) 
         _jobs(project),
         _background_work(project),
     ]
+    for rule, evaluate in rules:
+        check = evaluate(project, profile)
+        if not isinstance(check, Check) or check.rule != rule.id:
+            raise ValueError(f"custom rule {rule.id} must return a Check for that rule")
+        checks.append(check)
     return VerificationResult(profile_version=profile.version, checks=checks)
 
 

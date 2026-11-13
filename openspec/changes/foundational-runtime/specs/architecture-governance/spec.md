@@ -13,12 +13,25 @@ unsupported or incomplete checks from successful checks. (FR-ARCH-001, NFR-ARCH-
 ### Requirement: Versioned profiles and rule catalog
 
 Verification SHALL evaluate a versioned architecture profile against a catalog
-of stable, identified rules. (FR-ARCH-001, FR-ARCH-002, NFR-ARCH-005)
+of stable, identified rules. Profiles SHALL be definable as configuration, and
+additional rules SHALL be registerable through the documented verification
+interface without changing the verifier. (FR-ARCH-001, FR-ARCH-002,
+NFR-ARCH-005, NFR-EXT-004, NFR-EXT-005)
 
 #### Scenario: A rule is evaluated
 
 - **WHEN** verification runs
 - **THEN** each result names its stable rule identifier, title, and severity
+
+#### Scenario: A custom profile is used
+
+- **WHEN** an application supplies an architecture profile with its required files, directories, forbidden imports, and layer boundaries
+- **THEN** verification evaluates those requirements without changing verifier code
+
+#### Scenario: A custom rule is registered
+
+- **WHEN** an application passes a rule and its evaluator to verification
+- **THEN** the resulting check carries that rule's identifier, title, severity, status, evidence, and remediation
 
 ### Requirement: Explicit verification statuses
 
@@ -206,13 +219,21 @@ architecture verification results, identify gaps, and produce a structured,
 deterministic plan of independently verifiable tasks for a selected strategy.
 The plan SHALL also identify the behavioral regression tests needed to preserve
 existing application functionality and the compatibility risks a framework
-upgrade or architecture profile change can introduce. (FR-MIG-001..005,
-FR-MIG-009, FR-MIG-014, FR-TEST-008, NFR-COMP-007, NFR-MIG-005, NFR-MIG-006)
+upgrade or architecture profile change can introduce. Migration analysis SHALL
+accept additional analyzers for project layouts, CLI libraries, and
+infrastructure patterns outside the built-in catalog. (FR-MIG-001..005,
+FR-MIG-009, FR-MIG-014, FR-TEST-008, NFR-COMP-007, NFR-EXT-006, NFR-MIG-005,
+NFR-MIG-006)
 
 #### Scenario: Planning an existing application
 
 - **WHEN** migration analysis runs on an existing project
 - **THEN** it reports actionable findings with evidence, a plan of tasks each naming its verification and rollback, the behavioral regression tests that must keep passing, and compatibility risks for the targeted profile version
+
+#### Scenario: A custom analyzer finds a project-specific pattern
+
+- **WHEN** migration analysis is given an additional analyzer that returns a finding
+- **THEN** the finding appears in the plan and report and receives a verifiable task like a built-in finding
 
 ### Requirement: Migration preservation constraints
 

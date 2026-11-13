@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Iterable
 
 from .discovery import Evidence, Finding, ProjectProfile
 from .verification import FAIL, NEEDS_REVIEW, VerificationResult
@@ -92,6 +92,9 @@ class MigrationFinding:
                 "rule": self.rule, "recommendation": self.recommendation}
 
 
+MigrationAnalyzer = Callable[[ProjectProfile, VerificationResult], Iterable[MigrationFinding]]
+
+
 @dataclass(frozen=True)
 class MigrationTask:
     """An independently verifiable unit of migration work."""
@@ -149,11 +152,19 @@ class MigrationPlan:
 
 
 def analyze_migration(project: ProjectProfile, verification: VerificationResult,
-                      *, strategy: str = "incremental") -> MigrationPlan:
+                      *, strategy: str = "incremental",
+                      analyzers: Iterable["MigrationAnalyzer"] = ()) -> MigrationPlan:
     """Derive a migration plan from discovery and architecture verification results."""
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown migration strategy: {strategy}")
     findings = _findings(project, verification)
+    for analyzer in analyzers:
+        extra = list(analyzer(project, verification))
+        if any(not isinstance(item, MigrationFinding) for item in extra):
+            raise TypeError("migration analyzers must return MigrationFinding objects")
+        findings.extend(extra)
+    findings = sorted({finding.id: finding for finding in findings}.values(),
+                      key=lambda item: item.id)
     tasks = _tasks(project, findings, strategy)
     return MigrationPlan(
         profile_version=verification.profile_version,

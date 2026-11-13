@@ -29,6 +29,39 @@ fails when a rule is added, removed, or changed without updating it.
 | `ARCH-JOB-001` | Managed job execution | warning | Long-running work uses the managed job manager. |
 | `ARCH-JOB-002` | Managed background work | warning | Background work uses the managed job manager instead of unmanaged tasks or threads. |
 
+## Custom profiles and rules
+
+A profile is configuration, not code: `ArchitectureProfile` declares required
+files and directories, forbidden imports, and layer boundaries, and `verify`
+evaluates it without changing the verifier. Applications can also add their own
+rules. `Rule` supplies the stable identifier, title, and severity, `check_for`
+builds the result, and `verify(..., rules=...)` appends it to the catalog checks:
+
+```python
+from nikhi.adhara_sutra import Rule, check_for, verify
+from nikhi.adhara_sutra.verification import FAIL, PASS
+
+readme = Rule("APP-DOC-001", "Project README", "warning", "The project documents itself.")
+
+def evaluate(project, profile):
+    if "README.md" in project.files:
+        return check_for(readme, PASS, detail="README.md is present")
+    return check_for(readme, FAIL, detail="README.md is missing", remediation="Add README.md")
+
+result = verify(project, rules=[(readme, evaluate)])
+```
+
+Custom checks appear alongside catalog checks in verification reports and use
+the same statuses, evidence, and remediation fields.
+
+## Custom migration analyzers
+
+`analyze_migration(..., analyzers=...)` accepts callables that receive the
+inspected project and verification result and return `MigrationFinding` objects.
+Their findings become plan and report findings, and receive the same verifiable
+task treatment as built-in findings, so a project-specific layout or CLI library
+can be covered without changing the migration core.
+
 ## Related documentation
 
 - [Architecture governance specification](../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md)

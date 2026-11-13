@@ -94,6 +94,29 @@ using static analysis and executable tests. (FR-ARCH-008)
 - **WHEN** the application accesses state through the request context and long-running work through registered jobs
 - **THEN** the corresponding checks pass
 
+### Requirement: Baselines and documented exceptions
+
+The verifier SHALL let an existing project acknowledge known violations in a
+versioned baseline so new violations keep blocking, while keeping acknowledged
+findings visible. Each exception SHALL be scoped to a rule and source location
+and MAY carry a documented reason. (FR-ARCH-013, FR-ARCH-014, NFR-ARCH-004,
+NFR-ARCH-010)
+
+#### Scenario: An acknowledged violation no longer blocks
+
+- **WHEN** verification runs with a baseline that lists every location of a known violation
+- **THEN** the check is reported as acknowledged and excluded from the blocking status while remaining in the report
+
+#### Scenario: A new violation at a new location
+
+- **WHEN** the same rule reports a location that the baseline does not list
+- **THEN** the check is not acknowledged and the verification status still reports the violation
+
+#### Scenario: An invalid baseline
+
+- **WHEN** the baseline has an unsupported schema version or an entry without a rule, path, and snippet
+- **THEN** verification fails with a clear error instead of ignoring the baseline
+
 ### Requirement: Reviewable migration
 
 Migration planning SHALL produce reviewable changes and SHALL verify affected

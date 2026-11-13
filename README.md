@@ -41,6 +41,12 @@ integrations, standard-stream protocol bypasses, and unmanaged background
 tasks. It
 exits 0 without failures, 1 with failures (or with needs-review checks under
 `--strict`), and 2 for an invalid invocation, so it can run in CI.
+`--baseline FILE` applies a committed JSON baseline of acknowledged violations:
+a check is acknowledged only when every location it reports is listed, so new
+violations in the same rule still block (and with `--strict`, unacknowledged
+needs-review checks too), while acknowledged checks stay visible in reports.
+`--write-baseline FILE` captures the current violations as a starting point; edit
+the entries to add `reason` notes for review.
 `adhara migrate [path] [--strategy adapter-first|incremental|rebuild] [--status FILE]
 [--json] [--output FILE]` combines discovery and verification into a structured
 migration plan: actionable findings with evidence and recommendations, and

@@ -172,8 +172,12 @@ def _render_verification(report: dict[str, Any]) -> str:
              "| --- | --- | --- | --- |",
              f"| {summary['pass']} | {summary['fail']} | {summary['needs_review']} | {summary['not_checked']} |", "",
              "## Checks", ""]
+    if report.get("acknowledged"):
+        lines.insert(-2, f"Acknowledged exceptions: {report['acknowledged']}")
+        lines.insert(-2, "")
     for check in report["checks"]:
-        lines += [f"### {check['status'].upper()} `{check['rule']}` - {check['title']}", "",
+        marker = " (acknowledged)" if check["acknowledged"] else ""
+        lines += [f"### {check['status'].upper()} `{check['rule']}` - {check['title']}{marker}", "",
                   f"- Severity: {check['severity']}"]
         if check["detail"]:
             lines.append(f"- Detail: {check['detail']}")

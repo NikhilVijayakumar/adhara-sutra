@@ -69,8 +69,8 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-ARCH-010 | Verification Status | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-ARCH-011 | Machine-Readable Reports | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-ARCH-012 | Evidence and Remediation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-ARCH-013 | Baseline Support | New | Not mapped |
-| FR-ARCH-014 | Approved Exceptions | New | Not mapped |
+| FR-ARCH-013 | Baseline Support | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
+| FR-ARCH-014 | Approved Exceptions | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-ARCH-015 | CI Enforcement | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-ARCH-016 | Optional LLM Review | New | Not mapped |
 
@@ -360,13 +360,13 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-ARCH-001 | Deterministic Verification | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-ARCH-002 | Evidence-Based Findings | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-ARCH-003 | Explicit Verification Coverage | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| NFR-ARCH-004 | False Positive Management | New | Not mapped |
+| NFR-ARCH-004 | False Positive Management | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-ARCH-005 | Stable Rule Identification | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-ARCH-006 | Incremental Verification | New | Not mapped |
 | NFR-ARCH-007 | CI Reliability | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-ARCH-008 | LLM Independence | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-ARCH-009 | Result Transparency | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| NFR-ARCH-010 | Baseline Integrity | New | Not mapped |
+| NFR-ARCH-010 | Baseline Integrity | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [Availability and Recoverability Requirements](non-functional-availability-and-recoverability-requirements.md)
 

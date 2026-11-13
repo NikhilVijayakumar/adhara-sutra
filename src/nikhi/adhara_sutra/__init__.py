@@ -17,15 +17,17 @@ from .report import (REPORT_SCHEMA_VERSION, implementation_report, migration_rep
 from .sqlite import SQLiteDatabase
 from .state import ObservableState
 from .testing import ApplicationTestClient, CLIContractTests
-from .verification import (ArchitectureProfile, Check, RULE_CATALOG, VerificationResult, default_profile, verify)
+from .verification import (ArchitectureProfile, Baseline, BaselineEntry, Check, RULE_CATALOG,
+                           VerificationResult, apply_baseline, default_profile, verify)
 
 __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext", "ApplicationDefinitionError",
-           "ApplicationTestClient", "ArchitectureProfile", "BootstrapError", "Check", "CLIContractTests", "CommandResult",
+           "ApplicationTestClient", "ArchitectureProfile", "Baseline", "BaselineEntry", "BootstrapError", "Check",
+           "CLIContractTests", "CommandResult",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",
            "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary",
            "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",
            "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "SQLiteDatabase", "SQLiteState", "STRATEGIES",
            "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "__version__",
-           "analyze_migration", "configure_logging", "default_profile", "implementation_report",
+           "analyze_migration", "apply_baseline", "configure_logging", "default_profile", "implementation_report",
            "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
            "verification_report", "verify"]

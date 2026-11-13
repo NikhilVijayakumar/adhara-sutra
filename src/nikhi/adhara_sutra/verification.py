@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+import json
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -89,12 +90,13 @@ class Check:
     detail: str = ""
     evidence: tuple[Evidence, ...] = ()
     remediation: str = ""
+    acknowledged: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {"rule": self.rule, "title": self.title, "status": self.status,
                 "severity": self.severity, "detail": self.detail,
                 "evidence": [asdict(item) for item in self.evidence],
-                "remediation": self.remediation}
+                "remediation": self.remediation, "acknowledged": self.acknowledged}
 
 
 @dataclass
@@ -106,7 +108,7 @@ class VerificationResult:
 
     @property
     def status(self) -> str:
-        statuses = {check.status for check in self.checks}
+        statuses = {check.status for check in self.checks if not check.acknowledged}
         if FAIL in statuses:
             return FAIL
         if NEEDS_REVIEW in statuses:
@@ -119,10 +121,104 @@ class VerificationResult:
         return {
             "profile": {"version": self.profile_version},
             "status": self.status,
+            "acknowledged": sum(1 for check in self.checks if check.acknowledged),
             "summary": {status: sum(1 for check in self.checks if check.status == status)
                         for status in _STATUSES},
             "checks": [check.to_dict() for check in self.checks],
         }
+
+
+BASELINE_SCHEMA_VERSION = "1.0"
+
+
+@dataclass(frozen=True)
+class BaselineEntry:
+    """One documented, scoped exception for a known violation location."""
+
+    rule: str
+    path: str
+    snippet: str
+    reason: str = ""
+
+
+@dataclass(frozen=True)
+class Baseline:
+    """A versioned set of acknowledged violation locations.
+
+    Matching ignores line numbers so unrelated edits do not invalidate the
+    baseline, and a check is acknowledged only when every location it reports is
+    listed. New locations for the same rule therefore keep blocking.
+    """
+
+    entries: tuple[BaselineEntry, ...] = ()
+    schema_version: str = BASELINE_SCHEMA_VERSION
+
+    @classmethod
+    def capture(cls, result: VerificationResult) -> "Baseline":
+        """Build a baseline from the current failing and needs-review evidence."""
+        entries = []
+        seen = set()
+        for check in result.checks:
+            if check.status not in (FAIL, NEEDS_REVIEW):
+                continue
+            for item in check.evidence:
+                key = (check.rule, item.path, item.snippet)
+                if key not in seen:
+                    seen.add(key)
+                    entries.append(BaselineEntry(*key))
+        return cls(tuple(entries))
+
+    def acknowledges(self, check: Check) -> bool:
+        keys = {(entry.rule, entry.path, entry.snippet) for entry in self.entries}
+        return bool(check.evidence) and all(
+            (check.rule, item.path, item.snippet) in keys for item in check.evidence)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Baseline":
+        if data.get("schema_version") != BASELINE_SCHEMA_VERSION:
+            raise ValueError(f"unsupported baseline schema version: {data.get('schema_version')!r}")
+        raw = data.get("entries")
+        if not isinstance(raw, list):
+            raise ValueError("baseline entries must be a list")
+        entries = []
+        for index, item in enumerate(raw):
+            if not isinstance(item, dict):
+                raise ValueError(f"baseline entry {index} must be an object")
+            missing = [name for name in ("rule", "path", "snippet")
+                       if not isinstance(item.get(name), str)]
+            if missing:
+                raise ValueError(f"baseline entry {index} is missing {', '.join(missing)}")
+            reason = item.get("reason", "")
+            if not isinstance(reason, str):
+                raise ValueError(f"baseline entry {index} has a non-text reason")
+            entries.append(BaselineEntry(item["rule"], item["path"], item["snippet"], reason))
+        return cls(tuple(entries))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"schema_version": self.schema_version,
+                "entries": [asdict(entry) for entry in self.entries]}
+
+    @classmethod
+    def load(cls, path: str | Path) -> "Baseline":
+        try:
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+        except OSError as exc:
+            raise ValueError(f"cannot read baseline {path}: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"baseline {path} is not valid JSON: {exc}") from exc
+        if not isinstance(data, dict):
+            raise ValueError(f"baseline {path} must be a JSON object")
+        return cls.from_dict(data)
+
+    def save(self, path: str | Path) -> None:
+        Path(path).write_text(json.dumps(self.to_dict(), indent=2) + "\n", encoding="utf-8")
+
+
+def apply_baseline(result: VerificationResult, baseline: Baseline) -> VerificationResult:
+    """Mark checks whose every reported location is acknowledged in the baseline."""
+    return VerificationResult(result.profile_version, [
+        replace(check, acknowledged=True) if baseline.acknowledges(check) else check
+        for check in result.checks])
 
 
 def verify(project: ProjectProfile, profile: ArchitectureProfile | None = None) -> VerificationResult:

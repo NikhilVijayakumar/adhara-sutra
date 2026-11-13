@@ -16,7 +16,7 @@ from .doctor import application_report, environment_report, render_text
 from .migration import STRATEGIES, analyze_migration, load_statuses
 from .report import (implementation_report, migration_report, render_json, render_markdown, verification_report)
 from .scaffolding import PROFILES, generate
-from .verification import default_profile, verify
+from .verification import Baseline, apply_baseline, default_profile, verify
 
 
 def _load(target: str) -> Application:
@@ -81,6 +81,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     verify_command.add_argument("--output", help="write the report to a file instead of stdout")
     verify_command.add_argument("--strict", action="store_true",
                                 help="treat checks needing review as failures")
+    verify_command.add_argument("--baseline",
+                                help="JSON file of acknowledged violations that do not block verification")
+    verify_command.add_argument("--write-baseline",
+                                help="write the current violations to this baseline file and exit")
     migrate = commands.add_parser("migrate", help="analyze a project and produce a migration plan")
     migrate.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
     migrate.add_argument("--strategy", choices=STRATEGIES, default="incremental",
@@ -131,6 +135,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
         try:
             result = verify(ProjectInspector(args.target).inspect(), default_profile())
+            if args.write_baseline:
+                baseline = Baseline.capture(result)
+                baseline.save(args.write_baseline)
+                print(f"wrote {len(baseline.entries)} acknowledged violation(s) to {args.write_baseline}")
+                return 0
+            if args.baseline:
+                result = apply_baseline(result, Baseline.load(args.baseline))
         except Exception as exc:
             print(f"adhara: cannot verify {args.target}: {exc}", file=sys.stderr)
             return 2

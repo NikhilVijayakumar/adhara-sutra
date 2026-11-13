@@ -1,6 +1,6 @@
 # AdharaSutra (आधारसूत्र)
 
-**Documentation:** [Requirements](docs/requirements/README.md) · [OpenSpec changes](openspec/README.md) · [Knowledge](knowledge/index.md)
+**Documentation:** [Requirements](docs/requirements/README.md) · [Architecture rules](docs/architecture-rules.md) · [Protocol reference](docs/protocol-reference.md) · [OpenSpec changes](openspec/README.md) · [Knowledge](knowledge/index.md)
 
 The initial runtime is available as `nikhi.adhara_sutra`. For a working example,
 run `PYTHONPATH=src python3 examples/basic_app.py` and send a newline-terminated

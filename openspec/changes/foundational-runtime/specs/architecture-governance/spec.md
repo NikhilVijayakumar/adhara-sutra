@@ -117,6 +117,16 @@ NFR-ARCH-010)
 - **WHEN** the baseline has an unsupported schema version or an entry without a rule, path, and snippet
 - **THEN** verification fails with a clear error instead of ignoring the baseline
 
+### Requirement: Architecture rule reference
+
+Every enforceable rule SHALL have a stable identifier and a documented purpose in
+the rule reference. (FR-DOC-005)
+
+#### Scenario: Reading the rule reference
+
+- **WHEN** a developer consults `docs/architecture-rules.md`
+- **THEN** every catalogued rule appears once with its identifier, title, severity, and purpose
+
 ### Requirement: Reviewable migration
 
 Migration planning SHALL produce reviewable changes and SHALL verify affected

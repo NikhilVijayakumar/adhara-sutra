@@ -132,9 +132,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | FR-DEV-001 | Standard Developer Commands | New | Not mapped |
 | FR-DEV-002 | Local Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| FR-DEV-003 | Examples | New | Not mapped |
+| FR-DEV-003 | Examples | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | FR-DEV-004 | Documentation Discovery | New | Not mapped |
-| FR-DEV-005 | Agent-Friendly Reports | New | Not mapped |
+| FR-DEV-005 | Agent-Friendly Reports | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | FR-DEV-006 | Framework Capability Discovery | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
 
 ## [Documentation Requirements](functional-documentation-requirements.md)

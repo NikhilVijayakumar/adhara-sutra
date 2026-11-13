@@ -9,7 +9,10 @@ Use `--persistent` to keep the process open; the first request must call
 `system.hello`. Persistent requests currently execute sequentially. With the
 package installed, `adhara run examples/basic_app.py` (or a module name) loads
 the application's `app`, `application`, or `create_app()` and serves the same
-protocol; `adhara version` prints the framework version. `adhara doctor [target]
+protocol; `adhara version` prints the framework version. The
+[repository example](examples/sqlite_repository.py) runs the same way and serves
+`items.add` and `items.list`; both shipped examples are exercised by the test
+suite. `adhara doctor [target]
 [--json] [--output FILE]` reports framework, interpreter, dependency, and
 configuration diagnostics with remediation, and, when a target is given, the
 application's registered actions, jobs, and services without printing

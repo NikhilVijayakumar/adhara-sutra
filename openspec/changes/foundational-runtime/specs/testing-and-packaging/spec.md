@@ -35,12 +35,20 @@ FR-TEST-007)
 ### Requirement: Packaged runtime support
 
 The desktop integration SHALL support a production runtime without assuming
-that an end user's machine has a Python development environment. (FR-PKG-006)
+that an end user's machine has a Python development environment. It SHALL define
+backend discovery for supported desktop platforms, configuration and diagnostics
+for bundled or separately installed external executables, and documented
+compatibility and upgrade guidance. (FR-PKG-005, FR-PKG-006, FR-PKG-007, FR-PKG-009)
 
 #### Scenario: Launch a packaged application
 
 - **WHEN** a supported packaged application starts on an end-user machine
 - **THEN** it can locate its configured production Python backend without a development environment
+
+#### Scenario: Diagnose a missing executable
+
+- **WHEN** a configured external executable cannot be resolved
+- **THEN** its diagnostic report identifies the executable as not found without starting it
 
 ### Requirement: Python distribution and developer command
 

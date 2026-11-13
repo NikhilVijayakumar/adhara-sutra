@@ -15,6 +15,7 @@ from .migration import (STRATEGIES, TASK_STATUSES, MigrationFinding, MigrationPl
 from .persistent_state import SQLiteState
 from .report import (REPORT_SCHEMA_VERSION, implementation_report, migration_report, render_json, render_markdown,
                      verification_report)
+from .runtime import RuntimeDiscoveryError, locate_backend, supported_platforms
 from .sqlite import SQLiteDatabase
 from .websocket import WebSocketClient
 from .state import ObservableState
@@ -33,4 +34,4 @@ __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext
            "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "WebSocketClient", "__version__",
            "analyze_migration", "apply_baseline", "configure_logging", "default_profile", "implementation_report",
            "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
-           "validate_documentation", "verification_report", "verify"]
+           "RuntimeDiscoveryError", "locate_backend", "supported_platforms", "validate_documentation", "verification_report", "verify"]

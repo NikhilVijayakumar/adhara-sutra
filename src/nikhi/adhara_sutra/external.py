@@ -214,6 +214,16 @@ class ExternalCommand:
     def health(self) -> bool:
         return bool(self.path) and os.path.isfile(self.path)
 
+    def diagnose(self) -> dict[str, Any]:
+        """Report executable resolution without starting the process (FR-PKG-007)."""
+        configured = bool(os.path.dirname(self.executable))
+        resolved = self.executable if configured else shutil.which(self.executable, path=self.search_path)
+        found = bool(resolved and os.path.isfile(resolved))
+        return {"executable": self.executable,
+                "resolved": os.path.abspath(resolved) if found else None,
+                "found": found,
+                "source": "configured path" if configured else "search path"}
+
     async def run(self, args: Iterable[str] = (), *, timeout: float | None = None,
                   input: bytes | str | None = None, cwd: str | None = None,
                   env: Mapping[str, str] | None = None,

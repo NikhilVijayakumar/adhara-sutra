@@ -269,11 +269,11 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-PKG-002 | Command-Line Entry Point | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-003 | Optional Dependencies | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-004 | Electron Bridge Distribution | Completed | [electron-bridge](../../openspec/changes/foundational-runtime/specs/electron-bridge/spec.md) |
-| FR-PKG-005 | Supported Platform Packaging | New | Not mapped |
-| FR-PKG-006 | Production Runtime Support | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-PKG-007 | External Executable Packaging | New | Not mapped |
+| FR-PKG-005 | Supported Platform Packaging | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-PKG-006 | Production Runtime Support | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-PKG-007 | External Executable Packaging | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-PKG-008 | Version Compatibility | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-PKG-009 | Upgrade and Migration Guidance | New | Not mapped |
+| FR-PKG-009 | Upgrade and Migration Guidance | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 
 ## [Project Scaffolding Requirements](functional-project-scaffolding-requirements.md)
 

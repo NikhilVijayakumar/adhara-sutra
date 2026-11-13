@@ -307,15 +307,19 @@ class Application:
         config = dict(self._base_config)
         path = self._config_file or os.environ.get("ADHARA_CONFIG_FILE")
         if path:
+            source = "config_file" if self._config_file else "ADHARA_CONFIG_FILE"
             try:
                 with open(path, encoding="utf-8") as handle:
                     loaded = json.load(handle)
             except OSError as exc:
-                raise BootstrapError("INVALID_CONFIGURATION", f"Configuration file cannot be read: {path}") from exc
+                raise BootstrapError("INVALID_CONFIGURATION",
+                                     f"Configuration file cannot be read: {path} (from {source}): {exc}") from exc
             except ValueError as exc:
-                raise BootstrapError("INVALID_CONFIGURATION", f"Configuration file is not valid JSON: {path}") from exc
+                raise BootstrapError("INVALID_CONFIGURATION",
+                                     f"Configuration file is not valid JSON: {path} (from {source}): {exc}") from exc
             if not isinstance(loaded, dict):
-                raise BootstrapError("INVALID_CONFIGURATION", f"Configuration file must contain an object: {path}")
+                raise BootstrapError("INVALID_CONFIGURATION",
+                                     f"Configuration file must contain an object: {path} (from {source})")
             config.update(loaded)
         prefix = "ADHARA_CONFIG_"
         for key, value in os.environ.items():

@@ -72,7 +72,9 @@ from `config_file=` or `ADHARA_CONFIG_FILE`, `ADHARA_CONFIG_<KEY>` environment
 variables (lowercased top-level keys, values parsed as JSON when possible), and
 `app.override_config({...})` before startup. Validation runs on the merged
 mapping. An unreadable, malformed, or non-object config file aborts startup with
-its path in the error. Credentials can come from `ADHARA_CONFIG_*` variables or a
+its path, its source (`config_file` or `ADHARA_CONFIG_FILE`), and the underlying
+reason in the error. A failing `validate_config` reports its message before any
+service starts. Credentials can come from `ADHARA_CONFIG_*` variables or a
 config file, so they need not be embedded in application source; connectors
 accept them as headers or environment values.
 Diagnostics are structured JSON written to stderr; `Application.run()` installs

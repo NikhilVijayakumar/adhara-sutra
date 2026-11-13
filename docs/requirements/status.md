@@ -100,7 +100,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-CFG-005 | Application-Specific Settings | Completed | Not mapped |
 | FR-CFG-006 | Secret Handling | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 | FR-CFG-007 | Runtime Overrides | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
-| FR-CFG-008 | Configuration Diagnostics | Partially implemented | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
+| FR-CFG-008 | Configuration Diagnostics | Completed | [configuration-lifecycle](../../openspec/changes/foundational-runtime/specs/configuration-lifecycle/spec.md) |
 
 ## [Connector Framework Requirements](functional-connector-framework-requirements.md)
 

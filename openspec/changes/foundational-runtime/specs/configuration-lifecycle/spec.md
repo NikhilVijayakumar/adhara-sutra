@@ -23,8 +23,8 @@ precedence before validation. (FR-CFG-002, FR-CFG-004, FR-CFG-006, FR-CFG-007)
 
 #### Scenario: A higher-priority source is invalid
 
-- **WHEN** the config file is missing, unreadable, or not a JSON object
-- **THEN** startup fails with an actionable error naming the file and no service starts
+- **WHEN** the config file is missing, unreadable, not a JSON object, or selected by `ADHARA_CONFIG_FILE`
+- **THEN** startup fails with an actionable error naming the file, the source that selected it, and the underlying reason, and no service starts
 
 ### Requirement: Clean up failed initialization
 

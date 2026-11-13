@@ -51,7 +51,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-DISC-008 | Current Implementation Report | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-DISC-009 | Source Evidence | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-DISC-010 | Uncertainty Reporting | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-DISC-011 | Incremental Analysis | New | Not mapped |
+| FR-DISC-011 | Incremental Analysis | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 
 ## [Architecture Verification Requirements](functional-architecture-verification-requirements.md)
 

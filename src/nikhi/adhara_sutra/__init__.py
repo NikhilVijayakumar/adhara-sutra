@@ -4,7 +4,7 @@ from ._version import __version__
 from .application import (PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS, Application, ApplicationContext,
                           ApplicationDefinitionError, BootstrapError, ConnectorError, ProtocolError)
 from .diagnostics import configure_logging, redact
-from .discovery import Evidence, Finding, ProjectInspector, ProjectProfile
+from .discovery import AnalysisCache, Evidence, Finding, ProjectInspector, ProjectProfile
 from .external import CommandResult, ExternalCommand, ExternalSession
 from .filesystem import AppDirectories, ArtifactStore, PathBoundary, PathViolation
 from .http import HttpClient, HttpResponse, HttpStreamResponse
@@ -22,6 +22,7 @@ from .verification import (ArchitectureProfile, Baseline, BaselineEntry, Check, 
                            VerificationResult, apply_baseline, default_profile, verify)
 
 __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext", "ApplicationDefinitionError",
+           "AnalysisCache",
            "ApplicationTestClient", "ArchitectureProfile", "Baseline", "BaselineEntry", "BootstrapError", "Check",
            "CLIContractTests", "CommandResult", "ExternalSession",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",

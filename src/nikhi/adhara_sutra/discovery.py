@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import re
 import subprocess
 import sys
 import tomllib
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -85,12 +86,21 @@ class ProjectProfile:
         }
 
 
+@dataclass
+class AnalysisCache:
+    """Per-file inspection results reused while a file's content is unchanged (FR-DISC-011)."""
+
+    files: dict[str, tuple[str, list[Finding], list[Finding],
+                          dict[str, list[Evidence]], dict[str, list[Evidence]]]] = field(default_factory=dict)
+
+
 class ProjectInspector:
     """Discover entry points, framework usage, integrations, and dependencies from source."""
 
-    def __init__(self, root: str | Path, *, exclude: Iterable[str] = ()) -> None:
+    def __init__(self, root: str | Path, *, exclude: Iterable[str] = (), cache: AnalysisCache | None = None) -> None:
         self.root = Path(root).resolve()
         self.exclude = _EXCLUDED | set(exclude)
+        self.cache = cache
 
     def inspect(self) -> ProjectProfile:
         if not self.root.is_dir():
@@ -104,7 +114,26 @@ class ProjectInspector:
         imports: dict[str, list[Evidence]] = {}
         module_imports: dict[str, list[Evidence]] = {}
         for path in python_files:
-            self._inspect_python(path, findings, errors, imports, module_imports)
+            relative = self._relative(path)
+            digest = hashlib.sha256(path.read_bytes()).hexdigest() if self.cache is not None else ""
+            cached = self.cache.files.get(relative) if self.cache is not None else None
+            if cached is not None and cached[0] == digest:
+                file_findings, file_errors, file_imports, file_module_imports = cached[1:]
+            else:
+                file_findings, file_errors = [], []
+                file_imports, file_module_imports = {}, {}
+                self._inspect_python(path, file_findings, file_errors, file_imports, file_module_imports)
+                if self.cache is not None:
+                    self.cache.files[relative] = (digest, file_findings, file_errors,
+                                                  file_imports, file_module_imports)
+            findings.extend(file_findings)
+            errors.extend(file_errors)
+            _merge_imports(imports, file_imports)
+            _merge_imports(module_imports, file_module_imports)
+        if self.cache is not None:
+            current = {self._relative(path) for path in python_files}
+            for stale in set(self.cache.files) - current:
+                del self.cache.files[stale]
         for path in files:
             if path.suffix in _JS_SUFFIXES:
                 self._inspect_javascript(path, findings)
@@ -282,6 +311,11 @@ def _add_import(imports: dict[str, list[Evidence]], name: str, evidence: Evidenc
     top = name.split(".")[0]
     if top:
         imports.setdefault(top, []).append(evidence)
+
+
+def _merge_imports(target: dict[str, list[Evidence]], source: dict[str, list[Evidence]]) -> None:
+    for name, evidence in source.items():
+        target.setdefault(name, []).extend(evidence)
 
 
 def _resolve_import(node: ast.ImportFrom, relative: str) -> str | None:

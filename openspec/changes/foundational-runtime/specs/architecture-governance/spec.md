@@ -153,6 +153,11 @@ The framework SHALL inspect an existing Python project and report its current
 implementation: entry points, registered actions, jobs, services, integrations,
 dependencies, state and job access, and Electron boundaries. (FR-DISC-001..008)
 
+#### Scenario: Incremental analysis after source changes
+
+- **WHEN** a project is inspected again with a reusable analysis cache
+- **THEN** files whose content is unchanged are not reanalyzed, while changed files are refreshed and reports reflect the current source (FR-DISC-011)
+
 #### Scenario: Inspecting a project
 
 - **WHEN** a developer runs `adhara inspect` on a project directory

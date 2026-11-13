@@ -72,7 +72,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-ARCH-013 | Baseline Support | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-ARCH-014 | Approved Exceptions | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-ARCH-015 | CI Enforcement | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-ARCH-016 | Optional LLM Review | New | Not mapped |
+| FR-ARCH-016 | Optional LLM Review | Out of Scope | Not mapped — advisory LLM review is the consuming application's responsibility; the library keeps deterministic results only. |
 
 ## [CLI Framework Requirements](functional-cli-framework-requirements.md)
 
@@ -190,7 +190,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-MIG-008 | Persistence Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-009 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-010 | Migration Status Tracking | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-MIG-011 | Safe Automated Transformations | New | Not mapped |
+| FR-MIG-011 | Safe Automated Transformations | Out of Scope | Not mapped — the library analyzes and reviews migrations; applying transformations is left to library users. |
 | FR-MIG-012 | Reviewable Changes | Out of Scope | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) — library evaluates/reviews migration; users apply changes themselves (no automated transformation/apply). |
 | FR-MIG-013 | Migration Verification | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | FR-MIG-014 | Rollback Planning | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
@@ -451,7 +451,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | --- | --- | --- | --- |
 | NFR-MIG-001 | Business Behavior Preservation | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-002 | Non-Destructive Analysis | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| NFR-MIG-003 | Reviewable Transformations | New | Not mapped |
+| NFR-MIG-003 | Reviewable Transformations | Out of Scope | Not mapped — no automated transformations are performed by the library. |
 | NFR-MIG-004 | Data Integrity | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-005 | Incremental Migration | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
 | NFR-MIG-006 | Rollback Readiness | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
@@ -481,7 +481,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-OQ-004 | State Persistence | Open question | Not mapped |
 | NFR-OQ-005 | Connector Reliability | Open question | Not mapped |
 | NFR-OQ-006 | Architecture Verification Scope | Open question | Not mapped |
-| NFR-OQ-007 | Migration Automation | Open question | Not mapped |
+| NFR-OQ-007 | Migration Automation | Out of Scope | Not mapped — automated source transformation is not part of this library. |
 | NFR-OQ-008 | Performance Baseline | Open question | Not mapped |
 | NFR-OQ-009 | Release Compatibility | Open question | Not mapped |
 | NFR-OQ-010 | Framework Packaging | Open question | Not mapped |
@@ -576,7 +576,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | NFR-SEC-009 | External Network Safety | New | Not mapped |
 | NFR-SEC-010 | Dependency Security | New | Not mapped |
 | NFR-SEC-011 | Safe Diagnostics | Completed | [security-and-diagnostics](../../openspec/changes/foundational-runtime/specs/security-and-diagnostics/spec.md) |
-| NFR-SEC-012 | Unsafe Automated Modification Prevention | New | Not mapped |
+| NFR-SEC-012 | Unsafe Automated Modification Prevention | Out of Scope | Not mapped — the library never modifies application source; scaffold/analysis operations are non-destructive. |
 
 ## [Testability Requirements](non-functional-testability-requirements.md)
 

@@ -7,7 +7,14 @@ import sqlite3
 from contextlib import contextmanager
 from typing import Any, Callable, Iterable, Iterator, Sequence
 
-from .application import ConnectorError
+from .application import ConnectorError as _ConnectorError
+
+
+class ConnectorError(_ConnectorError):
+    """SQLite connector failure that reports its connector identity."""
+
+    def __init__(self, message: str, **kwargs: Any) -> None:
+        super().__init__(message, connector="sqlite", **kwargs)
 
 
 class SQLiteDatabase:

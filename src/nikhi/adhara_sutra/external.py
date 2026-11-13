@@ -12,7 +12,14 @@ import time
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable, Mapping
 
-from .application import ConnectorError
+from .application import ConnectorError as _ConnectorError
+
+
+class ConnectorError(_ConnectorError):
+    """External-command connector failure that reports its connector identity."""
+
+    def __init__(self, message: str, **kwargs: Any) -> None:
+        super().__init__(message, connector="external", **kwargs)
 
 
 @dataclass(frozen=True)

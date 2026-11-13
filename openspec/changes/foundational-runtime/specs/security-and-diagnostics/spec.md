@@ -122,6 +122,22 @@ into supported framework error codes with a safe public message. (FR-ERR-006)
 - **WHEN** an unsupported code, empty message, duplicate type, or non-exception type is registered
 - **THEN** registration fails, and mappings cannot be added after startup
 
+### Requirement: Connector failure diagnostics
+
+Connector failures SHALL expose the connector identity and the stable connector
+failure category alongside the message, retryability, and any connector-supplied
+details. (NFR-OBS-003)
+
+#### Scenario: A managed connector fails
+
+- **WHEN** an HTTP, external-command, or SQLite connector raises a failure
+- **THEN** the protocol error has category `connector` and error details naming the connector (`http`, `external`, or `sqlite`)
+
+#### Scenario: An application connector fails
+
+- **WHEN** an application raises `ConnectorError(..., connector="billing")`
+- **THEN** the error details name that connector and keep the application-supplied detail fields
+
 ### Requirement: Structured diagnostics with correlation
 
 Logging SHALL be structured, correlated across requests and jobs, and kept

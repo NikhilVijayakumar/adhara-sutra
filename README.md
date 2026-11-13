@@ -133,9 +133,11 @@ Connectors are services: register them with `app.service`, resolve them with
 double in place of the live factory. A service with a callable `health()`
 (synchronous or asynchronous, truthy when available) is reported by
 `system.health` after startup as `{"status": "ok"|"degraded", "state": ...,
-"services": {...}}`. Raise `ConnectorError(message, retryable=..., details=...)`
-for an expected upstream failure: the response reports code `CONNECTOR_FAILURE`,
-category `connector`, the retryability flag, and optional details, and one-shot
+"services": {...}}`. Raise `ConnectorError(message, retryable=..., details=...,
+connector=...)` for an expected upstream failure: the response reports code
+`CONNECTOR_FAILURE`, category `connector`, the retryability flag, the connector
+identity (the built-in HTTP, external-command, and SQLite connectors report
+`http`, `external`, and `sqlite`), and optional details, and one-shot
 execution exits 7 while a persistent session continues. Raise it with
 `code="CONNECTOR_TIMEOUT"` for a timeout so the response reports
 `CONNECTOR_TIMEOUT` and one-shot execution exits 5; built-in command and HTTP

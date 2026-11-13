@@ -91,15 +91,19 @@ class ConnectorError(Exception):
     """A connector failure that maps to the connector error category.
 
     ``code`` selects the protocol error code; use ``CONNECTOR_TIMEOUT`` for
-    timeouts so one-shot execution reports the timeout exit code.
+    timeouts so one-shot execution reports the timeout exit code. ``connector``
+    identifies the failing connector and is exposed in the error details.
     """
 
     def __init__(self, message: str, *, retryable: bool = True, details: Any = None,
-                 code: str = "CONNECTOR_FAILURE"):
+                 code: str = "CONNECTOR_FAILURE", connector: str | None = None):
         super().__init__(message)
         self.retryable = retryable
-        self.details = details
         self.code = code
+        self.connector = connector
+        if connector is not None and (details is None or isinstance(details, dict)):
+            details = {"connector": connector, **(details or {})}
+        self.details = details
 
 
 def _error(code: str, message: str, *, retryable: bool | None = False,

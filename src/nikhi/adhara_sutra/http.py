@@ -10,9 +10,16 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any, Iterator, Mapping
 
-from .application import ConnectorError
+from .application import ConnectorError as _ConnectorError
 
 _INSTALL_HINT = "Install the HTTP extra: pip install nikhi-adhara-sutra[http]"
+
+
+class ConnectorError(_ConnectorError):
+    """HTTP connector failure that reports its connector identity."""
+
+    def __init__(self, message: str, **kwargs: Any) -> None:
+        super().__init__(message, connector="http", **kwargs)
 
 
 @dataclass(frozen=True)

@@ -245,9 +245,9 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-JOB-006 | Timeout Management | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-007 | Concurrency Management | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-008 | Job Results | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-JOB-009 | Job Persistence | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| FR-JOB-009 | Job Persistence | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 | FR-JOB-010 | Worker Ownership | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
-| FR-JOB-011 | Recovery Policy | New | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
+| FR-JOB-011 | Recovery Policy | Completed | [state-and-jobs](../../openspec/changes/foundational-runtime/specs/state-and-jobs/spec.md) |
 
 ## [Logging and Diagnostics Requirements](functional-logging-and-diagnostics-requirements.md)
 

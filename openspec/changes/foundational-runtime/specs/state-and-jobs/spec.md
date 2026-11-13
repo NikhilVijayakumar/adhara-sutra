@@ -80,11 +80,18 @@ independent applications SHALL NOT share state, configuration, jobs, or services
 - **WHEN** two applications with their own state, configuration, and jobs are started in one process
 - **THEN** each request observes only its own application's facilities and stopping one does not affect the other
 
-### Requirement: Job execution ownership
+### Requirement: Job execution ownership and persistence
 
 Every managed job SHALL have an identifiable execution record and an execution
-owner. Persisted metadata SHALL NOT imply that execution continues after the
-owner exits unless a persistent execution mechanism exists. (FR-JOB-002, FR-JOB-009, FR-JOB-010)
+owner. When configured with a durable job store, the framework SHALL persist job
+metadata across restarts. Persisted metadata SHALL NOT imply that execution
+continues after the owner exits unless a persistent execution mechanism exists.
+(FR-JOB-002, FR-JOB-009, FR-JOB-010)
+
+#### Scenario: Job metadata persists across restart
+
+- **WHEN** an application is configured with a durable job store and restarts
+- **THEN** terminal job records remain available with their recorded state and result/error
 
 #### Scenario: Job owner exits unexpectedly
 
@@ -119,13 +126,14 @@ concurrency rules. (FR-JOB-001, FR-JOB-003, FR-JOB-007, FR-JOB-008)
 ### Requirement: Interruption recovery
 
 After an owning process exits unexpectedly, recovery SHALL distinguish
-interruption from confirmed terminal outcomes before reporting job status.
+interruption from confirmed terminal outcomes before reporting job status and
+SHALL NOT re-execute interrupted jobs automatically.
 (FR-JOB-011)
 
 #### Scenario: Owner process crashes mid-execution
 
-- **WHEN** the process owning a running job exits unexpectedly
-- **THEN** the recovered job is marked interrupted rather than completed or failed without evidence
+- **WHEN** recovery runs for persisted jobs whose owner exited before a terminal state
+- **THEN** those jobs are marked `interrupted` with recovery details rather than completed, failed without evidence, or re-executed automatically
 
 ### Requirement: Bounded queues and backpressure
 

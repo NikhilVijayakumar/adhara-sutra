@@ -8,7 +8,7 @@ from .discovery import Evidence, Finding, ProjectInspector, ProjectProfile
 from .external import CommandResult, ExternalCommand
 from .filesystem import AppDirectories, ArtifactStore, PathBoundary, PathViolation
 from .http import HttpClient, HttpResponse, HttpStreamResponse
-from .jobs import JobQueueFull
+from .jobs import JobQueueFull, SQLiteJobStore
 from .migration import (STRATEGIES, TASK_STATUSES, MigrationFinding, MigrationPlan, MigrationTask,
                         analyze_migration, load_statuses)
 from .persistent_state import SQLiteState
@@ -24,9 +24,9 @@ __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext
            "ApplicationTestClient", "ArchitectureProfile", "Baseline", "BaselineEntry", "BootstrapError", "Check",
            "CLIContractTests", "CommandResult",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",
-           "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary",
+           "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary", "SQLiteJobStore",
            "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",
-           "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "SQLiteDatabase", "SQLiteState", "STRATEGIES",
+           "REPORT_SCHEMA_VERSION", "RULE_CATALOG", "SQLiteDatabase", "SQLiteJobStore", "SQLiteState", "STRATEGIES",
            "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "__version__",
            "analyze_migration", "apply_baseline", "configure_logging", "default_profile", "implementation_report",
            "load_statuses", "migration_report", "redact", "render_json", "render_markdown",

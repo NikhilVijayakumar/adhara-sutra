@@ -168,7 +168,8 @@ class Application:
                  validate_config: Callable[[dict[str, Any]], None] | None = None,
                  config_file: str | os.PathLike | None = None,
                  max_concurrent_jobs: int = 4, max_queued_jobs: int = 64,
-                 shutdown_timeout: float = 10.0):
+                 shutdown_timeout: float = 10.0,
+                 job_store: Any = None, recover_jobs: bool = False):
         if not isinstance(name, str) or not name.strip() or name != name.strip():
             raise ApplicationDefinitionError("INVALID_APPLICATION_NAME", "name", "Application name must be a non-empty string without surrounding whitespace")
         if not isinstance(version, str) or not version.strip() or version != version.strip():
@@ -187,6 +188,8 @@ class Application:
         self._state = ObservableState()
         self._max_concurrent_jobs, self._max_queued_jobs = max_concurrent_jobs, max_queued_jobs
         self._shutdown_timeout = shutdown_timeout
+        self._job_store = job_store
+        self._recover_jobs = recover_jobs
         self._job_handlers: dict[str, tuple[Callable[..., Any], float | None]] = {}
         self._jobs: JobManager | None = None
         self._base_config = dict(config or {})
@@ -365,9 +368,13 @@ class Application:
                 else:
                     value = self._stack.enter_context(resource)
                 self.context.services[name] = value
+            store = self._job_store
+            if isinstance(store, str):
+                store = self.context.services.get(store)
             self._jobs = JobManager(self._job_handlers, self._job_context,
                                     max_concurrent=self._max_concurrent_jobs,
-                                    max_queued=self._max_queued_jobs)
+                                    max_queued=self._max_queued_jobs,
+                                    store=store, recover_on_start=self._recover_jobs)
             self.context = ApplicationContext(self.context.services, self.context.config,
                                               self.context.metadata, state=self.context.state,
                                               jobs=JobService(self._jobs, None, {}),

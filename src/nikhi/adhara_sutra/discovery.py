@@ -27,6 +27,8 @@ _ELECTRON = {
     "electron-process": re.compile(r"child_process|spawn\(|execFile\(|fork\("),
     "electron-ipc": re.compile(r"ipcMain|ipcRenderer|contextBridge"),
 }
+# shortcut: other executors (concurrent.futures, loop.create_task) are not detected yet; extend here when needed.
+_UNMANAGED = {"asyncio": ("create_task", "ensure_future"), "threading": ("Thread", "Timer")}
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,7 @@ class ProjectProfile:
     dependencies: list[dict[str, Any]]
     findings: list[Finding]
     errors: list[Finding]
+    imports: dict[str, list[Evidence]]  # full dotted names, analysed but not serialized in reports
 
     def by_kind(self, kind: str) -> list[Finding]:
         return [finding for finding in self.findings if finding.kind == kind]
@@ -99,8 +102,9 @@ class ProjectInspector:
         findings: list[Finding] = []
         errors: list[Finding] = []
         imports: dict[str, list[Evidence]] = {}
+        module_imports: dict[str, list[Evidence]] = {}
         for path in python_files:
-            self._inspect_python(path, findings, errors, imports)
+            self._inspect_python(path, findings, errors, imports, module_imports)
         for path in files:
             if path.suffix in _JS_SUFFIXES:
                 self._inspect_javascript(path, findings)
@@ -116,6 +120,7 @@ class ProjectInspector:
             dependencies=_classify(imports, modules),
             findings=_dedupe(findings),
             errors=errors,
+            imports=module_imports,
         )
 
     def _excluded(self, path: Path) -> bool:
@@ -131,7 +136,8 @@ class ProjectInspector:
         return ".".join(parts) or "__root__"
 
     def _inspect_python(self, path: Path, findings: list[Finding], errors: list[Finding],
-                        imports: dict[str, list[Evidence]]) -> None:
+                        imports: dict[str, list[Evidence]],
+                        module_imports: dict[str, list[Evidence]]) -> None:
         relative = self._relative(path)
         try:
             source = path.read_text(encoding="utf-8", errors="replace")
@@ -155,8 +161,13 @@ class ProjectInspector:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     _add_import(imports, alias.name, evidence(node))
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                _add_import(imports, node.module, evidence(node))
+                    module_imports.setdefault(alias.name, []).append(evidence(node))
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    _add_import(imports, node.module, evidence(node))
+                resolved = _resolve_import(node, relative)
+                if resolved:
+                    module_imports.setdefault(resolved, []).append(evidence(node))
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 for decorator in node.decorator_list:
                     if (isinstance(decorator, ast.Call) and isinstance(decorator.func, ast.Attribute)
@@ -178,13 +189,20 @@ class ProjectInspector:
                 elif node.attr == "argv" and isinstance(node.value, ast.Name) and node.value.id == "sys":
                     findings.append(Finding("cli", "sys.argv", "inferred", "manual argument parsing",
                                             (evidence(node),)))
+                elif node.attr in ("stdin", "stdout") and isinstance(node.value, ast.Name) \
+                        and node.value.id == "sys":
+                    findings.append(Finding("protocol_bypass", f"sys.{node.attr}", "observed",
+                                            "direct standard stream access", (evidence(node),)))
             elif isinstance(node, ast.If) and _is_main_guard(node.test):
                 findings.append(Finding("entry_point", "__main__", "observed", "module script entry",
                                         (evidence(node),)))
 
     def _inspect_call(self, node: ast.Call, evidence: Any, findings: list[Finding]) -> None:
         function = node.func
-        if isinstance(function, ast.Name) and function.id == "open":
+        if isinstance(function, ast.Name) and function.id == "print":
+            findings.append(Finding("protocol_bypass", "print()", "inferred",
+                                    "writes directly to stdout", (evidence(node),)))
+        elif isinstance(function, ast.Name) and function.id == "open":
             findings.append(Finding("integration", "filesystem", "inferred", "open() call",
                                     (evidence(node),)))
         elif isinstance(function, ast.Name) and function.id == "Application":
@@ -203,6 +221,10 @@ class ProjectInspector:
                     and function.value.id in ("app", "application"):
                 findings.append(Finding("entry_point", f"{function.value.id}.run()", "observed",
                                         "application runtime entry", (evidence(node),)))
+            elif isinstance(function.value, ast.Name) \
+                    and function.attr in _UNMANAGED.get(function.value.id, ()):
+                findings.append(Finding("unmanaged_task", f"{function.value.id}.{function.attr}",
+                                        "inferred", "unmanaged background work", (evidence(node),)))
 
     def _inspect_javascript(self, path: Path, findings: list[Finding]) -> None:
         relative = self._relative(path)
@@ -260,6 +282,18 @@ def _add_import(imports: dict[str, list[Evidence]], name: str, evidence: Evidenc
     top = name.split(".")[0]
     if top:
         imports.setdefault(top, []).append(evidence)
+
+
+def _resolve_import(node: ast.ImportFrom, relative: str) -> str | None:
+    """Resolve an absolute or relative import to a dotted module prefix."""
+    if node.level == 0:
+        return node.module
+    parts = relative.split("/")[:-1]
+    keep = len(parts) - node.level + 1
+    base = parts[:keep] if keep > 0 else []
+    if node.module:
+        base.append(node.module)
+    return ".".join(base) or None
 
 
 def _is_main_guard(test: ast.AST) -> bool:

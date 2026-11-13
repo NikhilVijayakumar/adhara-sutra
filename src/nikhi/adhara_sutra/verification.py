@@ -36,12 +36,16 @@ RULE_CATALOG: tuple[Rule, ...] = (
          "Every Python module can be parsed, so the analysis is complete."),
     Rule("ARCH-DEP-001", "Forbidden dependencies", "error",
          "The project does not import dependencies forbidden by the architecture profile."),
+    Rule("ARCH-LAYER-001", "Module-layer boundaries", "error",
+         "Imports respect the module-layer boundaries configured by the architecture profile."),
     Rule("ARCH-FW-001", "Framework application", "error",
          "The project creates an Application with the framework."),
     Rule("ARCH-FW-002", "Registered actions", "warning",
          "The application registers at least one action."),
     Rule("ARCH-ENTRY-001", "Runtime entry point", "error",
          "The application has an entry point that starts the framework runtime."),
+    Rule("ARCH-PROTO-001", "CLI protocol integrity", "warning",
+         "The application does not bypass the CLI protocol with direct standard stream access."),
     Rule("ARCH-CONN-001", "Managed HTTP connector", "warning",
          "HTTP access goes through the managed connector instead of a direct client."),
     Rule("ARCH-CONN-002", "Managed external CLI connector", "warning",
@@ -52,6 +56,8 @@ RULE_CATALOG: tuple[Rule, ...] = (
          "Application state is accessed through the request-scoped context."),
     Rule("ARCH-JOB-001", "Managed job execution", "warning",
          "Long-running work uses the managed job manager."),
+    Rule("ARCH-JOB-002", "Managed background work", "warning",
+         "Background work uses the managed job manager instead of unmanaged tasks or threads."),
 )
 _CATALOG = {rule.id: rule for rule in RULE_CATALOG}
 
@@ -64,6 +70,8 @@ class ArchitectureProfile:
     required_files: tuple[str, ...] = ()
     required_directories: tuple[str, ...] = ()
     forbidden_imports: tuple[tuple[str, str], ...] = ()
+    # (source path prefix, imported module prefix, remediation)
+    layer_boundaries: tuple[tuple[str, str, str], ...] = ()
 
 
 def default_profile() -> ArchitectureProfile:
@@ -126,14 +134,17 @@ def verify(project: ProjectProfile, profile: ArchitectureProfile | None = None) 
         _modules(project),
         _parse_errors(project),
         _forbidden_imports(project, profile),
+        _layer_boundaries(project, profile),
         _framework(project),
         _actions(project),
         _entry_point(project),
+        _protocol(project),
         _connector(project, "ARCH-CONN-001", "HTTP", "use the managed HttpClient"),
         _connector(project, "ARCH-CONN-002", "external CLI", "use the managed ExternalCommand"),
         _connector(project, "ARCH-CONN-003", "SQLite", "use the managed SQLiteDatabase"),
         _state(project),
         _jobs(project),
+        _background_work(project),
     ]
     return VerificationResult(profile_version=profile.version, checks=checks)
 
@@ -198,6 +209,31 @@ def _forbidden_imports(project: ProjectProfile, profile: ArchitectureProfile) ->
     return _check("ARCH-DEP-001", PASS, detail="No forbidden dependencies found")
 
 
+def _layer_boundaries(project: ProjectProfile, profile: ArchitectureProfile) -> Check:
+    if not profile.layer_boundaries:
+        return _check("ARCH-LAYER-001", NOT_CHECKED, detail="No layer boundaries configured")
+    violations = []
+    for source, imported, remediation in profile.layer_boundaries:
+        for name, locations in project.imports.items():
+            if name != imported and not name.startswith(imported + "."):
+                continue
+            for location in locations:
+                if _under(location.path, source):
+                    violations.append((source, imported, remediation, location))
+    if violations:
+        detail = "; ".join(f"{source} must not import {imported}: {remediation}"
+                           for source, imported, remediation, _ in violations[:3])
+        return _check("ARCH-LAYER-001", FAIL, detail=detail,
+                      evidence=tuple(location for *_, location in violations[:5]),
+                      remediation="Route the dependency through the allowed layer or an adapter")
+    return _check("ARCH-LAYER-001", PASS,
+                  detail=f"Respected {len(profile.layer_boundaries)} configured layer boundary(ies)")
+
+
+def _under(path: str, prefix: str) -> bool:
+    return path == prefix or path.startswith(prefix.rstrip("/") + "/")
+
+
 def _framework(project: ProjectProfile) -> Check:
     applications = project.by_kind("application")
     if not applications:
@@ -233,6 +269,19 @@ def _entry_point(project: ProjectProfile) -> Check:
                   remediation="Add an entry point that starts the application runtime")
 
 
+def _protocol(project: ProjectProfile) -> Check:
+    if not project.by_kind("application"):
+        return _check("ARCH-PROTO-001", NOT_CHECKED, detail="No Application was detected")
+    bypasses = project.by_kind("protocol_bypass")
+    if bypasses:
+        evidence = tuple(item for finding in bypasses[:5] for item in finding.evidence)
+        return _check("ARCH-PROTO-001", NEEDS_REVIEW,
+                      detail=f"{len(bypasses)} direct standard stream use(s) detected",
+                      evidence=evidence,
+                      remediation="Emit events through context.emit and let the framework runtime own stdin/stdout")
+    return _check("ARCH-PROTO-001", PASS, detail="The application does not bypass the CLI protocol")
+
+
 def _connector(project: ProjectProfile, rule_id: str, integration: str, remediation: str) -> Check:
     if not project.by_kind("application"):
         return _check(rule_id, NOT_CHECKED, detail="No Application was detected")
@@ -262,6 +311,19 @@ def _jobs(project: ProjectProfile) -> Check:
     evidence = tuple(item for finding in [*jobs[:3], *access[:3]] for item in finding.evidence)
     return _check("ARCH-JOB-001", PASS, detail="Long-running work uses the managed job manager",
                   evidence=evidence)
+
+
+def _background_work(project: ProjectProfile) -> Check:
+    if not project.by_kind("application"):
+        return _check("ARCH-JOB-002", NOT_CHECKED, detail="No Application was detected")
+    tasks = project.by_kind("unmanaged_task")
+    if tasks:
+        evidence = tuple(item for finding in tasks[:5] for item in finding.evidence)
+        return _check("ARCH-JOB-002", NEEDS_REVIEW,
+                      detail=f"{len(tasks)} unmanaged background task(s) detected",
+                      evidence=evidence,
+                      remediation="Register the work with @app.job so it is managed, cancellable, and observable")
+    return _check("ARCH-JOB-002", PASS, detail="No unmanaged background work detected")
 
 
 def _is_framework_path(finding: Finding) -> bool:

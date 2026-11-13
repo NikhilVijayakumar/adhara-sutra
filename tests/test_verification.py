@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from nikhi.adhara_sutra import ArchitectureProfile, ProjectInspector, verify
-from nikhi.adhara_sutra.verification import FAIL, NOT_CHECKED, PASS
+from nikhi.adhara_sutra.verification import FAIL, NEEDS_REVIEW, NOT_CHECKED, PASS
 
 APP = '''\
 from nikhi.adhara_sutra import Application
@@ -50,6 +50,39 @@ class VerificationTests(unittest.TestCase):
         self.assertEqual(statuses["ARCH-ENTRY-001"], PASS)
         self.assertEqual(statuses["ARCH-STRUCT-002"], NOT_CHECKED)
         self.assertEqual(statuses["ARCH-DEP-001"], NOT_CHECKED)
+        self.assertEqual(statuses["ARCH-LAYER-001"], NOT_CHECKED)
+        self.assertEqual(statuses["ARCH-PROTO-001"], PASS)
+        self.assertEqual(statuses["ARCH-JOB-002"], PASS)
+
+    def test_layer_boundaries_are_enforced(self):
+        files = {"app/main.py": APP,
+                 "app/ui/screen.py": "from app.data import store\n",
+                 "app/data/store.py": ""}
+        forbidden = ArchitectureProfile(
+            layer_boundaries=(("app/ui", "app.data", "use the store adapter"),))
+        self.assertEqual(self.statuses(verify(self.make_project(**files), forbidden))["ARCH-LAYER-001"],
+                         FAIL)
+
+        allowed = ArchitectureProfile(
+            layer_boundaries=(("app/data", "app.ui", "keep data independent"),))
+        self.assertEqual(self.statuses(verify(self.make_project(**files), allowed))["ARCH-LAYER-001"],
+                         PASS)
+
+    def test_protocol_bypass_needs_review(self):
+        statuses = self.statuses(verify(self.make_project(**{"app.py": APP + "\nprint('debug')\n"})))
+        self.assertEqual(statuses["ARCH-PROTO-001"], NEEDS_REVIEW)
+
+        stream = self.make_project(**{"app.py": APP, "helper.py": "import sys\nsys.stdout.write('x')\n"})
+        self.assertEqual(self.statuses(verify(stream))["ARCH-PROTO-001"], NEEDS_REVIEW)
+
+    def test_unmanaged_background_work_needs_review(self):
+        source = APP + "\nimport asyncio\n\nasync def work():\n    pass\n\nasyncio.create_task(work())\n"
+        self.assertEqual(self.statuses(verify(self.make_project(**{"app.py": source})))["ARCH-JOB-002"],
+                         NEEDS_REVIEW)
+
+        managed = APP + "\n\n@app.job('work')\nasync def work(payload, context):\n    pass\n"
+        self.assertEqual(self.statuses(verify(self.make_project(**{"app.py": managed})))["ARCH-JOB-002"],
+                         PASS)
 
     def test_configured_requirements_fail_and_pass(self):
         profile = ArchitectureProfile(required_files=("README.md",),

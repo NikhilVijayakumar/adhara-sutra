@@ -22,11 +22,14 @@ _PHASE_BY_RULE = {
     "ARCH-FW-001": "runtime",
     "ARCH-FW-002": "runtime",
     "ARCH-ENTRY-001": "entry-points",
+    "ARCH-LAYER-001": "dependencies",
+    "ARCH-PROTO-001": "contracts",
     "ARCH-CONN-001": "integrations",
     "ARCH-CONN-002": "integrations",
     "ARCH-CONN-003": "integrations",
     "ARCH-STATE-001": "state-jobs",
     "ARCH-JOB-001": "state-jobs",
+    "ARCH-JOB-002": "state-jobs",
 }
 _VERIFICATION_BY_RULE = {
     "ARCH-STRUCT-001": "`adhara verify` reports ARCH-STRUCT-001 as pass.",
@@ -37,11 +40,14 @@ _VERIFICATION_BY_RULE = {
     "ARCH-FW-001": "The migrated runtime starts and `adhara verify` reports ARCH-FW-001 as pass.",
     "ARCH-FW-002": "The existing behavior is reachable through actions and `adhara verify` reports ARCH-FW-002 as pass.",
     "ARCH-ENTRY-001": "The entry point runs through the framework and `adhara verify` reports ARCH-ENTRY-001 as pass.",
+    "ARCH-LAYER-001": "Imports respect the configured layers and `adhara verify` reports ARCH-LAYER-001 as pass.",
+    "ARCH-PROTO-001": "The application communicates only through the CLI protocol and `adhara verify` reports ARCH-PROTO-001 as pass.",
     "ARCH-CONN-001": "HTTP behavior matches the existing integration and `adhara verify` reports ARCH-CONN-001 as pass.",
     "ARCH-CONN-002": "External command behavior matches the existing integration and `adhara verify` reports ARCH-CONN-002 as pass.",
     "ARCH-CONN-003": "Database behavior matches the existing integration and `adhara verify` reports ARCH-CONN-003 as pass.",
     "ARCH-STATE-001": "State behavior is preserved and `adhara verify` reports ARCH-STATE-001 as pass.",
     "ARCH-JOB-001": "Job behavior is preserved and `adhara verify` reports ARCH-JOB-001 as pass.",
+    "ARCH-JOB-002": "Background work is managed and `adhara verify` reports ARCH-JOB-002 as pass.",
 }
 _STRATEGY_TASKS = {
     "adapter-first": {

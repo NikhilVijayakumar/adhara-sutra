@@ -33,7 +33,12 @@ boundaries. Every finding cites file and line evidence and is marked observed
 or inferred; reports carry a schema version and the Git revision when available.
 `adhara verify [path] [--json] [--output FILE] [--strict]` evaluates the
 versioned architecture profile against that discovery and reports each check as
-pass, fail, needs review, or not checked, with evidence and remediation. It
+pass, fail, needs review, or not checked, with evidence and remediation. A
+profile can require files and directories, forbid imports, and declare layer
+boundaries (a source path prefix, an imported module prefix, and remediation);
+catalogued rules also flag direct HTTP, external-command, and SQLite
+integrations, standard-stream protocol bypasses, and unmanaged background
+tasks. It
 exits 0 without failures, 1 with failures (or with needs-review checks under
 `--strict`), and 2 for an invalid invocation, so it can run in CI.
 `adhara migrate [path] [--strategy adapter-first|incremental|rebuild] [--status FILE]

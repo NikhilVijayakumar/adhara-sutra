@@ -53,6 +53,47 @@ remediation where possible. (FR-ARCH-012, NFR-ARCH-002)
 - **WHEN** a project uses a direct HTTP client while using the framework
 - **THEN** the check needs review and cites the source location with the managed connector as remediation
 
+### Requirement: Dependency and layer boundaries
+
+The verifier SHALL detect imports forbidden by the profile and imports that
+cross configured module-layer boundaries, citing the importing source.
+(FR-ARCH-004)
+
+#### Scenario: A layer imports a forbidden layer
+
+- **WHEN** a module under a configured source prefix imports a module matched by that boundary
+- **THEN** ARCH-LAYER-001 fails with the source location and the configured remediation
+
+#### Scenario: No layer boundary is configured
+
+- **WHEN** the profile declares no layer boundaries
+- **THEN** the check is reported as not checked rather than passing silently
+
+### Requirement: CLI protocol compatibility
+
+The verifier SHALL evaluate whether the application uses the framework runtime
+without bypassing the CLI protocol through direct standard streams. (FR-ARCH-006)
+
+#### Scenario: A module writes to stdout directly
+
+- **WHEN** a discovered module uses `print`, `sys.stdout`, or `sys.stdin`
+- **THEN** ARCH-PROTO-001 needs review, cites the location, and recommends `context.emit` and the framework runtime
+
+### Requirement: Managed state and background work
+
+The verifier SHALL evaluate applicable state and job-management requirements
+using static analysis and executable tests. (FR-ARCH-008)
+
+#### Scenario: Background work bypasses the job manager
+
+- **WHEN** a discovered module starts work with `asyncio.create_task`, `asyncio.ensure_future`, or an unmanaged thread
+- **THEN** ARCH-JOB-002 needs review, cites the location, and recommends registering the work with `@app.job`
+
+#### Scenario: State and jobs use the runtime
+
+- **WHEN** the application accesses state through the request context and long-running work through registered jobs
+- **THEN** the corresponding checks pass
+
 ### Requirement: Reviewable migration
 
 Migration planning SHALL produce reviewable changes and SHALL verify affected

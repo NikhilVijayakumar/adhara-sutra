@@ -90,6 +90,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-EXT-010: added managed interactive `ExternalSession` via `ExternalCommand.open_session(...)` with stdin writes, incremental stdout/stderr reception, wait/close, and process cleanup; updated spec/docs/status with tests.
 - [x] Complete and practically verify FR-DISC-011: added `AnalysisCache` and `ProjectInspector(..., cache=...)` so unchanged files are not re-parsed while changed files are refreshed and stale entries pruned; added tests, spec scenario, and status mapping.
 - [x] Complete and practically verify FR-TEST-008: migration plans now include `regression_tests` identifying behavioral tests that must keep passing (actions, jobs, CLI, Electron IPC, HTTP/external/SQLite integrations, state), rendered in JSON/Markdown reports; tests/spec/status updated.
+- [x] Complete and practically verify FR-DOC-001/006/007 and NFR-DOC-001/002/007/008: added `docs/migration.md` (workflows, limitations, compatibility, recovery), `docs/README.md` (authoritative locations/owners), and `validate_documentation` for required sections and resolvable local links; README/index links and tests added.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

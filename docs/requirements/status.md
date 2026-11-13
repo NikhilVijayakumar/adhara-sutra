@@ -141,13 +141,13 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| FR-DOC-001 | Framework Documentation | New | Not mapped |
+| FR-DOC-001 | Framework Documentation | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | FR-DOC-002 | Application Documentation Templates | Completed | [project-scaffolding](../../openspec/changes/foundational-runtime/specs/project-scaffolding/spec.md) |
 | FR-DOC-003 | Protocol Reference | Completed | [protocol-reference](../protocol-reference.md) |
 | FR-DOC-004 | Connector Reference | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | FR-DOC-005 | Architecture Rule Reference | Completed | [architecture-governance](../../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md) |
-| FR-DOC-006 | Migration Documentation | New | Not mapped |
-| FR-DOC-007 | Documentation Validation | New | Not mapped |
+| FR-DOC-006 | Migration Documentation | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| FR-DOC-007 | Documentation Validation | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 
 ## [Electron Communication Requirements](functional-electron-communication-requirements.md)
 
@@ -409,14 +409,14 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 
 | ID | Functionality | Implementation | Draft OpenSpec |
 | --- | --- | --- | --- |
-| NFR-DOC-001 | Documentation Completeness | New | Not mapped |
-| NFR-DOC-002 | Documentation Consistency | New | Not mapped |
+| NFR-DOC-001 | Documentation Completeness | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DOC-002 | Documentation Consistency | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | NFR-DOC-003 | Documentation Traceability | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | NFR-DOC-004 | Machine-Readable Reports | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | NFR-DOC-005 | Source References | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 | NFR-DOC-006 | Documentation Freshness | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
-| NFR-DOC-007 | Documentation Validation | New | Not mapped |
-| NFR-DOC-008 | Documentation Ownership | New | Not mapped |
+| NFR-DOC-007 | Documentation Validation | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
+| NFR-DOC-008 | Documentation Ownership | Completed | [developer-experience](../../openspec/changes/foundational-runtime/specs/developer-experience/spec.md) |
 
 ## [Extensibility Requirements](non-functional-extensibility-requirements.md)
 

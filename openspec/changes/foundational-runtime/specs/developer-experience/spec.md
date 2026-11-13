@@ -33,6 +33,23 @@ internal links. (FR-DEV-004)
 - **WHEN** a developer opens the README
 - **THEN** it links to the requirements, architecture rules, connector reference, protocol reference, OpenSpec changes, and knowledge index, and those targets exist
 
+### Requirement: Migration documentation and validation
+
+The framework SHALL document supported migration workflows, limitations,
+compatibility requirements, and recovery procedures, and SHALL provide
+machine-verifiable documentation validation. (FR-DOC-001, FR-DOC-006, FR-DOC-007,
+NFR-DOC-001, NFR-DOC-002, NFR-DOC-007, NFR-DOC-008)
+
+#### Scenario: Reviewing migration guidance
+
+- **WHEN** a developer consults the migration guide
+- **THEN** it covers workflows, limitations, compatibility requirements, and recovery procedures
+
+#### Scenario: Validating documentation
+
+- **WHEN** documentation validation runs over the framework docs
+- **THEN** missing required sections and broken local links are reported
+
 ### Requirement: Connector reference
 
 Every public connector category SHALL have documented configuration, lifecycle,

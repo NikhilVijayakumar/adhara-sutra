@@ -5,6 +5,7 @@ from .application import (PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS, Applica
                           ApplicationDefinitionError, BootstrapError, ConnectorError, ProtocolError)
 from .diagnostics import configure_logging, redact
 from .discovery import AnalysisCache, Evidence, Finding, ProjectInspector, ProjectProfile
+from .docs import validate_documentation
 from .external import CommandResult, ExternalCommand, ExternalSession
 from .filesystem import AppDirectories, ArtifactStore, PathBoundary, PathViolation
 from .http import HttpClient, HttpResponse, HttpStreamResponse
@@ -32,4 +33,4 @@ __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext
            "SUPPORTED_PROTOCOL_VERSIONS", "TASK_STATUSES", "VerificationResult", "WebSocketClient", "__version__",
            "analyze_migration", "apply_baseline", "configure_logging", "default_profile", "implementation_report",
            "load_statuses", "migration_report", "redact", "render_json", "render_markdown",
-           "verification_report", "verify"]
+           "validate_documentation", "verification_report", "verify"]

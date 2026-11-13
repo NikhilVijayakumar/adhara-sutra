@@ -43,6 +43,16 @@ and error behavior. (FR-DOC-004)
 - **WHEN** a developer consults the connector reference
 - **THEN** it documents configuration, lifecycle, and error behavior for each public connector category (HTTP, external CLI, SQLite, filesystem and artifacts, and persistent state)
 
+### Requirement: Traceable rules and protocol contracts
+
+Important architecture rules and public protocol contracts SHALL be traceable to
+documentation and verification evidence. (NFR-DOC-003)
+
+#### Scenario: Tracing a rule or protocol contract
+
+- **WHEN** a developer follows the architecture rule or protocol reference
+- **THEN** it leads to the governing specification or requirements and to verification evidence (the rule catalogue tests or protocol behavior)
+
 ### Requirement: Working examples
 
 The framework SHALL ship representative, runnable examples of common integration

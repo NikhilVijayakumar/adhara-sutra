@@ -83,6 +83,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-DOC-004: added `docs/connectors.md` documenting configuration, lifecycle, and error behavior for the public HTTP, external CLI, SQLite, filesystem/artifacts, and persistent state connectors; linked it from the README and verified coverage and resolvable links in tests. Marked FR-DOC-004 complete.
 - [x] Complete and practically verify FR-LOG-007: `adhara doctor` exports structured JSON and text diagnostic reports to files (or stdout) with framework, platform, and check information; verified via the CLI and added the spec scenario. Marked FR-LOG-007 complete.
 - [x] Complete and practically verify FR-DOC-002: verified `adhara new` scaffolding generates a project README with profile, connector selection, and run/test instructions alongside tests and build metadata; added scaffolding test and marked the requirement complete.
+- [x] Complete and practically verify NFR-DOC-003: the architecture rule reference links to governing specs/requirements and is enforced against the rule catalogue by tests; the protocol reference and its contracts remain linked from the README; added traceability tests and spec scenario. Marked NFR-DOC-003 complete.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design

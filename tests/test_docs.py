@@ -39,6 +39,17 @@ class RuleReferenceTests(unittest.TestCase):
         for heading in ("configuration", "lifecycle", "error behavior"):
             self.assertGreaterEqual(text.count(heading), 4)
 
+    def test_rules_and_protocol_contracts_are_traceable(self):
+        rules_doc = ROOT / "docs" / "architecture-rules.md"
+        text = rules_doc.read_text(encoding="utf-8")
+        for target in ("../openspec/changes/foundational-runtime/specs/architecture-governance/spec.md",
+                       "requirements/functional-architecture-verification-requirements.md"):
+            self.assertIn(target, text)
+            self.assertTrue((rules_doc.parent / target.split("#")[0]).resolve().exists(), target)
+        protocol = (ROOT / "docs" / "protocol-reference.md").read_text(encoding="utf-8")
+        self.assertIn("PROTOCOL_VERSION", protocol)
+        self.assertIn("system.hello", protocol)
+
     def test_readme_internal_links_resolve(self):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         for target in re.findall(r"\]\(([^)]+)\)", text):

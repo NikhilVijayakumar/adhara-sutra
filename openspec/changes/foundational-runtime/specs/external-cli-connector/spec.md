@@ -101,3 +101,14 @@ external command results. (FR-EXT-008)
 
 - **WHEN** an application applies a registered parser to a captured result
 - **THEN** the parser receives the result including output and exit status, and its return value is available to the application
+
+### Requirement: Interactive external sessions
+
+The connector SHALL support managed interactive external CLI sessions when
+explicitly opened, with streamed output, stdin writes, and managed cleanup.
+(FR-EXT-010)
+
+#### Scenario: Streaming interaction with a long-running process
+
+- **WHEN** an application opens an interactive session
+- **THEN** it can write to stdin, receive stdout/stderr output incrementally, and close the session with process cleanup

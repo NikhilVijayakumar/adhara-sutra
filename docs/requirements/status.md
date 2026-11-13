@@ -209,7 +209,7 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-EXT-007 | Process Cleanup | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 | FR-EXT-008 | Output Parsing Extensions | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 | FR-EXT-009 | External CLI Compatibility | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
-| FR-EXT-010 | Interactive External Processes | New | Not mapped |
+| FR-EXT-010 | Interactive External Processes | Completed | [external-cli-connector](../../openspec/changes/foundational-runtime/specs/external-cli-connector/spec.md) |
 
 ## [Filesystem Requirements](functional-filesystem-requirements.md)
 

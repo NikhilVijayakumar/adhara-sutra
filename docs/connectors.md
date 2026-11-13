@@ -36,6 +36,11 @@ available.
   `run(args, *, timeout=..., input=..., cwd=..., env=..., on_output=...)` passes a
   structured argument array without a shell and returns a `CommandResult`
   (exit code, captured stdout/stderr, duration) while streaming output.
+- **Interactive sessions:** `open_session(args, *, cwd=..., env=...)` starts a
+  managed long-running process with stdin/stdout/stderr pipes; `await
+  session.write(...)`, `await session.receive(timeout=...)`, `await
+  session.close_stdin()`, `await session.wait(...)`, and `await session.close()`
+  support explicit streaming interaction and cleanup.
 - **Error behavior:** invalid arguments, a missing executable, or use before
   start raise non-retryable connector errors (`connector: external`). Timeouts
   and cancellation terminate the process tree and raise retryable

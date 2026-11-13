@@ -5,7 +5,7 @@ from .application import (PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS, Applica
                           ApplicationDefinitionError, BootstrapError, ConnectorError, ProtocolError)
 from .diagnostics import configure_logging, redact
 from .discovery import Evidence, Finding, ProjectInspector, ProjectProfile
-from .external import CommandResult, ExternalCommand
+from .external import CommandResult, ExternalCommand, ExternalSession
 from .filesystem import AppDirectories, ArtifactStore, PathBoundary, PathViolation
 from .http import HttpClient, HttpResponse, HttpStreamResponse
 from .jobs import JobQueueFull, SQLiteJobStore
@@ -23,7 +23,7 @@ from .verification import (ArchitectureProfile, Baseline, BaselineEntry, Check, 
 
 __all__ = ["AppDirectories", "ArtifactStore", "Application", "ApplicationContext", "ApplicationDefinitionError",
            "ApplicationTestClient", "ArchitectureProfile", "Baseline", "BaselineEntry", "BootstrapError", "Check",
-           "CLIContractTests", "CommandResult",
+           "CLIContractTests", "CommandResult", "ExternalSession",
            "ConnectorError", "Evidence", "ExternalCommand", "Finding", "HttpClient", "HttpResponse", "HttpStreamResponse",
            "JobQueueFull", "MigrationFinding", "MigrationPlan", "MigrationTask", "ObservableState", "PathBoundary", "SQLiteJobStore",
            "PathViolation", "PROTOCOL_VERSION", "ProjectInspector", "ProjectProfile", "ProtocolError",

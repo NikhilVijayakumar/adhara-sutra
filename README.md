@@ -23,7 +23,10 @@ and `await client.call(action, payload)` (or `.dispatch` for the full envelope)
 without the CLI transport. Subclass the shipped `CLIContractTests` case and
 implement `create_application()` to run the framework's executable protocol
 contract tests (handshake, help, error envelopes, health, cancellation) against
-your application. `adhara inspect [path] [--json] [--output FILE]`
+your application. Services and connectors can be replaced with test doubles,
+`ExternalCommand` runs controlled executable fixtures with their own environment
+and working directory, and `verify(ProjectInspector(path).inspect())` evaluates
+the architecture rules inside a test. `adhara inspect [path] [--json] [--output FILE]`
 statically analyzes a project and reports its entry points, actions, jobs,
 services, integrations, dependencies, state and job access, and Electron
 boundaries. Every finding cites file and line evidence and is marked observed

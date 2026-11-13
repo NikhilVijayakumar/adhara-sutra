@@ -2,8 +2,10 @@
 
 ### Requirement: Reusable testing facilities
 
-The framework SHALL support CLI contract tests and connector test doubles.
-(FR-TEST-002, FR-TEST-004)
+The framework SHALL support CLI contract tests, connector test doubles,
+controlled executable fixtures, state and job behavior checks, and executable
+architecture checks. (FR-TEST-002, FR-TEST-004, FR-TEST-005, FR-TEST-006,
+FR-TEST-007)
 
 #### Scenario: Run the shipped protocol contract tests
 
@@ -14,6 +16,21 @@ The framework SHALL support CLI contract tests and connector test doubles.
 
 - **WHEN** a test substitutes a connector test double
 - **THEN** it can test application interaction without requiring that live service
+
+#### Scenario: Test external process behavior
+
+- **WHEN** a test runs `ExternalCommand` against a controlled executable fixture with its own environment and working directory
+- **THEN** it can assert the captured exit code and output without depending on the real external program
+
+#### Scenario: Validate state and job behavior
+
+- **WHEN** a test drives the managed job queue through a failing or cancelled operation
+- **THEN** the terminal state, error detail, and lifecycle transitions are observable and assertable
+
+#### Scenario: Run architecture checks in a test
+
+- **WHEN** a test evaluates an architecture profile against an inspected fixture project
+- **THEN** each catalogued rule reports a deterministic status with evidence, so conformance is checked without the CLI
 
 ### Requirement: Packaged runtime support
 

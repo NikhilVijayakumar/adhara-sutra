@@ -336,10 +336,10 @@ OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundat
 | FR-TEST-001 | Framework Testing Utilities | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-002 | CLI Contract Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-003 | Action Handler Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-TEST-004 | Connector Test Doubles | New | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
-| FR-TEST-005 | Process Execution Tests | New | Not mapped |
-| FR-TEST-006 | State and Job Tests | New | Not mapped |
-| FR-TEST-007 | Architecture Tests | New | Not mapped |
+| FR-TEST-004 | Connector Test Doubles | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-TEST-005 | Process Execution Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-TEST-006 | State and Job Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
+| FR-TEST-007 | Architecture Tests | Completed | [testing-and-packaging](../../openspec/changes/foundational-runtime/specs/testing-and-packaging/spec.md) |
 | FR-TEST-008 | Migration Regression Tests | New | Not mapped |
 | FR-TEST-009 | Electron Integration Tests | New | Not mapped |
 

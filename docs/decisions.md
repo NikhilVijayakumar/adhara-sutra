@@ -4,13 +4,20 @@ Resolutions for the open questions in the requirements drafts. Each decision is
 implemented by the referenced specification and code; a resolved question is a
 decision, not an implementation task.
 
+The independent [architecture review](architecture-review-2026-11-13.md) proposes
+refinements tracked in [OpenSpec](../openspec/changes/architecture-integrity-review/tasks.md).
+Numbered [proposed ADRs](../knowledge/decisions/index.md) describe the rationale
+for those corrections and remain proposed. The [task evidence](../openspec/changes/architecture-integrity-review/evidence.md)
+records implemented changes and remaining failures; neither historical decisions
+nor proposed ADRs alone establish full release qualification.
+
 ## NFR-OQ-001 — Python Runtime Packaging
 
 **Decision:** support both a bundled Python interpreter and a frozen backend.
-Packaged applications default to a bundled interpreter discovered by
-`nikhi.adhara_sutra.runtime.locate_backend`; a frozen executable is used by
-fixing it as the bridge command directly. Discovery order and the bundled layout
-are documented in [packaging.md](packaging.md).
+The Python helper `nikhi.adhara_sutra.runtime.locate_backend` can locate bundled
+interpreters once Python is already running; a frozen executable can be supplied
+as the bridge command directly. Node-owned pre-start discovery is not implemented
+and is tracked as T18. Discovery and layouts are documented in [packaging.md](packaging.md).
 
 ## NFR-OQ-002 — Persistent Process Model
 
@@ -18,16 +25,20 @@ are documented in [packaging.md](packaging.md).
 Electron integration. The bridge spawns one backend, negotiates `system.hello`
 once, and serves requests sequentially over the persistent CLI protocol.
 One-shot execution remains available for scripts and CI through `adhara run`.
-Sequential processing is an explicit trade-off: concurrent requests are not
-promised by this runtime.
+Sequential processing keeps action reentrancy and shared-state coordination out
+of the transport contract; concurrent request dispatch remains deferred. Short
+actions may submit managed async background jobs and return an application-owned ID.
 
 ## NFR-OQ-003 — Job Execution Isolation
 
 **Decision:** jobs execute in the runtime process, owned by `JobManager`, with
 bounded concurrency and queueing. Durable execution is never claimed: an
 optional persistent store keeps job metadata, and recovery marks non-terminal
-jobs `interrupted` instead of re-running them. Executing jobs under a separate
-durable worker is out of scope for this library.
+jobs `interrupted` instead of re-running them. An invalid explicitly configured
+store fails startup. Shutdown closes admission and reserves at least half its
+cooperative budget for service cleanup. Terminal save failures leave the local
+outcome inspectable with failed persistence metadata, but do not guarantee recovery
+of that outcome. Executing jobs under a separate durable worker is out of scope.
 
 ## NFR-OQ-004 — State Persistence
 
@@ -47,8 +58,8 @@ aggregates availability without mutating dependencies.
 
 **Decision:** profile version 1 enforces structural, dependency, layer,
 framework, and entry-point checks as errors; integration, state, and job
-adoption checks are warnings. `adhara verify` reports both, and `--strict`
-promotes warnings to a failing result. Profiles are versioned and replaceable,
+adoption checks are warnings. `adhara verify` reports both; `--strict` makes a
+`needs_review` status fail regardless of severity, rather than failing every warning. Profiles are versioned and replaceable,
 so an application can tighten or relax the catalog deliberately.
 
 ## NFR-OQ-009 — Release Compatibility

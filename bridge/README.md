@@ -32,6 +32,8 @@ const { job_id } = await bridge.request("report.submit", { month: "2026-11" });
 const events = []; // progress events for this job carry the same job_id
 bridge.on("event", (event) => event.job_id === job_id && events.push(event));
 
+const { status } = await bridge.jobStatus(job_id); // null if the ID is unknown
+
 const outcome = await bridge.cancel(job_id);
 // { job_id, cancelled: true|false, status: { state, ... } | null }
 
@@ -42,15 +44,16 @@ await bridge.close();
 for protocol or action failures. The error carries the stable `code`,
 `category`, `retryable`, optional `details`, and the full `response` envelope.
 Use `health()` for readiness and connector health and `help()` for registered
-actions and jobs.
+actions and jobs. `jobStatus(jobId)` reads the existing job snapshot; the
+application owns job submission, listing, and any access authorization.
 
 ## Events and ordering
 
-The runtime writes events before the terminal response for the request that
-emitted them, and the bridge delivers stdout messages in that order. Distinguish
-events from responses with the `kind` field. Events may carry `request_id`,
-`job_id`, or both. Malformed lines and uncorrelated responses are reported on
-the `protocolError` event instead of being treated as data.
+Events emitted by an action during its request precede its response. A submitted
+job can emit events after the submission response; correlate its progress by
+`job_id`, rather than assuming an order relative to that response. The bridge
+delivers stdout messages in order. Distinguish events from responses with `kind`.
+Malformed lines and uncorrelated responses are reported on `protocolError`.
 
 ## Cancellation and timeouts
 
@@ -59,8 +62,15 @@ persistent session executes requests sequentially, so an action that is still
 running cannot be cancelled until it returns. The result reports whether
 cancellation was accepted (`cancelled`) and the job's current status; a job whose
 operation cannot be interrupted may still finish normally. Pass
-`defaultTimeoutMs` or `{ timeoutMs }` to reject a pending request; a timeout does
-not stop the Python work.
+`defaultTimeoutMs` or `{ timeoutMs }` to reject a pending request. `BRIDGE_TIMEOUT`
+includes `request_id`, `action`, `outcome: "unknown"`, and
+`cancellation_requested: false` in its details. The timeout does not request
+cancellation, stop the Python work, or retry it. A later response for the timed-out
+request is currently emitted as an uncorrelated `protocolError`.
+
+If the job ID is known, use `jobStatus(jobId)` to inspect it. If a job submission
+response was lost, reconcile it using the application's own operation identity or
+other application-specific mechanism before resubmitting.
 
 ## Failure handling
 

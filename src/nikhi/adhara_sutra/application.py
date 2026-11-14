@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import threading
+import warnings
 from contextlib import AsyncExitStack
 from dataclasses import dataclass, field
 from graphlib import CycleError, TopologicalSorter
@@ -271,6 +272,11 @@ class Application:
                 raise ValueError(f"Job already registered: {name}")
             if not callable(handler):
                 raise ValueError("Job handler must be callable")
+            if not inspect.iscoroutinefunction(handler):
+                warnings.warn(
+                    "Synchronous job handlers run inline; timeout does not bound their synchronous portion. "
+                    "Use an async handler with nonblocking operations for long work.",
+                    DeprecationWarning, stacklevel=2)
             self._job_handlers[name] = (handler, timeout)
             return handler
         return register
@@ -370,7 +376,15 @@ class Application:
                 self.context.services[name] = value
             store = self._job_store
             if isinstance(store, str):
-                store = self.context.services.get(store)
+                name = store
+                store = self.context.services.get(name)
+                if store is None:
+                    raise BootstrapError("INVALID_JOB_STORE", f"Job store service not found or empty: {name}")
+            if store is None and self._recover_jobs:
+                raise BootstrapError("INVALID_JOB_STORE", "Job recovery requires a job store")
+            if store is not None and any(not callable(getattr(store, method, None))
+                                         for method in ("save", "load_all")):
+                raise BootstrapError("INVALID_JOB_STORE", "Job store must provide save and load_all methods")
             try:
                 self._jobs = JobManager(self._job_handlers, self._job_context,
                                         max_concurrent=self._max_concurrent_jobs,
@@ -404,23 +418,49 @@ class Application:
         if self.state in ("stopped", "failed"):
             return
         self._transition("stopping")
+        if self._jobs is not None:
+            self._jobs._close_admission()
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self._shutdown_timeout
+        errors: list[Exception] = []
+        cancellation: asyncio.CancelledError | None = None
         try:
-            async def cleanup() -> None:
-                if self._jobs is not None:
-                    await self._jobs.shutdown()
-                await self._stack.aclose()
-            await asyncio.wait_for(cleanup(), self._shutdown_timeout)
-        except Exception:
-            self._transition("failed")
-            self.context.services.clear()
-            raise
+            if self._jobs is not None:
+                try:
+                    await asyncio.wait_for(self._jobs.shutdown(), self._shutdown_timeout / 2)
+                except asyncio.CancelledError as exc:
+                    cancellation = exc
+                except Exception as exc:
+                    errors.append(exc)
+            try:
+                remaining = max(0.0, deadline - loop.time())
+                # Start cleanup even when the cooperative budget has expired.
+                cleanup = asyncio.create_task(self._stack.aclose())
+                if remaining <= 0:
+                    await asyncio.sleep(0)
+                await asyncio.wait_for(cleanup, remaining)
+            except asyncio.CancelledError as exc:
+                cancellation = cancellation or exc
+            except Exception as exc:
+                errors.append(exc)
         finally:
             self.context.services.clear()
+        if cancellation is not None:
+            self._transition("failed")
+            for error in errors:
+                _LOG.error("Shutdown phase failed during cancellation", exc_info=error)
+            raise cancellation
+        if errors:
+            self._transition("failed")
+            if len(errors) == 1:
+                raise errors[0]
+            raise ExceptionGroup("Job and resource shutdown failed", errors)
         self._transition("stopped")
 
     async def dispatch(self, request: Any, *,
                        emit: Callable[[dict[str, Any]], None] | None = None,
                        session_state: dict[str, Any] | None = None) -> dict[str, Any]:
+        session_state = session_state if session_state is not None else {}
         request_id = request.get("request_id") if isinstance(request, dict) else None
         action = request.get("action") if isinstance(request, dict) else None
         token = _REQUEST.set({"request_id": request_id, "action": action})
@@ -445,6 +485,13 @@ class Application:
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
                 result = await self._health()
+            elif name == "system.jobs.get":
+                if self.state not in ("ready", "running"):
+                    raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
+                job_id = payload.get("job_id")
+                if not isinstance(job_id, str) or not job_id:
+                    raise ProtocolError("ACTION_VALIDATION_FAILED", "A job_id is required", details="job_id")
+                result = {"job_id": job_id, "status": self.context.jobs.status(job_id)}
             elif name == "system.cancel":
                 if self.state not in ("ready", "running"):
                     raise ProtocolError("RUNTIME_NOT_READY", "Application is not ready")
@@ -487,9 +534,9 @@ class Application:
                 request_context = ApplicationContext(self.context.services, self.context.config,
                                                      {"request_id": request_id, "action": name}, emit,
                                                      state=self._state,
-                                                     session_state=session_state if session_state is not None else {},
+                                                     session_state=session_state,
                                                      request_state={},
-                                                     jobs=JobService(self._jobs, emit, session_state or {}) if self._jobs else None,
+                                                     jobs=JobService(self._jobs, emit, session_state) if self._jobs else None,
                                                      state_lock=self.context.state_lock)
                 try:
                     result = handler(payload, request_context)

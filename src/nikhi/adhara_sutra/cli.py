@@ -14,9 +14,10 @@ from .application import Application
 from .discovery import ProjectInspector
 from .doctor import application_report, environment_report, render_text
 from .migration import STRATEGIES, analyze_migration, load_statuses, load_test_evidence
-from .report import (implementation_report, migration_report, render_json, render_markdown, verification_report)
+from .report import (implementation_report, load_report, migration_report, render_json, render_markdown, verification_report)
+from .profiles import resolve_profile
 from .scaffolding import PROFILES, generate
-from .verification import Baseline, apply_baseline, default_profile, verify
+from .verification import Baseline, apply_baseline, verify
 
 
 def _load(target: str) -> Application:
@@ -29,7 +30,14 @@ def _load(target: str) -> Application:
         module = importlib.util.module_from_spec(spec)
         sys.path.insert(0, str(path.resolve().parent))
         try:
-            spec.loader.exec_module(module)
+            try:
+                spec.loader.exec_module(module)
+            except ImportError as exc:
+                if "attempted relative import with no known parent package" in str(exc):
+                    raise ValueError(
+                        "This file uses package-relative imports; install the project and use "
+                        "its dotted module target, for example: adhara run package.app") from exc
+                raise
         finally:
             sys.path.pop(0)
     else:
@@ -79,6 +87,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     verify_command.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
     verify_command.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
     verify_command.add_argument("--output", help="write the report to a file instead of stdout")
+    verify_command.add_argument("--profile", help="override selected architecture profile")
+    verify_command.add_argument("--profile-version", help="override selected architecture profile version")
     verify_command.add_argument("--strict", action="store_true",
                                 help="treat checks needing review as failures")
     verify_command.add_argument("--baseline",
@@ -87,10 +97,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                                 help="write the current violations to this baseline file and exit")
     migrate = commands.add_parser("migrate", help="analyze a project and produce a migration plan")
     migrate.add_argument("target", nargs="?", default=".", help="project root (default: current directory)")
+    migrate.add_argument("--profile", help="override selected architecture profile")
+    migrate.add_argument("--profile-version", help="override selected architecture profile version")
     migrate.add_argument("--strategy", choices=STRATEGIES, default="incremental",
                          help="migration strategy (default: incremental)")
     migrate.add_argument("--status", help="JSON file mapping task/finding ids to recorded statuses")
     migrate.add_argument("--evidence", help="JSON file with behavioral/regression test evidence for completion")
+    migrate.add_argument("--plan", help="saved migration report to compare")
     migrate.add_argument("--check-source", action="store_true",
                          help="fail if the analyzed source does not match the current working tree")
     migrate.add_argument("--json", action="store_true", help="emit JSON instead of Markdown")
@@ -138,7 +151,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
         try:
             project = ProjectInspector(args.target).inspect()
-            result = verify(project, default_profile())
+            profile = resolve_profile(args.target, name=args.profile, version=args.profile_version,
+                                      captured_files=project.configuration_files)
+            result = verify(project, profile)
             if args.write_baseline:
                 baseline = Baseline.capture(result)
                 baseline.save(args.write_baseline)
@@ -159,12 +174,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not Path(args.target).is_dir():
             print(f"adhara: not a directory: {args.target}", file=sys.stderr)
             return 2
+        if args.check_source and not args.plan:
+            print("adhara: --check-source requires --plan", file=sys.stderr)
+            return 2
         try:
+            saved = load_report(args.plan) if args.check_source else None
+            if saved is not None:
+                source = saved.get("source")
+                if saved.get("kind") != "migration" or not isinstance(source, dict) or any(
+                        not isinstance(value, str) or not value.strip() for value in
+                        (source.get("source_fingerprint"), saved.get("analyzer_version"), saved.get("profile_digest"))):
+                    raise ValueError("saved migration report is missing required identity fields")
             project = ProjectInspector(args.target).inspect()
-            result = verify(project)
+            profile = resolve_profile(args.target, name=args.profile, version=args.profile_version,
+                                      captured_files=project.configuration_files)
+            result = verify(project, profile)
             plan = analyze_migration(project, result, strategy=args.strategy)
-            if args.check_source and not plan.source_matches(project):
-                print("adhara: migration source does not match the current working tree", file=sys.stderr)
+            if saved is not None and (saved["source"]["source_fingerprint"] != project.source_fingerprint
+                    or saved["analyzer_version"] != result.analyzer_version
+                    or saved["profile_digest"] != result.profile_digest):
+                print("adhara: saved migration identity does not match current analysis", file=sys.stderr)
                 return 1
             statuses = load_statuses(args.status) if args.status else None
             evidence = load_test_evidence(args.evidence) if args.evidence else None

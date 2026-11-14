@@ -8,6 +8,17 @@ tags: [jobs, processes, execution, lifecycle]
 
 # Jobs versus processes
 
+Current/proposed boundary (2026-11-13): the implemented manager uses queued,
+running, succeeded, failed, cancelled, and interrupted states. Persistence is
+metadata-only and does not replay jobs. The extended definition/executor/policy
+model below is draft context, not the implemented API. `system.jobs.get`, cancellation,
+terminal persistence diagnostics, and the reserved cleanup budget are implemented;
+async HTTP remains conditional work in the [architecture integrity change](../../openspec/changes/architecture-integrity-review/proposal.md).
+Results are JSON-validated and waiters are released after the terminal save attempt.
+A failed terminal save leaves the local outcome visible but may leave an older durable
+snapshot; recovery never replays it. See [ADR-001](../decisions/001-cooperative-execution.md) and
+[ADR-003](../decisions/003-runtime-ownership.md); both remain proposed.
+
 A job is a managed unit of work with a lifecycle, cancellation policy and result; a process is an operating-system execution resource. A job may run without a subprocess, a subprocess may exist without a job record, and one job may run several processes sequentially. The proposed rule: every running operation has a defined execution owner and every managed subprocess a lifecycle owner — job records do not imply running, persisted metadata does not imply survival, cancellation acknowledgments do not prove termination, and process exits do not prove business success.
 
 # Framework-owned infrastructure
@@ -18,9 +29,9 @@ AdharaSutra owns the execution infrastructure; applications define the work. The
 
 A job definition declares a namespaced type identifier (`audio.generate`), input and result schemas, execution strategy, concurrency, timeout, cancellation, persistence, recovery and retention policies; applications own type names and business meaning. Every execution receives a unique `job_id` — not an authorization token — with attempt identity and executor owner tracked separately. Submission validates definition and input, checks admission, queues or starts work and returns an acknowledgment; an accepted ID is returned only once the job is registered with its intended execution owner. Admission may reject on invalid input, missing dependencies, unavailable executors, concurrency or queue limits, shutdown or unsupported policy. Queues are bounded with explicit overflow; submissions are distinct executions, exactly-once business execution is not guaranteed, and deduplication requires explicit idempotency policy.
 
-# Proposed job lifecycle
+# Job lifecycle
 
-Public states are `pending`, `running`, `completed`, `failed`, `cancelled` and `interrupted` (stopped or ownership lost without confirmed success); internal states such as cancellation-requested, starting and recovering need not be exposed. Invalid transitions are rejected: completed jobs cannot rerun without a new attempt, failed jobs cannot be marked completed without verified execution, and cancelled attempts must not publish progress. Retries create explicitly tracked new attempts rather than rewriting terminal history.
+The implemented public states are `queued`, `running`, `succeeded`, `failed`, `cancelled` and `interrupted` (stopped or ownership lost without confirmed success); the following ideas about additional internal states and attempt policies remain proposed. Invalid transitions should be rejected: completed jobs cannot rerun without a new attempt, failed jobs cannot be marked completed without verified execution, and cancelled attempts must not publish progress. Retries create explicitly tracked new attempts rather than rewriting terminal history.
 
 # Execution strategies and ownership
 
@@ -31,7 +42,7 @@ Public states are `pending`, `running`, `completed`, `failed`, `cancelled` and `
 
 # Progress and events
 
-Progress may carry job and attempt IDs, stage, percentage or unit counts, message, timestamp and metadata; unknown completion is reported as indeterminate, and progress must not be emitted after an attempt's confirmed terminal event. Lifecycle events (`job.started`, `job.progress`, `job.completed`, `job.failed`, `job.cancelled`, `job.interrupted`) flow through the framework event subsystem, never by handlers writing JSON to protocol stdout; clients recover from best-effort delivery via the proposed reserved actions `system.jobs.get` and `system.jobs.list`, subject to authorization.
+The following lifecycle-event and attempt metadata are proposals, not currently emitted framework events. Progress may carry job and attempt IDs, stage, percentage or unit counts, message, timestamp and metadata; unknown completion is reported as indeterminate, and progress must not be emitted after an attempt's confirmed terminal event. Lifecycle events (`job.started`, `job.progress`, `job.completed`, `job.failed`, `job.cancelled`, `job.interrupted`) flow through the framework event subsystem, never by handlers writing JSON to protocol stdout; clients recover from best-effort delivery via implemented `system.jobs.get`; listing and authorization are application-owned.
 
 # Cancellation and timeouts
 
@@ -61,7 +72,7 @@ Explicitly out of scope initially: distributed queues or scheduling, Kubernetes 
 - JPM-OQ-008 — What graceful and forced termination periods to use, pending cross-platform testing.
 - JPM-OQ-009 — Whether the framework should attempt to reattach to external processes after a crash.
 - JPM-OQ-010 — Whether durable workers are a separate Python executable or service.
-- JPM-OQ-011 — Whether the reserved protocol includes `system.jobs.get` and `system.jobs.list`.
+- JPM-OQ-011 — `system.jobs.get` is implemented; listing remains application-owned. See the [protocol reference](../../docs/protocol-reference.md).
 - JPM-OQ-012 — Whether job events carry monotonically increasing per-job sequence numbers.
 - JPM-OQ-013 — Whether the framework automatically removes artifacts when job metadata expires.
 - JPM-OQ-014 — Whether jobs can declare GPU resource requirements.

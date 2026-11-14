@@ -62,9 +62,10 @@ A failed request has `success: false`, `data: null`, and an error object.
 
 ### Event
 
-Handlers emit progress with `context.emit(name, data)`. Events are written before
-the terminal response and carry the same `request_id`; job events also carry
-`job_id`.
+Actions can emit events with `context.emit(name, data)` while processing a request;
+those events precede that action's response and carry its `request_id`. A submitted
+job runs independently and its events can arrive after the submission response. Job
+events carry `job_id` and currently have a null `request_id`; correlate them by job ID.
 
 ```json
 {
@@ -84,6 +85,7 @@ the terminal response and carry the same `request_id`; job events also carry
 | `system.hello` | `{}` | `protocol_version`, `supported_protocol_versions`, `framework_version`, application `name` and `version`. |
 | `system.help` | `{}` | `framework_version`, registered `actions` metadata, registered `jobs` metadata. |
 | `system.health` | `{}` | `status` (`ok` or `degraded`), lifecycle `state`, and per-service `services` status. Requires a ready or running application. |
+| `system.jobs.get` | `{"job_id": "..."}` | `job_id` and its `status` snapshot, or `null` for an unknown job. Requires a ready or running application. |
 | `system.cancel` | `{"job_id": "..."}` | `job_id`, `cancelled` (whether cancellation was accepted), `cancellation` (`requested`, `completed`, `unsupported`, or `failed`), and the current `status` snapshot, or `null` for an unknown job. Requires a ready or running application. |
 
 `system.help` actions carry `name`, `description`, `input_schema`, and
@@ -142,6 +144,24 @@ the bridge's protocol version.
   reports also carry the architecture profile version.
 - The Electron bridge exports `PROTOCOL_VERSION` and fails startup with
   `BRIDGE_PROTOCOL_UNSUPPORTED` when the backend does not support it.
+
+`system.jobs.get` requires a non-empty string `job_id`; malformed IDs return
+`ACTION_VALIDATION_FAILED` with details `job_id`. Applications own submission,
+job listing, and access authorization for their exposed actions and bridge.
+
+## Job terminal outcomes
+
+Job status snapshots include a local `persistence` object. Its status is `pending`
+while a stored job is active, `disabled` without a store, `saved` after a successful
+terminal save or recovery, and `failed` with error code `JOB_PERSISTENCE_FAILED`
+when the terminal save fails. A failed save does not change the actual local execution
+outcome, but that outcome may not survive a restart; the diagnostic field itself is
+not a durable database column. A failed running-state save prevents handler execution.
+
+Job results must be JSON-compatible and cannot contain non-finite numbers. Invalid
+results produce `JOB_OUTPUT_INVALID`; use an ArtifactStore reference for binary or
+large data. A terminal save is attempted before waiters are released, and waiters are
+still released if that save fails.
 
 ## Exit codes
 

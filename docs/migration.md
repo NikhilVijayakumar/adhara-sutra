@@ -50,19 +50,49 @@ advisory review belongs to the consuming application.
 
 4. Supply behavioral test evidence and evaluate completion:
 
+   Copy the identity values from the saved JSON plan into the test evidence,
+   and record a passing result for every ID in its `required_test_ids` list:
+
    ```json
-   {"tests": {"status": "passed", "command": "python -m unittest", "revision": "<git revision>"}}
+   {"tests": {"status": "passed", "source_fingerprint": "<fingerprint>",
+     "analyzer_version": "<analyzer version>", "profile_digest": "<digest>",
+     "results": {"actions": "passed", "cli": "passed"}}}
    ```
+
+   Add the other IDs listed in the plan when those capabilities are present.
+   Summary-only evidence from older versions must be replaced with these identities
+   and individual results; Git revision alone does not establish input identity.
 
    ```console
    adhara migrate . --status migration-status.json --evidence evidence.json
-   adhara migrate . --check-source        # detect a stale plan after source changes
+   adhara migrate . --check-source --plan plan.json
    ```
 
-Completion is evidence-based, never declarative. A plan is `complete` only when
-`adhara verify` passes, no tasks or findings remain pending/in progress/blocked,
-and the supplied test evidence passed for the analyzed source revision.
-Otherwise the evaluation is `incomplete` or `not_evidenced`, with reasons.
+Completion requires matching plan, verification and test identities, passes for
+mandatory architecture rules, resolved task/finding statuses, and passed results
+for every required test ID. Other unacknowledged failures and reviews also block
+completion. Evidence is supplied by the caller; it is an assertion, not a
+cryptographic attestation of test execution.
+
+## Selecting an architecture profile
+
+Generated projects record `profile`, `profile_version`, and `package` in
+`[tool.adhara]` in `pyproject.toml`. Verification and migration both select that
+profile, or `minimal` version `1` when metadata is absent. Use `--profile minimal`
+or `--profile cli`, and optionally `--profile-version 1`, to override selection;
+reports show the selection and its configuration digest. The CLI profile requires
+its declared package's generated entry and action files. Unsupported profile names
+or versions fail explicitly.
+
+A project may add `.adhara-profile.json` with `required_files`,
+`required_directories`, `forbidden_imports` (pairs of import and remediation), or
+`layer_boundaries` (triples of source path, import prefix, and remediation). Paths
+must be project-relative. These settings extend the selected profile and change its
+configuration digest. For example:
+
+```json
+{"layer_boundaries": [["src/ui", "app.data", "Use the application service"]]}
+```
 
 ## Compatibility requirements
 
@@ -71,8 +101,7 @@ Otherwise the evaluation is `incomplete` or `not_evidenced`, with reasons.
   match a supported protocol version.
 - Reports carry `schema_version`; consumers should accept additive fields and
   check the version before relying on structure.
-- `adhara migrate --check-source` compares the plan's recorded `root`,
-  `revision`, and `dirty` state with the current source and flags stale plans.
+- `adhara migrate --check-source --plan plan.json` compares the saved plan's source fingerprint, analyzer version, and profile digest with current analysis.
 
 ## Limitations
 

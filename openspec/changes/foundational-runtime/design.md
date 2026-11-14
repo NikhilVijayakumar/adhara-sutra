@@ -2,8 +2,12 @@
 
 ## Context
 
-The framework is in architecture planning. Requirements are proposed and must be
-reviewed against the protocol and runtime source documents before implementation.
+This remains a draft specification, but substantial runtime, connector, bridge,
+and governance code exists at c320dcf. Proposed status is not the same as absent
+implementation. The [current behavior map](../../../knowledge/architecture.md)
+and [recorded decisions](../../../docs/decisions.md) identify implemented choices.
+The [architecture integrity review](../architecture-integrity-review/proposal.md)
+tracks corrections and must be reconciled before this draft is accepted/archived.
 
 ## Boundaries
 
@@ -13,12 +17,13 @@ initialization validates configuration before starting dependent resources and
 cleans up resources if initialization fails. CLI transport validates requests
 before dispatch and separates protocol output from diagnostics.
 
-## Open decisions
+## Earlier decision checklist and current disposition
 
-- Exact lifecycle transition table, cleanup order, and failure reporting.
-- Message schemas, protocol version negotiation, correlation and ordering.
-- Sync and async execution, concurrency, cancellation, and shutdown semantics.
-- Package layout, libraries, public APIs, and compatibility policy.
+- Lifecycle transitions exist in Application; T07 closes admission and attempts cleanup after job shutdown failure within a cooperative budget.
+- The protocol reference documents status/cancel actions, detached job event ordering, and bridge timeout outcomes.
+- Requests are sequential, jobs are concurrent/cooperative, and synchronous job registration warns while preserving compatibility.
+- One Python distribution and a separate Node package are recorded choices; import-boundary and Node-bootstrap gaps are tracked as A08/A17.
 
-Do not infer these details from illustrative APIs. Resolve them against the
-source requirements and record durable decisions before implementing them.
+Do not infer current APIs from illustrative concepts. Proposed numbered ADRs in
+knowledge/decisions record rationale for the corrections; they remain proposed.
+This annotation does not mark the historical review/implementation tasks complete.

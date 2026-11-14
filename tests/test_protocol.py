@@ -41,6 +41,10 @@ class ProtocolContractTests(unittest.IsolatedAsyncioTestCase):
         async def wait(payload, context):
             await asyncio.sleep(30)
 
+        @self.app.job("done")
+        async def done(payload, context):
+            return {"complete": True}
+
         await self.app.start()
 
     async def asyncTearDown(self):
@@ -55,6 +59,47 @@ class ProtocolContractTests(unittest.IsolatedAsyncioTestCase):
     @staticmethod
     def _bad_output(result):
         raise ValueError("not serializable by the action")
+
+    async def test_jobs_share_exact_session_mapping_and_scopes_are_isolated(self):
+        app = Application(f"session_scope_{uuid4().hex}", "1.0")
+        seen_actions, seen_jobs = [], []
+
+        @app.action("submit")
+        def submit(payload, context):
+            seen_actions.append(context.session_state)
+            return {"job_id": context.jobs.submit("update", payload)}
+
+        @app.action("read")
+        def read(payload, context):
+            return dict(context.session_state)
+
+        @app.job("update")
+        async def update(payload, context):
+            seen_jobs.append(context.session_state)
+            context.session_state["job_value"] = payload["value"]
+
+        await app.start()
+        try:
+            empty, populated, separate = {}, {"existing": True}, {}
+            for scope, value in ((empty, "empty"), (populated, "populated")):
+                response = await app.dispatch(envelope("submit", {"value": value}), session_state=scope)
+                self.assertTrue(response["success"])
+                await app.context.jobs.wait(response["data"]["job_id"])
+                self.assertIs(seen_actions[-1], scope)
+                self.assertIs(seen_jobs[-1], scope)
+                self.assertEqual(scope["job_value"], value)
+            self.assertEqual(populated["existing"], True)
+            self.assertEqual((await app.dispatch(envelope("read"), session_state=separate))["data"], {})
+            self.assertEqual((await app.dispatch(envelope("read"), session_state=empty))["data"]["job_value"], "empty")
+            for value in ("first", "second"):
+                response = await app.dispatch(envelope("submit", {"value": value}))
+                await app.context.jobs.wait(response["data"]["job_id"])
+                self.assertIs(seen_actions[-1], seen_jobs[-1])
+            self.assertIsNot(seen_actions[-1], seen_actions[-2])
+            self.assertEqual(seen_actions[-1], {"job_value": "second"})
+            self.assertEqual(separate, {})
+        finally:
+            await app.stop()
 
     async def test_hello_reports_protocol_and_identity(self):
         response = await self.app.dispatch(envelope("system.hello"))
@@ -124,6 +169,36 @@ class ProtocolContractTests(unittest.IsolatedAsyncioTestCase):
         data = (await self.app.dispatch(envelope("system.health")))["data"]
         self.assertEqual(data["status"], "ok")
         self.assertEqual(data["state"], "ready")
+
+    async def test_job_status_validates_and_requires_readiness(self):
+        unstarted = Application(f"status_not_ready_{uuid4().hex}", "1.0")
+        response = await unstarted.dispatch(envelope("system.jobs.get", {"job_id": "x"}))
+        self.assertEqual(response["error"]["code"], "RUNTIME_NOT_READY")
+        for payload in ({}, {"job_id": ""}, {"job_id": None}, {"job_id": 2}):
+            with self.subTest(payload=payload):
+                error = (await self.app.dispatch(envelope("system.jobs.get", payload)))["error"]
+                self.assertEqual(error["code"], "ACTION_VALIDATION_FAILED")
+                self.assertEqual(error["details"], "job_id")
+        data = (await self.app.dispatch(envelope("system.jobs.get", {"job_id": "missing"})))["data"]
+        self.assertEqual(data, {"job_id": "missing", "status": None})
+
+    async def test_job_status_reports_active_completed_and_cancelled(self):
+        active_id = self.app.context.jobs.submit("wait")
+        await asyncio.sleep(0)
+        async def query(job_id):
+            response = await self.app.dispatch(envelope("system.jobs.get", {"job_id": job_id}))
+            self.assertTrue(response["success"])
+            self.assertEqual(set(response["data"]), {"job_id", "status"})
+            self.assertEqual(response["data"]["job_id"], job_id)
+            self.assertEqual(response["data"]["status"], self.app.context.jobs.status(job_id))
+            return response["data"]["status"]
+        self.assertIn((await query(active_id))["state"], ("queued", "running"))
+        done_id = self.app.context.jobs.submit("done")
+        await self.app.context.jobs.wait(done_id)
+        self.assertEqual((await query(done_id))["state"], "succeeded")
+        self.app.context.jobs.cancel(active_id)
+        await self.app.context.jobs.wait(active_id)
+        self.assertEqual((await query(active_id))["state"], "cancelled")
 
     async def test_cancel_requires_a_job_and_reports_unknown_jobs(self):
         invalid = await self.app.dispatch(envelope("system.cancel", {}))

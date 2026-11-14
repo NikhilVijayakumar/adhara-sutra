@@ -126,7 +126,9 @@ the subscription is no longer needed.
 
 Background jobs are registered with `@app.job(name, timeout=...)` and submitted
 from a handler with `context.jobs.submit(name, payload)`, which returns an
-identifier. Job handlers receive `(payload, context)`; events they emit carry the
+identifier. Actions and their submitted jobs share the same session-state mapping,
+including when it starts empty; a dispatch with no supplied mapping gets a fresh
+scope. Job handlers receive `(payload, context)`; events they emit carry the
 `job_id`, and their log records are correlated with it. Use
 `context.jobs.status(id)`, `.list()`, `.cancel(id)`, and `.wait(id)` to inspect
 execution. Send `system.cancel` with `{"job_id": ...}` to cancel a managed job;
@@ -137,10 +139,39 @@ without bound.
 Jobs run in-process with bounded concurrency (`max_concurrent_jobs`, default 4)
 and a bounded waiting queue (`max_queued_jobs`, default 64); timeouts apply to
 async handlers. Stopping the application cancels active jobs before services
-close, so jobs never outlive their owning process, and shutdown waits at most
-`shutdown_timeout` seconds (default 10) for cancellation and cleanup; external
-commands accept a `kill_timeout` grace period before forced termination.
-Persistence and recovery across processes are not yet provided.
+close, so jobs never outlive their owning process. Shutdown uses a cooperative
+`shutdown_timeout` budget (default 10 seconds), reserving at least half for service
+cleanup and attempting it even when job shutdown fails. Blocking synchronous cleanup
+or cancellation-resistant coroutines can exceed that budget. External commands
+accept a `kill_timeout` grace period before forced termination.
+Long jobs should use async handlers and nonblocking adapters. Synchronous job
+handlers remain supported but registration emits a `DeprecationWarning`: they run
+inline, and a job timeout cannot bound their synchronous portion. Removing this
+support would require a future declared incompatible version; no removal date is
+set. Timeouts and cancellation are cooperative. Changing `def` to `async def`
+does not make a blocking function safe to call directly; blocking the event loop
+also blocks health checks and cancellation. Run CPU-heavy work in an external
+process or a future executor designed for it.
+
+For example, after registering an `ExternalCommand` service named `command`:
+
+```python
+@app.job("convert", timeout=60)
+async def convert(payload, context):
+    result = await context.get_service("command").run([payload["input"]])
+    result.raise_for_status()
+    return {"output": result.stdout_text}
+```
+
+For synchronous HTTP, see the isolated offload guidance in the
+[connector reference](docs/connectors.md#http-httpclient).
+
+Optional job-store persistence records job metadata; recovery marks unfinished
+records interrupted and does not restart their handlers. Admission first creates
+its context and saves the queued snapshot before scheduling. If scheduling fails,
+the runtime attempts to save a `JOB_ADMISSION_FAILED` terminal record. The store
+and event loop do not share a transaction: if that save also fails, a queued
+snapshot may remain and is marked interrupted on recovery.
 
 Connectors are services: register them with `app.service`, resolve them with
 `context.get_service`, and replace them with a test double by registering the

@@ -8,6 +8,30 @@ tags: [architecture, boundaries]
 
 # Proposed boundaries
 
+## Current implementation and review boundary (2026-11-13)
+
+Current package paths are `nikhi.adhara_sutra`, not the illustrative layout below.
+Persistent requests are sequential; short actions can submit async background jobs.
+Jobs run concurrently on the event loop and sync handlers run inline with a registration
+warning. Timeouts and cancellation are cooperative. HttpClient is synchronous; SQLite
+is optional and thread-owned. Persistence stores job metadata, not durable execution.
+The fixed-command Node bridge exposes `jobStatus` and job cancellation. Business
+submission, listing, and authorization stay application-owned. Generated minimal/cli
+profiles share selection with verification and migration; DDD/Electron/AI remain candidates.
+
+The remaining sections preserve draft design context and alternatives. In particular,
+their concurrent-request and proposed service-lifetime descriptions are not current
+API promises. Current API/wire shapes are in the maintained
+[protocol reference](../docs/protocol-reference.md) and runtime source. The
+[independent review](../docs/architecture-review-2026-11-13.md) explains confirmed
+gaps and recommended targets, tracked by
+[the architecture integrity change](../openspec/changes/architecture-integrity-review/proposal.md).
+Shared profile selection, job status, captured source identity, and completion gates
+are implemented as tracked there. Async HTTP and Node-owned backend discovery remain
+conditional integration work; the runtime/tooling import boundary remains deferred.
+
+## Historical draft design context
+
 AdharaSutra is the proposed foundational runtime for independent Python applications.
 Applications use its public interfaces and register their own business behavior; the
 framework manages runtime and infrastructure without importing application modules;

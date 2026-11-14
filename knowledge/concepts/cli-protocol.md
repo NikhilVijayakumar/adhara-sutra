@@ -8,6 +8,14 @@ tags: [cli, protocol, electron]
 
 # Communication boundary
 
+Current/proposed boundary (2026-11-13): the current runtime dispatches persistent
+requests sequentially; managed async jobs may continue after a submission action
+has returned. The maintained [protocol reference](../../docs/protocol-reference.md)
+defines current envelopes. Broader concurrent-request and control proposals below
+are draft context. The [architecture integrity change](../../openspec/changes/architecture-integrity-review/proposal.md)
+records implemented `system.jobs.get` and timeout details. Action events precede their
+response; detached job events may arrive later and use `job_id` for correlation.
+
 Callers and the Python runtime communicate over process streams: stdin carries requests and control
 messages, stdout carries framed protocol messages, and stderr carries diagnostics, never
 authoritative results. Framing is NDJSON, one UTF-8 JSON object per line, so readers must buffer
@@ -30,9 +38,8 @@ active requests, and actions are namespaced with `system.*` and `protocol.*` res
 framework. Each accepted request should produce one terminal response — on success `error` is
 null; on failure `data` is null and `error` is structured. A background-job response only
 acknowledges the job: it needs an identifiable owner and must not appear durably executing after
-that owner exits. Concurrent requests may complete in any order, so correlation, not arrival order,
-is authoritative; request state is isolated, concurrency is bounded by configurable limits, and
-handlers must declare concurrency constraints. Event delivery is best-effort; exactly-once
+that owner exits. Concurrent request dispatch and handler concurrency declarations remain draft proposals;
+the implemented persistent loop dispatches requests sequentially. Request state is isolated. Event delivery is best-effort; exactly-once
 execution is not guaranteed — retries need application idempotency.
 
 # Events and control semantics

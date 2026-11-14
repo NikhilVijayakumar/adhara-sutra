@@ -1,10 +1,23 @@
 # Architecture rule reference
 
+Baselines match every discovered violation occurrence, including repeated
+snippets in one file. Line movement alone does not invalidate an exception;
+a new occurrence requires a separate entry. Older baselines with fewer entries
+may therefore stop acknowledging a check until reviewed again.
+
 `adhara verify` evaluates the rules below against an inspected project. Every
 rule has a stable identifier that does not change across compatible catalog
 versions, a severity, and a documented purpose. Each check reports `pass`,
 `fail`, `needs_review`, or `not_checked`, with source evidence where available
 and a remediation where one exists.
+
+A pass describes recognized syntax, not whole-program correctness or blanket
+protocol coverage. Framework recognition supports direct imported `Application`
+(and aliases), stable module-level application assignments, and their direct
+`run`/`serve` calls. Dynamic factories, decorator owners, rebinding, reflection,
+and interprocedural data flow can remain unresolved. Job and state checks do not
+prove all work or state is managed. Reports list evaluated IDs, not-checked IDs,
+and mandatory-unresolved IDs; aggregate pass can coexist with unchecked rules.
 
 This table is kept in step with `RULE_CATALOG` in
 [`verification.py`](../src/nikhi/adhara_sutra/verification.py); the test suite
@@ -21,13 +34,13 @@ fails when a rule is added, removed, or changed without updating it.
 | `ARCH-FW-001` | Framework application | error | The project creates an Application with the framework. |
 | `ARCH-FW-002` | Registered actions | warning | The application registers at least one action. |
 | `ARCH-ENTRY-001` | Runtime entry point | error | The application has an entry point that starts the framework runtime. |
-| `ARCH-PROTO-001` | CLI protocol integrity | warning | The application does not bypass the CLI protocol with direct standard stream access. |
+| `ARCH-PROTO-001` | CLI protocol integrity | warning | Recognizes selected direct standard stream access syntax. |
 | `ARCH-CONN-001` | Managed HTTP connector | warning | HTTP access goes through the managed connector instead of a direct client. |
 | `ARCH-CONN-002` | Managed external CLI connector | warning | External programs run through the managed connector instead of subprocess. |
 | `ARCH-CONN-003` | Managed SQLite connector | warning | Database access goes through the managed connector instead of sqlite3 directly. |
-| `ARCH-STATE-001` | Scoped application state | warning | Application state is accessed through the request-scoped context. |
-| `ARCH-JOB-001` | Managed job execution | warning | Long-running work uses the managed job manager. |
-| `ARCH-JOB-002` | Managed background work | warning | Background work uses the managed job manager instead of unmanaged tasks or threads. |
+| `ARCH-STATE-001` | Scoped application state | warning | Recognizes selected context state access syntax. |
+| `ARCH-JOB-001` | Managed job execution | warning | Recognizes job decorator or context.jobs access syntax. |
+| `ARCH-JOB-002` | Managed background work | warning | Recognizes selected unmanaged task and thread creation syntax. |
 
 ## Custom profiles and rules
 

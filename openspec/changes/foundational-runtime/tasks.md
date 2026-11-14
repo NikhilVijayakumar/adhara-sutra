@@ -1,8 +1,9 @@
 # Tasks
 
-Work on one requirement at a time: finish its implementation and practical
-verification, update the requirement index, then select the next. Existing
-partial work on other requirements remains recorded but is not active work.
+This is a historical implementation log, not the active single-task tracker.
+The [architecture integrity tracker](../architecture-integrity-review/tasks.md)
+records subsequent corrections, current deferrals, and evidence. Historical claims
+below describe their original checks; later corrections supersede stale details.
 
 ## Active task
 
@@ -22,7 +23,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-ERR-001/004/005, standard error model/serialization/sensitive-info protection: structured error envelopes with code/message/retryable/details and request correlation; frontend-facing errors follow protocol; internal details not exposed in responses.
 - [x] Complete and practically verify FR-CFG-001/005, central configuration and application-specific settings: app config provided/accessible via centralized context; `validate_config` supports app-defined schemas and normalized config.
 - [x] Complete and practically verify FR-CLI-005, one-shot CLI execution: a stdin request is dispatched, a structured response is returned, and the process exits with a documented status. Checked success (0), unknown action (4), invalid JSON and unsupported version (8), empty input (2), action failure (4), and initialization failure (3); persistent action failures do not force a nonzero exit.
-- [x] Complete and practically verify FR-CLI-006, persistent CLI execution: multiple requests run in one process lifetime, responses correlate by `request_id`, handlers emit correlated events that precede the terminal response, and EOF or a malformed frame ends the session with documented cleanup and exit status.
+- [x] Complete and practically verify FR-CLI-006, persistent CLI execution: multiple requests run in one process lifetime, responses correlate by `request_id`, action handlers emit correlated events that precede their response (detached job events can follow the submission response), and EOF or a malformed frame ends the session with documented cleanup and exit status.
 - [x] Complete and practically verify FR-CLI-009, CLI version information: `system.hello` reports the application name and version, the framework version, and the supported protocol versions in both one-shot and persistent sessions.
 - [x] Complete and practically verify FR-ERR-002, error classification: every protocol error now carries a stable `category` (protocol, validation, action, lifecycle, internal) derived from its code; checked each category and confirmed the mapping is stable across requests.
 - [x] Complete and practically verify FR-ERR-003, error propagation: handler, validation, and startup failures keep their original exception as the cause and are logged with the traceback while responses stay safe; a shutdown failure no longer replaces an error already propagating.
@@ -84,7 +85,7 @@ partial work on other requirements remains recorded but is not active work.
 - [x] Complete and practically verify FR-LOG-007: `adhara doctor` exports structured JSON and text diagnostic reports to files (or stdout) with framework, platform, and check information; verified via the CLI and added the spec scenario. Marked FR-LOG-007 complete.
 - [x] Complete and practically verify FR-DOC-002: verified `adhara new` scaffolding generates a project README with profile, connector selection, and run/test instructions alongside tests and build metadata; added scaffolding test and marked the requirement complete.
 - [x] Complete and practically verify NFR-DOC-003: the architecture rule reference links to governing specs/requirements and is enforced against the rule catalogue by tests; the protocol reference and its contracts remain linked from the README; added traceability tests and spec scenario. Marked NFR-DOC-003 complete.
-- [x] Complete and practically verify FR-MIG-010/013 and NFR-MIG-007/009: migration status tracking now covers findings as well as tasks (structured `{"tasks","findings"}` status files, legacy flat task maps still accepted); migration reports carry per-finding/task statuses and summaries; plans detect source mismatches via recorded revision/dirty state (`adhara migrate --check-source`); completion is evaluated evidence-based only when `adhara verify` passes, no tasks/findings remain unfinished, and supplied behavioral-test evidence passed for the analyzed revision (`--evidence`), otherwise reported incomplete/not evidenced. Marked requirements complete.
+- [x] Complete and practically verify FR-MIG-010/013 and NFR-MIG-007/009: migration status tracking now covers findings as well as tasks (structured `{"tasks","findings"}` status files, legacy flat task maps still accepted); migration reports carry per-finding/task statuses and summaries; later corrections require `adhara migrate --check-source --plan FILE` to compare captured identities, mandatory rule passes, and per-test results tied to matching source, analyzer, and profile identities; otherwise completion is incomplete or not evidenced. Marked requirements complete.
 - [x] Complete and practically verify FR-JOB-009/011: added durable job metadata via `SQLiteJobStore` and opt-in recovery (`Application(..., job_store=..., recover_jobs=True)`); terminal records persist across restart, non-terminal records are marked `interrupted` with recovery details on restart and never re-executed automatically. Added tests/spec updates and marked requirements complete.
 - [x] Complete and practically verify FR-WS-001..005: added managed async outbound `WebSocketClient` (optional `websocket` extra on `websockets`) with connect/close/health, send/receive/stream-style consumption, message validation, and controlled reconnection policy; connector errors carry connector identity/timeout/validation details. Added guarded integration tests (skipped when `websockets` unavailable), websocket-connector spec, connector reference, and exports. Marked FR-WS-001..005 complete.
 - [x] Complete and practically verify FR-EXT-010: added managed interactive `ExternalSession` via `ExternalCommand.open_session(...)` with stdin writes, incremental stdout/stderr reception, wait/close, and process cleanup; updated spec/docs/status with tests.
@@ -100,6 +101,10 @@ partial work on other requirements remains recorded but is not active work.
 - [ ] Select and complete the next requirement, updating the status index after verification.
 
 ## Review and design
+
+The independent 2026-11-13 review and proposed corrections are tracked in
+[architecture-integrity-review](../architecture-integrity-review/tasks.md).
+Its checklist does not automatically complete the historical tasks below.
 
 - [ ] Review the traced requirements, reconcile source documents, and resolve open questions.
 - [ ] Agree on lifecycle transitions, protocol schemas, error handling, and compatibility rules.

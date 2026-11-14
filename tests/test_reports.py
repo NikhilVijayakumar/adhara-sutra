@@ -70,6 +70,23 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(json.loads(render_json(report)), report)
         self.assertIn(f"Source: `{project.root}`", render_markdown(report))
 
+    def test_coverage_partitions_rules_and_reports_unresolved_mandatory(self):
+        from nikhi.adhara_sutra import ArchitectureProfile
+        project = self.inspect()
+        result = verify(project, ArchitectureProfile(required_files=("missing",),
+                         mandatory_rules=("ARCH-STRUCT-001", "ARCH-STATE-001", "ARCH-UNKNOWN-999")))
+        report = verification_report(result, generated_at="fixed")
+        coverage = report["coverage"]
+        evaluated, unchecked = set(coverage["evaluated"]), set(coverage["not_checked"])
+        self.assertFalse(evaluated & unchecked)
+        self.assertEqual(evaluated | unchecked, {check.rule for check in result.checks})
+        self.assertEqual(set(coverage["mandatory_unresolved"]),
+                         {"ARCH-STRUCT-001", "ARCH-STATE-001", "ARCH-UNKNOWN-999"})
+        self.assertIn("Mandatory unresolved", render_markdown(report))
+        plan = migration_report(analyze_migration(project, result))
+        self.assertEqual(plan["coverage"], coverage)
+        self.assertIn("Mandatory unresolved", render_markdown(plan))
+
     def test_reports_can_be_loaded_with_schema_checks(self):
         project = self.inspect()
         report = migration_report(analyze_migration(project, verify(project)), generated_at="fixed")

@@ -24,13 +24,24 @@ available.
   `response.raise_for_status()` maps 4xx responses to non-retryable and 5xx
   responses to retryable connector errors with status, URL, and body details.
 
+For long-running async jobs, do not call this synchronous HTTP client directly on
+the event loop. An adapter may use `await asyncio.to_thread(blocking_call)` for an
+isolated blocking call that owns and closes its own client and receives only the
+values it needs. Cancelling the awaiting coroutine does not stop an already running
+thread or prove the remote operation stopped. Do not move the application context,
+managed SQLite connection, or other thread-affine resources into that thread.
+Prefer an async adapter for long work; the planned nonblocking HTTP connector is
+tracked as [T16](../openspec/changes/integration-workflows-followup/tasks.md).
+
 ## External CLI (`ExternalCommand`)
 
 - **Configuration:** `ExternalCommand(executable, *, search_path=..., env=...,
   cwd=..., kill_timeout=..., max_concurrent=...)` (module
   `nikhi.adhara_sutra.external`). `search_path` and `PATH` locate the executable;
   `env`/`cwd` control the child environment; `kill_timeout` bounds forced
-  termination; `max_concurrent` limits concurrent runs per instance.
+  termination; `max_concurrent` limits concurrent runs per instance. On Windows,
+  if `taskkill` fails, cleanup falls back to terminating the directly owned process;
+  that fallback alone does not guarantee descendant termination.
 - **Lifecycle:** context-managed. `__enter__` resolves the executable and fails
   fast if it is missing; `__exit__` terminates any still-running process tree.
   `run(args, *, timeout=..., input=..., cwd=..., env=..., on_output=...)` passes a

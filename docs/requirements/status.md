@@ -1,12 +1,21 @@
 # Requirement and implementation status
 
-Snapshot: 2026-11-12. Requirements and linked OpenSpec specifications remain proposed; implementation status records the evidence available so far, not architectural approval.
+Snapshot: 2026-11-12; correction evidence updated 2026-11-14. Requirements and linked OpenSpec specifications remain proposed; implementation status records the evidence available so far, not architectural approval.
 
 **In progress**: the single active requirement. **New**: no implementation of the requirement has been identified. **Partially implemented**: related code exists, but the requirement or its verification is incomplete; this does not mean it is being actively worked on. **Completed**: the requirement has been implemented and checked against its stated acceptance criteria. Status is per requirement, not per OpenSpec artifact.
 
 The specification column identifies draft specifications that explicitly cite the requirement, including cited ranges. A link does not imply the entire requirement is specified. “Not mapped” means no explicit citation was found; it does not mean the requirement is rejected. Open questions are decisions, not implementation tasks; **Resolved** records the decision in [docs/decisions.md](../../docs/decisions.md).
 
-Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [Electron bridge](../../bridge/index.js); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The current persistent protocol is sequential; connector implementations, migration, and verification tooling are not present.
+Current code: [application runtime and protocol](../../src/nikhi/adhara_sutra/application.py); [jobs](../../src/nikhi/adhara_sutra/jobs.py); [Electron bridge](../../bridge/index.js); [example](../../examples/basic_app.py); [package metadata](../../pyproject.toml). The persistent protocol is sequential. Connector implementations, discovery, verification, migration analysis, and scaffolding are present.
+
+Review caveat (2026-11-13): the [independent architecture review](../architecture-review-2026-11-13.md) found gaps in baseline scope, source/completion evidence, runtime ownership, bootstrap, and profile consistency. Existing Completed rows record prior checks; they are not blanket architecture approval and need focused re-verification where cited. Corrections and knowledge/spec reconciliation are tracked in [architecture-integrity-review](../../openspec/changes/architecture-integrity-review/tasks.md). No affected requirement is newly marked complete by this review, and broad release/reliability/maintainability/security qualification remains deferred until integration.
+
+Update (2026-11-14): the integrity tracker records implemented corrections for
+admission, cleanup, session scope, terminal results, status/timeout behavior,
+profile selection, source evidence, and bounded static claims. Earlier completion
+rows remain historical and do not imply every workflow has been qualified. The previously reported Windows subprocess shutdown timeout was fixed and the full
+Python regression run passed with optional skips; see [task evidence](../../openspec/changes/architecture-integrity-review/evidence.md).
+Async HTTP, Node-owned backend discovery, and lazy tooling imports remain unchecked in the [follow-up](../../openspec/changes/integration-workflows-followup/tasks.md).
 
 OpenSpec tracks the [foundational-runtime change](../../openspec/changes/foundational-runtime/proposal.md) and its [implementation tasks](../../openspec/changes/foundational-runtime/tasks.md). Four completed OpenSpec planning artifacts describe document readiness, not finished functionality.
 

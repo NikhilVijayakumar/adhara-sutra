@@ -352,9 +352,16 @@ class ExternalCommand:
                 killer = await asyncio.create_subprocess_exec(
                     "taskkill", "/PID", str(process.pid), "/T", "/F",
                     stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
-                await killer.wait()
+                if await killer.wait() != 0:
+                    try:
+                        process.kill()
+                    except ProcessLookupError:
+                        pass
             except OSError:
-                pass
+                try:
+                    process.kill()
+                except ProcessLookupError:
+                    pass
         else:
             try:
                 os.killpg(os.getpgid(process.pid), signal.SIGTERM)
@@ -381,10 +388,11 @@ class ExternalCommand:
     def _kill_sync(self, process: asyncio.subprocess.Process) -> None:
         if sys.platform == "win32":
             try:
-                subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                               capture_output=True, check=False,
-                               creationflags=subprocess.CREATE_NO_WINDOW)
-                return
+                result = subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                                        capture_output=True, check=False,
+                                        creationflags=subprocess.CREATE_NO_WINDOW)
+                if result.returncode == 0:
+                    return
             except OSError:
                 pass
         else:

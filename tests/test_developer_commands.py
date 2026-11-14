@@ -7,7 +7,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from nikhi.adhara_sutra import __version__
-from nikhi.adhara_sutra.cli import main
+from nikhi.adhara_sutra.cli import _load, main
 
 
 class DeveloperCommandTests(unittest.TestCase):
@@ -36,6 +36,22 @@ class DeveloperCommandTests(unittest.TestCase):
             for command in ("run", "doctor", "inspect", "verify", "migrate"):
                 with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                     self.assertEqual(main([command, missing]), 2, command)
+
+    def test_loader_preserves_standalone_behavior_and_relative_import_cause(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            standalone = root / "standalone.py"
+            standalone.write_text('from nikhi.adhara_sutra import Application\napp = Application("standalone_loader", "1")\n', encoding="utf-8")
+            self.assertEqual(_load(str(standalone)).name, "standalone_loader")
+            package_file = root / "package_app.py"
+            package_file.write_text("from .actions import register\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "dotted module target") as caught:
+                _load(str(package_file))
+            self.assertIsInstance(caught.exception.__cause__, ImportError)
+            unrelated = root / "unrelated.py"
+            unrelated.write_text('raise ImportError("different error")\n', encoding="utf-8")
+            with self.assertRaisesRegex(ImportError, "different error"):
+                _load(str(unrelated))
 
     def test_reports_can_be_emitted_for_tooling(self):
         for command in ("doctor", "inspect", "verify", "migrate"):

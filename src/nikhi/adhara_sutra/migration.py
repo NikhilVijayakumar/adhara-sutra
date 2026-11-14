@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -129,34 +129,45 @@ class MigrationPlan:
     rollback: tuple[str, ...]
     regression_tests: tuple[str, ...] = ()
     compatibility_risks: tuple[str, ...] = ()
+    analyzer_version: str | None = None
+    profile_digest: str | None = None
+    custom_identity_complete: bool = True
+    rules_identity: str | None = None
+    analyzers_identity: str | None = None
+    required_test_ids: tuple[str, ...] = ()
+    profile_name: str = "custom"
+    mandatory_rules: tuple[str, ...] = ()
+    coverage: dict[str, list[str]] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        return {"profile": {"version": self.profile_version}, "source": self.source,
+        return {"profile": {"name": self.profile_name, "version": self.profile_version}, "source": self.source,
+                "mandatory_rules": list(self.mandatory_rules), "coverage": self.coverage,
+                "analyzer_version": self.analyzer_version, "profile_digest": self.profile_digest,
+                "custom_identity_complete": self.custom_identity_complete,
+                "rules_identity": self.rules_identity, "analyzers_identity": self.analyzers_identity,
                 "strategy": self.strategy, "constraints": list(self.constraints),
                 "findings": [finding.to_dict() for finding in self.findings],
                 "tasks": [task.to_dict() for task in self.tasks],
                 "completion": list(self.completion), "rollback": list(self.rollback),
                 "regression_tests": list(self.regression_tests),
+                "required_test_ids": list(self.required_test_ids),
                 "compatibility_risks": list(self.compatibility_risks)}
 
     def source_matches(self, project: ProjectProfile | dict[str, Any]) -> bool:
         """Return whether the plan's analyzed source matches the given project state."""
-        if isinstance(project, dict):
-            current = project
-        else:
-            current = {"root": project.root, "revision": project.revision, "dirty": project.dirty}
-        for key in ("root", "revision", "dirty"):
-            if self.source.get(key) != current.get(key):
-                return False
-        return True
+        current = project if isinstance(project, dict) else {"source_fingerprint": project.source_fingerprint}
+        fingerprint = self.source.get("source_fingerprint")
+        return bool(fingerprint and fingerprint == current.get("source_fingerprint"))
 
 
 def analyze_migration(project: ProjectProfile, verification: VerificationResult,
                       *, strategy: str = "incremental",
-                      analyzers: Iterable["MigrationAnalyzer"] = ()) -> MigrationPlan:
+                      analyzers: Iterable["MigrationAnalyzer"] = (),
+                      analyzers_identity: str | None = None) -> MigrationPlan:
     """Derive a migration plan from discovery and architecture verification results."""
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown migration strategy: {strategy}")
+    analyzers = tuple(analyzers)
     findings = _findings(project, verification)
     for analyzer in analyzers:
         extra = list(analyzer(project, verification))
@@ -168,7 +179,16 @@ def analyze_migration(project: ProjectProfile, verification: VerificationResult,
     tasks = _tasks(project, findings, strategy)
     return MigrationPlan(
         profile_version=verification.profile_version,
-        source={"root": project.root, "revision": project.revision, "dirty": project.dirty},
+        profile_name=verification.profile_name,
+        mandatory_rules=verification.mandatory_rules,
+        coverage=verification.coverage,
+        source={"root": project.root, "revision": project.revision, "dirty": project.dirty,
+                "source_fingerprint": project.source_fingerprint},
+        analyzer_version=verification.analyzer_version,
+        profile_digest=verification.profile_digest,
+        rules_identity=verification.rules_identity,
+        analyzers_identity=analyzers_identity if analyzers else None,
+        custom_identity_complete=verification.custom_identity_complete and (not analyzers or bool(analyzers_identity and analyzers_identity.strip())),
         strategy=strategy,
         constraints=(
             "Existing business behavior is preserved unless a change is explicitly authorized.",
@@ -191,6 +211,7 @@ def analyze_migration(project: ProjectProfile, verification: VerificationResult,
             "Tasks marked irreversible require a reviewed backup and recovery procedure.",
         ),
         regression_tests=_regression_tests(project),
+        required_test_ids=_required_test_ids(project),
         compatibility_risks=_compatibility_risks(verification),
     )
 
@@ -233,54 +254,101 @@ def evaluate_migration_completion(plan: MigrationPlan, verification: Verificatio
                                   test_evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     """Evaluate completion from deterministic verification and supplied evidence.
 
-    Completion is never claimed without strict verification and behavioral test
-    evidence tied to the analyzed source revision.
+    Completion requires matching captured input identities, mandatory rule passes,
+    and explicit passing results for all required behavioral tests.
     """
-    statuses = _normalize_statuses(statuses)
-    task_statuses = statuses["tasks"]
-    finding_statuses = statuses["findings"]
+    statuses = _normalize_statuses(statuses, plan)
+    task_statuses, finding_statuses = statuses["tasks"], statuses["findings"]
     reasons: list[str] = []
     incomplete: list[str] = []
+    tests = test_evidence.get("tests") if isinstance(test_evidence, dict) else None
+    identities = {"source_fingerprint": plan.source.get("source_fingerprint"),
+                  "analyzer_version": plan.analyzer_version, "profile_digest": plan.profile_digest}
+    for key, value in identities.items():
+        if not isinstance(value, str) or not value.strip() or getattr(verification, key, None) != value \
+                or not isinstance(tests, dict) or tests.get(key) != value:
+            reasons.append(f"{key} is missing or does not match across plan, verification, and test evidence")
+    if (not plan.custom_identity_complete or not getattr(verification, "custom_identity_complete", False)
+            or plan.rules_identity != getattr(verification, "rules_identity", None)):
+        reasons.append("custom evaluator identity is incomplete or mismatched")
     if verification.status != "pass":
         reasons.append(f"architecture verification is {verification.status}, not pass")
         incomplete.append("verification")
+    checks = getattr(verification, "checks", ())
+    if not plan.mandatory_rules or tuple(plan.mandatory_rules) != tuple(getattr(verification, "mandatory_rules", ())):
+        reasons.append("mandatory profile rules are missing or mismatched")
+        if "verification" not in incomplete:
+            incomplete.append("verification")
+    for rule in plan.mandatory_rules:
+        matching = [check for check in checks if check.rule == rule]
+        if len(matching) != 1 or matching[0].status != "pass":
+            reasons.append(f"mandatory rule {rule} has not passed")
+            if "verification" not in incomplete:
+                incomplete.append("verification")
     unresolved = [f.id for f in plan.findings
                   if finding_statuses.get(f.id, "pending") in ("pending", "in_progress", "blocked")]
+    unfinished = [t.id for t in plan.tasks
+                  if task_statuses.get(t.id, t.status) in ("pending", "in_progress", "blocked")]
     if unresolved:
         reasons.append(f"unresolved findings remain: {', '.join(unresolved)}")
         incomplete.append("findings")
-    unfinished = [t.id for t in plan.tasks
-                  if task_statuses.get(t.id, t.status) in ("pending", "in_progress", "blocked")]
     if unfinished:
         reasons.append(f"unfinished tasks remain: {', '.join(unfinished)}")
         incomplete.append("tasks")
-    tests = (test_evidence or {}).get("tests") if isinstance(test_evidence, dict) else None
-    evidenced = False
     if not isinstance(tests, dict):
         reasons.append("behavioral/regression test evidence has not been supplied")
     else:
-        revision = tests.get("revision")
-        status = str(tests.get("status", ""))
-        if status != "passed":
-            reasons.append(f"test evidence status is {status or 'missing'}, not passed")
-        elif revision not in (plan.source.get("revision"),):
-            reasons.append("test evidence revision does not match the analyzed source revision")
+        if tests.get("status") != "passed":
+            reasons.append("test evidence status is not passed")
+        results = tests.get("results")
+        if not plan.required_test_ids:
+            reasons.append("required test identifiers are missing from the plan")
+        elif not isinstance(results, dict):
+            reasons.append("required test results are missing")
         else:
-            evidenced = True
+            for test_id in plan.required_test_ids:
+                if results.get(test_id) != "passed":
+                    reasons.append(f"required test {test_id} has not passed")
     if not reasons:
         return {"status": "complete", "complete": True, "reasons": [],
                 "evidenced": True, "incomplete": [], "tests": tests}
-    status = "incomplete" if incomplete else "not_evidenced"
-    return {"status": status, "complete": False, "reasons": reasons,
-            "evidenced": evidenced and not incomplete, "incomplete": incomplete, "tests": tests}
+    return {"status": "incomplete" if incomplete else "not_evidenced", "complete": False,
+            "reasons": reasons, "evidenced": False, "incomplete": incomplete, "tests": tests}
 
 
-def _normalize_statuses(statuses: dict[str, Any] | None) -> dict[str, dict[str, str]]:
+def _normalize_statuses(statuses: dict[str, Any] | None, plan: MigrationPlan | None = None) -> dict[str, dict[str, str]]:
     if statuses is None:
         return {"tasks": {}, "findings": {}}
+    if not isinstance(statuses, dict):
+        raise ValueError("statuses must be an object")
     if "tasks" in statuses or "findings" in statuses:
-        return {"tasks": dict(statuses.get("tasks", {})), "findings": dict(statuses.get("findings", {}))}
-    return {"tasks": dict(statuses), "findings": {}}
+        if set(statuses) - {"tasks", "findings"} or any(not isinstance(statuses.get(k, {}), dict) for k in ("tasks", "findings")):
+            raise ValueError("statuses must contain task and finding objects")
+        result = {"tasks": dict(statuses.get("tasks", {})), "findings": dict(statuses.get("findings", {}))}
+    else:
+        result = {"tasks": dict(statuses), "findings": {}}
+    for kind, values in result.items():
+        if any(not isinstance(k, str) or not isinstance(v, str) or v not in TASK_STATUSES for k, v in values.items()):
+            raise ValueError(f"invalid {kind} status or identifier")
+        if plan is not None:
+            known = {item.id for item in getattr(plan, kind)}
+            unknown = set(values) - known
+            if unknown:
+                raise ValueError(f"unknown migration {kind} id(s): {', '.join(sorted(unknown))}")
+    return result
+
+
+def _required_test_ids(project: ProjectProfile) -> tuple[str, ...]:
+    ids = ["actions", "cli"]
+    if project.by_kind("electron-process") or project.by_kind("electron-ipc"):
+        ids.append("electron")
+    integrations = {item.name for item in project.by_kind("integration")}
+    ids.extend(key for name, key in (("HTTP", "http"), ("external CLI", "external"), ("SQLite", "sqlite")) if name in integrations)
+    if project.by_kind("state"):
+        ids.append("state")
+    if project.by_kind("job") or project.by_kind("job_access"):
+        ids.append("jobs")
+    return tuple(ids)
 
 
 def _findings(project: ProjectProfile, verification: VerificationResult) -> list[MigrationFinding]:

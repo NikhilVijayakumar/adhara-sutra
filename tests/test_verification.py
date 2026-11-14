@@ -1,11 +1,15 @@
 """Architecture rules as automated, reproducible tests (FR-TEST-007, FR-ARCH-009)."""
 
 import json
+import io
+from contextlib import redirect_stdout, redirect_stderr
 import tempfile
 import unittest
 from pathlib import Path
 
 from nikhi.adhara_sutra import ArchitectureProfile, ProjectInspector, Rule, check_for, verify
+from nikhi.adhara_sutra.cli import main
+from nikhi.adhara_sutra.profiles import resolve_profile
 from nikhi.adhara_sutra.verification import FAIL, NEEDS_REVIEW, NOT_CHECKED, PASS
 
 APP = '''\
@@ -53,6 +57,74 @@ class VerificationTests(unittest.TestCase):
         self.assertEqual(statuses["ARCH-LAYER-001"], NOT_CHECKED)
         self.assertEqual(statuses["ARCH-PROTO-001"], PASS)
         self.assertEqual(statuses["ARCH-JOB-002"], PASS)
+
+    def test_profile_configuration_and_selection_validation(self):
+        project = self.make_project(**{"pyproject.toml": '[tool.adhara]\nprofile = "minimal"\nprofile_version = "1"\n',
+                                        "src/app.py": APP,
+                                        "src/ui/screen.py": "import app.data\n"})
+        root = Path(project.root)
+        config = root / ".adhara-profile.json"
+        config.write_text(json.dumps({"layer_boundaries": [["src/ui", "app.data", "use adapter"]]}), encoding="utf-8")
+        captured = ProjectInspector(root).inspect()
+        profile = resolve_profile(root, captured_files=captured.configuration_files)
+        result = verify(captured, profile)
+        self.assertEqual(self.statuses(result)["ARCH-LAYER-001"], FAIL)
+        config.write_text("{}", encoding="utf-8")
+        self.assertEqual(resolve_profile(root, captured_files=captured.configuration_files), profile)
+        self.assertNotEqual(verify(ProjectInspector(root).inspect(), resolve_profile(root)).profile_digest, result.profile_digest)
+        for bad in ({"required_files": ["../outside"]}, {"required_directories": ["C:/outside"]},
+                    {"layer_boundaries": [["../outside", "x", "fix"]]}, {"unknown": []}):
+            config.write_text(json.dumps(bad), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                resolve_profile(root)
+        config.write_text("{}", encoding="utf-8")
+        for args in (("--profile", "unknown"), ("--profile-version", "2")):
+            for command in ("verify", "migrate"):
+                with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                    self.assertEqual(main([command, str(root), *args]), 2)
+        (root / "pyproject.toml").write_text('[tool.adhara]\nprofile_version = 1\n', encoding="utf-8")
+        with self.assertRaises(ValueError):
+            resolve_profile(root)
+
+    def test_supported_application_aliases_and_serve_are_recognized(self):
+        for imported, constructor in (("from nikhi.adhara_sutra import Application as App", "App"),
+                                      ("import nikhi.adhara_sutra as framework", "framework.Application")):
+            with self.subTest(imported=imported):
+                source = (f"{imported}\nservice = {constructor}('demo', '1')\n"
+                          "@service.action('ping')\ndef ping(payload, context):\n    return {}\n"
+                          "async def main():\n    await service.serve()\n")
+                project = self.make_project(**{"pyproject.toml": "", "app.py": source})
+                checks = self.statuses(verify(project))
+                self.assertEqual(checks["ARCH-FW-001"], PASS)
+                self.assertEqual(checks["ARCH-FW-002"], PASS)
+                self.assertEqual(checks["ARCH-ENTRY-001"], PASS)
+                self.assertIn("service.serve()", [f.name for f in project.by_kind("entry_point")])
+
+    def test_unrelated_and_dynamic_bindings_are_not_proven(self):
+        unrelated = self.make_project(**{"app.py": "class Application: pass\napp = Application()\n"})
+        self.assertNotEqual(self.statuses(verify(unrelated))["ARCH-FW-001"], PASS)
+        cases = (
+            "from nikhi.adhara_sutra import Application\nfactory = Application\napp = factory('x', '1')\n",
+            "from nikhi.adhara_sutra import Application as App\nApp = other\napp = App('x', '1')\n",
+            "from nikhi.adhara_sutra import Application\napp = Application('x', '1')\napp = other\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                result = verify(self.make_project(**{"app.py": source}))
+                self.assertNotEqual(self.statuses(result)["ARCH-FW-001"], PASS)
+                self.assertIn("ARCH-FW-001", result.coverage["mandatory_unresolved"])
+        dynamic = self.make_project(**{"app.py": "from nikhi.adhara_sutra import Application\n"
+                                    "app = Application('x','1')\n"
+                                    "other = app\n@other.action('x')\ndef work(p,c): pass\n"})
+        self.assertEqual(self.statuses(verify(dynamic))["ARCH-FW-002"], NEEDS_REVIEW)
+
+    def test_job_and_protocol_claims_are_bounded(self):
+        project = self.make_project(**{"app.py": APP + "\ndef do_work(context):\n    return context.jobs\n"})
+        checks = {c.rule: c for c in verify(project).checks}
+        self.assertEqual(checks["ARCH-JOB-001"].status, PASS)
+        self.assertIn("Recognized", checks["ARCH-JOB-001"].detail)
+        self.assertNotIn("Long-running work uses", checks["ARCH-JOB-001"].detail)
+        self.assertIn("syntax", checks["ARCH-PROTO-001"].detail)
 
     def test_layer_boundaries_are_enforced(self):
         files = {"app/main.py": APP,

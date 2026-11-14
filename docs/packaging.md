@@ -11,9 +11,8 @@ Linux (`linux`).
 
 ## Locating the Python backend
 
-Packaged Electron applications locate the backend with
-`nikhi.adhara_sutra.runtime.locate_backend(...)`, which does not assume a Python
-development environment. Resolution order:
+When Python is already running, `nikhi.adhara_sutra.runtime.locate_backend(...)`
+can resolve an interpreter using the following order:
 
 1. `ADHARA_PYTHON` environment variable (must point to an existing file).
 2. Bundled interpreter paths passed as `bundled=(...)`, relative to `app_root`
@@ -23,8 +22,10 @@ development environment. Resolution order:
 4. The interpreter running the application.
 
 A missing override or missing interpreter raises `RuntimeDiscoveryError` with a
-remediation message. Resolve the backend at startup, pass the result as the
-bridge `command`, and fail fast if discovery fails.
+remediation message. This Python helper cannot bootstrap the first Python process.
+The Electron main process must currently receive or determine a fixed backend
+command by application-specific means. Node-owned packaged/development resolution
+is unimplemented and tracked as T18 in the [architecture integrity plan](../openspec/changes/integration-workflows-followup/tasks.md).
 
 ## External executables
 
@@ -43,9 +44,9 @@ called out in the release notes with the replacement and removal conditions.
 ## Deprecation policy
 
 Deprecated public functionality keeps working for the current major release.
-Each deprecation names its replacement, the release that introduced it, and the
-release that will remove it; removal happens no earlier than the next major
-release. Deprecation warnings are emitted where a runtime warning is practical,
+A declared incompatible release must announce any removal and upgrade guidance;
+removal happens no earlier than the next major release. The synchronous job-handler
+warning has no declared removal date. Deprecation warnings are emitted where a runtime warning is practical,
 and the documentation is updated before removal.
 
 ## Compatibility and upgrades

@@ -118,6 +118,11 @@ concurrency rules. (FR-JOB-001, FR-JOB-003, FR-JOB-007, FR-JOB-008)
 - **WHEN** a registered job completes successfully
 - **THEN** its execution record reports the succeeded state and the returned result
 
+#### Scenario: Terminal save fails
+
+- **WHEN** the local job reaches a terminal outcome but its terminal metadata save fails
+- **THEN** waiters are released and local status reports persistence failure without claiming durable recovery
+
 #### Scenario: Admission limit reached
 
 - **WHEN** a job submission arrives while the configured concurrency or queue limit is reached

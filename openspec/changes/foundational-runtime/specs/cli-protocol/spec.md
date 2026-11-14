@@ -53,6 +53,11 @@ request, distinguishable from terminal responses. (FR-CLI-006, FR-ELC-005)
 - **THEN** each event carries the request's `request_id` and a `kind` of `event`
 - **AND** the terminal response is still returned with a `kind` of `response`
 
+#### Scenario: Background job emits after submission
+
+- **WHEN** a submitted job emits progress after its submission action has returned
+- **THEN** the event carries its `job_id` and need not precede the submission response
+
 #### Scenario: Caller asks for help
 
 - **WHEN** a caller sends `system.help`

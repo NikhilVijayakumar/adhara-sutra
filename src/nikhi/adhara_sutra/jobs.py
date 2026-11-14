@@ -106,6 +106,7 @@ class JobManager:
         self._jobs: dict[str, dict[str, Any]] = {}
         self._tasks: set[asyncio.Task] = set()
         self._store = store
+        self._accepting = True
         if store is not None and recover_on_start:
             self._recover()
 
@@ -113,14 +114,14 @@ class JobManager:
         """Mark persisted non-terminal jobs as interrupted (owner no longer running)."""
         for record in self._store.load_all():
             if record["state"] in _TERMINAL:
-                self._jobs[record["job_id"]] = {**record, "event": asyncio.Event()}
+                self._jobs[record["job_id"]] = {**record, "persistence": {"status": "saved"}, "event": asyncio.Event()}
                 self._jobs[record["job_id"]]["event"].set()
                 continue
             recovered = {**record, "state": "interrupted",
                          "error": {"code": "JOB_INTERRUPTED",
                                    "message": "Owning process exited before the job reached a terminal state"},
                          "finished_at": record.get("finished_at") or time.time(),
-                         "event": asyncio.Event()}
+                         "persistence": {"status": "saved"}, "event": asyncio.Event()}
             recovered["event"].set()
             self._jobs[recovered["job_id"]] = recovered
             self._store.save(self._snapshot(recovered))
@@ -137,6 +138,8 @@ class JobManager:
     def submit(self, name: str, payload: Any, emit: Callable[[dict[str, Any]], None] | None,
                session_state: dict[str, Any]) -> str:
         """Schedule a registered job and return its identifier."""
+        if not self._accepting:
+            raise RuntimeError("Job manager is shutting down")
         if name not in self._registry:
             raise ValueError(f"Unregistered job: {name}")
         queued = sum(1 for record in self._jobs.values() if record["state"] == "queued")
@@ -145,57 +148,96 @@ class JobManager:
         job_id = uuid4().hex
         record = {"job_id": job_id, "name": name, "state": "queued", "result": None, "error": None,
                   "created_at": time.time(), "started_at": None, "finished_at": None,
+                  "persistence": {"status": "pending" if self._store is not None else "disabled"},
                   "event": asyncio.Event()}
-        self._jobs[job_id] = record
-        self._persist(record)
         context = self._context_factory(job_id, name, emit, session_state)
-        task = asyncio.create_task(self._run(record, self._registry[name], payload, context))
+        self._persist(record)
+        coroutine = self._run(record, self._registry[name], payload, context)
+        try:
+            task = asyncio.create_task(coroutine)
+        except BaseException:
+            coroutine.close()
+            record["state"] = "failed"
+            record["error"] = {"code": "JOB_ADMISSION_FAILED", "message": "Could not schedule job"}
+            record["finished_at"] = time.time()
+            try:
+                self._persist(record)
+            except Exception:
+                _LOG.exception("Could not persist failed admission for job %s", job_id)
+            raise
         record["task"] = task
+        self._jobs[job_id] = record
         self._tasks.add(task)
         task.add_done_callback(self._tasks.discard)
         task.add_done_callback(lambda done: self._finalize(record, done))
         return job_id
 
-    def _finalize(self, record: dict[str, Any], task: asyncio.Task) -> None:
-        """Record a terminal state for a task that ended outside the normal path."""
-        if record["state"] not in _TERMINAL:
-            record["state"] = "cancelled" if task.cancelled() else "failed"
-            if record["state"] == "failed":
-                record["error"] = {"code": "JOB_FAILED", "message": "Job task ended unexpectedly"}
-            record["finished_at"] = record["finished_at"] or time.time()
+    def _terminalize(self, record: dict[str, Any], state: str, *, result: Any = None,
+                     error: dict[str, str] | None = None) -> None:
+        """Save one terminal outcome before releasing waiters, even on save failure."""
+        if record["event"].is_set():
+            return
+        record.update(state=state, result=result, error=error, finished_at=time.time())
+        try:
+            if self._store is None:
+                record["persistence"] = {"status": "disabled"}
+            else:
+                self._persist(record)
+                record["persistence"] = {"status": "saved"}
+        except Exception:
+            record["persistence"] = {"status": "failed", "error_code": "JOB_PERSISTENCE_FAILED"}
+            _LOG.exception("Could not persist terminal job outcome: %s", record["name"])
+        finally:
             record["event"].set()
-            self._persist(record)
+
+    def _finalize(self, record: dict[str, Any], task: asyncio.Task) -> None:
+        """Finalize a task cancelled before it started or ended unexpectedly."""
+        if not record["event"].is_set():
+            if task.cancelled():
+                self._terminalize(record, "cancelled")
+            else:
+                self._terminalize(record, "failed", error={"code": "JOB_FAILED",
+                                  "message": "Job task ended unexpectedly"})
 
     async def _run(self, record: dict[str, Any], entry: tuple[Callable[..., Any], float | None],
                    payload: Any, context: Any) -> None:
         handler, timeout = entry
         token = _REQUEST.set({"request_id": None, "action": f"job.{record['name']}", "job_id": record["job_id"]})
+        state, result = "failed", None
+        error = {"code": "JOB_FAILED", "message": "Job task ended unexpectedly"}
         try:
             async with self._semaphore:
                 record["state"] = "running"
                 record["started_at"] = time.time()
-                self._persist(record)
+                try:
+                    self._persist(record)
+                except Exception:
+                    _LOG.exception("Could not persist running job state: %s", record["name"])
+                    error = {"code": "JOB_PERSISTENCE_FAILED", "message": "Could not persist job state"}
+                    return
                 outcome = handler(payload, context)
                 if inspect.isawaitable(outcome):
                     outcome = await asyncio.wait_for(outcome, timeout)
-                record["result"] = outcome
-                record["state"] = "succeeded"
+                try:
+                    json.dumps(outcome, allow_nan=False)
+                except (TypeError, ValueError, OverflowError, RecursionError):
+                    error = {"code": "JOB_OUTPUT_INVALID", "message": "Job result is not valid JSON"}
+                else:
+                    state, result, error = "succeeded", outcome, None
         except asyncio.CancelledError:
-            record["state"] = "cancelled"
+            state, error = "cancelled", None
             raise
         except TimeoutError:
-            record["state"] = "failed"
-            record["error"] = {"code": "JOB_TIMEOUT", "message": "Job timed out"}
+            error = {"code": "JOB_TIMEOUT", "message": "Job timed out"}
             _LOG.error("Job timed out: %s", record["name"])
         except Exception as exc:
-            record["state"] = "failed"
-            record["error"] = {"code": "JOB_FAILED", "message": str(exc) or type(exc).__name__}
+            error = {"code": "JOB_FAILED", "message": str(exc) or type(exc).__name__}
             _LOG.exception("Job failed: %s", record["name"])
         finally:
-            record["finished_at"] = time.time()
-            record["event"].set()
-            self._persist(record)
-            _REQUEST.reset(token)
+            try:
+                self._terminalize(record, state, result=result, error=error)
+            finally:
+                _REQUEST.reset(token)
 
     def status(self, job_id: str) -> dict[str, Any] | None:
         """Return a snapshot of one job, or None when the identifier is unknown."""
@@ -203,7 +245,7 @@ class JobManager:
         if record is None:
             return None
         return {key: record[key] for key in ("job_id", "name", "state", "result", "error",
-                                             "created_at", "started_at", "finished_at")}
+                                             "created_at", "started_at", "finished_at", "persistence")}
 
     def list(self) -> list[dict[str, Any]]:
         """Return snapshots of every job in submission order."""
@@ -228,8 +270,12 @@ class JobManager:
         await record["event"].wait()
         return self.status(job_id)
 
+    def _close_admission(self) -> None:
+        self._accepting = False
+
     async def shutdown(self) -> None:
         """Cancel every active job and wait for the tasks to finish."""
+        self._close_admission()
         for record in self._jobs.values():
             if record["state"] not in _TERMINAL:
                 task = record.get("task")

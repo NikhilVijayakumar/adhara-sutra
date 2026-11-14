@@ -42,17 +42,24 @@ export interface ProtocolEvent<T = unknown> {
 export interface JobStatus {
   job_id: string;
   name: string;
-  state: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+  state: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "interrupted";
   result: unknown;
   error: { code: string; message: string } | null;
   created_at: number;
   started_at: number | null;
   finished_at: number | null;
+  persistence: { status: "pending" | "disabled" | "saved" | "failed"; error_code?: "JOB_PERSISTENCE_FAILED" };
+}
+
+export interface JobStatusResult {
+  job_id: string;
+  status: JobStatus | null;
 }
 
 export interface CancelResult {
   job_id: string;
   cancelled: boolean;
+  cancellation: "requested" | "completed" | "unsupported" | "failed";
   status: JobStatus | null;
 }
 
@@ -90,6 +97,7 @@ export declare class Bridge extends EventEmitter {
   start(options?: { timeoutMs?: number }): Promise<this>;
   request<T = unknown>(action: string, payload?: unknown, options?: { timeoutMs?: number }): Promise<T>;
   cancel(jobId: string): Promise<CancelResult>;
+  jobStatus(jobId: string): Promise<JobStatusResult>;
   health(): Promise<HealthResult>;
   help(): Promise<HelpResult>;
   close(options?: { timeoutMs?: number }): Promise<void>;

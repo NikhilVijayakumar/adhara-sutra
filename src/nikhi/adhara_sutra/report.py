@@ -9,7 +9,7 @@ from typing import Any
 
 from .diagnostics import redact
 from .discovery import ProjectProfile
-from .migration import TASK_STATUSES, MigrationPlan, evaluate_migration_completion
+from .migration import TASK_STATUSES, MigrationPlan, evaluate_migration_completion, _normalize_statuses
 from .verification import VerificationResult
 
 REPORT_SCHEMA_VERSION = "1"
@@ -38,7 +38,8 @@ def implementation_report(profile: ProjectProfile, *, generated_at: str | None =
         "schema_version": REPORT_SCHEMA_VERSION,
         "kind": "implementation",
         "generated_at": generated_at or _now(),
-        "source": {"root": profile.root, "revision": profile.revision, "dirty": profile.dirty},
+        "source": {"root": profile.root, "revision": profile.revision, "dirty": profile.dirty,
+                   "source_fingerprint": profile.source_fingerprint},
         "summary": {
             "files": len(profile.files),
             "modules": len(profile.modules),
@@ -72,21 +73,8 @@ def migration_report(plan: MigrationPlan, *, statuses: dict[str, Any] | None = N
                      generated_at: str | None = None, verification: Any = None,
                      test_evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build the versioned, machine-readable migration report for one plan."""
-    if statuses is None:
-        task_statuses, finding_statuses = {}, {}
-    elif "tasks" in statuses or "findings" in statuses:
-        task_statuses = dict(statuses.get("tasks", {}))
-        finding_statuses = dict(statuses.get("findings", {}))
-    else:
-        task_statuses, finding_statuses = dict(statuses), {}
-    known_tasks = {task.id for task in plan.tasks}
-    unknown_tasks = sorted(set(task_statuses) - known_tasks)
-    if unknown_tasks:
-        raise ValueError(f"unknown migration task id(s): {', '.join(unknown_tasks)}")
-    known_findings = {finding.id for finding in plan.findings}
-    unknown_findings = sorted(set(finding_statuses) - known_findings)
-    if unknown_findings:
-        raise ValueError(f"unknown migration finding id(s): {', '.join(unknown_findings)}")
+    normalized = _normalize_statuses(statuses, plan)
+    task_statuses, finding_statuses = normalized["tasks"], normalized["findings"]
     tasks = []
     for task in plan.tasks:
         item = task.to_dict()
@@ -162,6 +150,7 @@ def _render_migration(report: dict[str, Any]) -> str:
              f"- Schema version: {report['schema_version']}",
              f"- Generated: {report['generated_at']}",
              f"- Source: `{source['root']}` at `{revision}`{dirty}",
+             f"- Profile: {report['profile'].get('name', 'unavailable')}",
              f"- Profile version: {report['profile']['version']}",
              f"- Strategy: {report['strategy']}", "",
              "## Summary", "",
@@ -175,6 +164,13 @@ def _render_migration(report: dict[str, Any]) -> str:
         lines += ["Finding statuses:", "",
                   f"- pending: {fbs['pending']}, in_progress: {fbs['in_progress']}, done: {fbs['done']}, "
                   f"deferred: {fbs['deferred']}, blocked: {fbs['blocked']}", ""]
+    coverage = report.get("coverage")
+    if coverage:
+        lines += ["## Coverage", ""]
+        for key, label in (("evaluated", "Evaluated"), ("not_checked", "Not checked"),
+                           ("mandatory_unresolved", "Mandatory unresolved")):
+            lines.append(f"- {label}: {', '.join(coverage.get(key, [])) or 'none'}")
+        lines.append("")
     evaluation = report.get("completion_evaluation")
     if evaluation:
         lines += ["## Completion evaluation", "",
@@ -236,13 +232,20 @@ def _render_verification(report: dict[str, Any]) -> str:
         revision = source.get("revision") or "unavailable"
         dirty = " (uncommitted changes)" if source.get("dirty") else ""
         lines.append(f"- Source: `{source['root']}` at `{revision}`{dirty}")
-    lines += [f"- Profile version: {report['profile']['version']}",
+    lines += [f"- Profile: {report['profile'].get('name', 'unavailable')}",
+              f"- Profile version: {report['profile']['version']}",
               f"- Status: {report['status']}", "",
              "## Summary", "",
              "| Pass | Fail | Needs review | Not checked |",
              "| --- | --- | --- | --- |",
              f"| {summary['pass']} | {summary['fail']} | {summary['needs_review']} | {summary['not_checked']} |", "",
              "## Checks", ""]
+    coverage = report.get("coverage")
+    if coverage:
+        lines[-2:-2] = ["## Coverage", "", *[
+            f"- {label}: {', '.join(coverage.get(key, [])) or 'none'}"
+            for key, label in (("evaluated", "Evaluated"), ("not_checked", "Not checked"),
+                               ("mandatory_unresolved", "Mandatory unresolved"))], ""]
     if report.get("acknowledged"):
         lines.insert(-2, f"Acknowledged exceptions: {report['acknowledged']}")
         lines.insert(-2, "")

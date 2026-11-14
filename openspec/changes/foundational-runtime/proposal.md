@@ -29,13 +29,18 @@ and architecture remain proposed; this change is a draft for review.
 
 ## Impact
 
-This is a proposed specification. An initial runtime and CLI protocol are
-implemented, but the change is not complete or approved; its other capabilities
-remain largely unimplemented. See [implementation status](../../../docs/requirements/status.md).
+This remains a proposed specification. Substantial runtime, connector, Electron,
+state/job, scaffolding, discovery, verification, and migration-analysis code is
+implemented, but this change is not complete or approved. The independent
+[architecture integrity review](../architecture-integrity-review/proposal.md)
+tracks confirmed gaps and knowledge/specification reconciliation. See
+[implementation status](../../../docs/requirements/status.md).
 Further work depends on
 reviewing the [runtime](../../../docs/requirements/functional-application-runtime-requirements.md),
 [CLI](../../../docs/requirements/functional-cli-framework-requirements.md), and
 [Electron](../../../docs/requirements/functional-electron-communication-requirements.md)
 requirements and [CLI protocol knowledge](../../../knowledge/concepts/cli-protocol.md).
-Open questions include exact envelope fields and versions, lifecycle transition
-rules, execution and cancellation semantics, and compatibility policies.
+Envelope fields/versions, lifecycle transitions, sequential request dispatch, and
+compatibility policies have current implementations and recorded decisions. Their
+remaining corrections and validation limits are identified by the dependent review;
+do not treat the earlier planning questions as proof that those APIs do not exist.

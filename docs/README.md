@@ -12,6 +12,9 @@ changes.
 | Migration guidance | [migration.md](migration.md) | Migration maintainers |
 | Packaging and runtime discovery | [packaging.md](packaging.md) | Packaging maintainers |
 | Architecture decisions | [decisions.md](decisions.md) | Architecture maintainers |
+| Pre-integration architecture review | [Review and evidence](architecture-review-2026-11-13.md) | Architecture maintainers |
+| Proposed architecture corrections | [Implementation handoff](architecture-fix-plan.md) | Architecture maintainers |
+| Architecture correction tracking | [OpenSpec tasks](../openspec/changes/architecture-integrity-review/tasks.md) | Architecture maintainers |
 | CLI protocol reference | [protocol-reference.md](protocol-reference.md) | Runtime maintainers |
 | Migration status tracking | [migration-status.md](migration-status.md) | Migration maintainers |
 | Requirements | [requirements/README.md](requirements/README.md) | Requirements maintainers |

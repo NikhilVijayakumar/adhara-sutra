@@ -35,6 +35,7 @@ and jobs. (FR-ELC-005, FR-ELC-008)
 
 - **WHEN** a job emits progress
 - **THEN** the event carries the job identifier so the frontend can associate it with the submission
+- **AND** it may arrive after the submission response
 
 ### Requirement: Cancellation
 

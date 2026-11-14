@@ -6,7 +6,8 @@ import keyword
 import re
 from pathlib import Path
 
-PROFILES = ("minimal", "cli")
+from .profiles import PROFILES
+
 CONNECTORS = ("http", "sqlite", "external")
 
 _GITIGNORE = """__pycache__/
@@ -45,6 +46,11 @@ dependencies = ["{dependency}"]
 [project.optional-dependencies]
 test = ["pytest>=8"]
 {scripts}
+[tool.adhara]
+profile = "{profile}"
+profile_version = "1"
+package = "{package}"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -77,10 +83,15 @@ def _app_py(name: str, profile: str, connectors: tuple[str, ...]) -> str:
         "",
     ]
     if profile == "cli":
-        lines += ["from .actions import register", ""]
+        lines += ["from .actions import greeting", ""]
     lines += [f"app = Application(name={name!r}, version=\"0.1.0\")", ""]
     if profile == "cli":
-        lines += ["register(app)"]
+        lines += [
+            '@app.action("greeting.create")',
+            "def greeting_create(payload, context):",
+            '    """Return a greeting for the supplied name."""',
+            "    return greeting(payload)",
+        ]
     else:
         lines += [
             '@app.action("greeting.create")',
@@ -89,6 +100,7 @@ def _app_py(name: str, profile: str, connectors: tuple[str, ...]) -> str:
             '    return {"message": f"Hello, {payload.get(\'name\', \'world\')}!"}',
         ]
     lines += services
+    lines += ["", "def main():", "    import sys", '    return app.run(persistent="--persistent" in sys.argv[1:])']
     return "\n".join(lines) + "\n"
 
 
@@ -110,8 +122,8 @@ pip install -e ".[test]"
 {run}
 ```
 
-Use `--persistent` for the JSON-line session protocol. `adhara run src/{package}/app.py`
-serves the same application without installing it.
+Use `--persistent` for the JSON-line session protocol. After installation,
+`adhara run {package}.app` also serves the application.
 
 ## Test
 
@@ -141,24 +153,9 @@ def test_greeting():
 
 
 def _entry_point(package: str, profile: str) -> str:
-    if profile == "cli":
-        return f'''"""Module entry point for {package}."""
-
-from .cli import main
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-'''
     return f'''"""Module entry point for {package}."""
 
-import sys
-
-from .app import app
-
-
-def main() -> int:
-    return app.run(persistent="--persistent" in sys.argv[1:])
-
+from .app import main
 
 if __name__ == "__main__":
     raise SystemExit(main())
@@ -177,26 +174,16 @@ def _files(name: str, package: str, profile: str, connectors: tuple[str, ...]) -
     }
     if profile == "cli":
         files[f"src/{package}/actions/__init__.py"] = (
-            '"""Application actions."""\n\nfrom .greeting import register\n\n__all__ = ["register"]\n'
+            '"""Application actions."""\n\nfrom .greeting import greeting\n\n__all__ = ["greeting"]\n'
         )
         files[f"src/{package}/actions/greeting.py"] = (
             '"""Greeting actions."""\n\n\n'
-            "def register(app):\n"
-            '    @app.action("greeting.create")\n'
-            "    def greeting_create(payload, context):\n"
-            '        """Return a greeting for the supplied name."""\n'
-            '        return {"message": f"Hello, {payload.get(\'name\', \'world\')}!"}\n'
+            "def greeting(payload):\n"
+            '    return {"message": f"Hello, {payload.get(\'name\', \'world\')}!"}\n'
         )
         files[f"src/{package}/cli.py"] = f'''"""Console entry point for {name}."""
 
-import sys
-
-from .app import app
-
-
-def main() -> int:
-    return app.run(persistent="--persistent" in sys.argv[1:])
-
+from .app import main
 
 if __name__ == "__main__":
     raise SystemExit(main())

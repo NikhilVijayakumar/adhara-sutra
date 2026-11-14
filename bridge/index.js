@@ -128,6 +128,14 @@ export class Bridge extends EventEmitter {
     return this.request("system.cancel", { job_id: jobId });
   }
 
+  /** Read the status of a managed job, or null when it is unknown. */
+  async jobStatus(jobId) {
+    if (typeof jobId !== "string" || !jobId) {
+      throw new TypeError("jobId is required");
+    }
+    return this.request("system.jobs.get", { job_id: jobId });
+  }
+
   /** Report application readiness and connector health. */
   health() {
     return this.request("system.health");
@@ -180,7 +188,7 @@ export class Bridge extends EventEmitter {
           this.#pending.delete(requestId);
           reject(new BridgeError(`Request timed out after ${timeoutMs} ms`, {
             code: "BRIDGE_TIMEOUT",
-            details: { request_id: requestId, action },
+            details: { request_id: requestId, action, outcome: "unknown", cancellation_requested: false },
           }));
         }, timeoutMs);
       }

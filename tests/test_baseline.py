@@ -29,6 +29,42 @@ if __name__ == "__main__":
 
 
 class BaselineTests(unittest.TestCase):
+    def test_baseline_survives_line_movement(self):
+        root = self.project(**{"pyproject.toml": "", "app.py": APP + "\nprint('debug')\n"})
+        baseline = Baseline.capture(verify(ProjectInspector(root).inspect()))
+        (root / "app.py").write_text(APP + "\n\n\nprint('debug')\n", encoding="utf-8")
+        check = self.checks(apply_baseline(verify(ProjectInspector(root).inspect()), baseline))["ARCH-PROTO-001"]
+        self.assertTrue(check.acknowledged)
+
+    def test_layer_baseline_blocks_new_location_beyond_display_limit(self):
+        root = self.project(**{"pyproject.toml": "", "app.py": APP})
+        profile = ArchitectureProfile(layer_boundaries=(("domain", "infra", "use a port"),))
+        for i in range(6):
+            path = root / "domain" / f"m{i}.py"
+            path.parent.mkdir(exist_ok=True)
+            path.write_text("import infra\n", encoding="utf-8")
+        baseline = Baseline.capture(verify(ProjectInspector(root).inspect(), profile))
+        (root / "domain" / "m6.py").write_text("import infra\n", encoding="utf-8")
+        result = apply_baseline(verify(ProjectInspector(root).inspect(), profile), baseline)
+        check = self.checks(result)["ARCH-LAYER-001"]
+        self.assertEqual(len(check.to_dict()["evidence"]), 7)
+        self.assertFalse(check.acknowledged)
+
+    def test_baseline_covers_all_occurrences_and_not_new_duplicates(self):
+        root = self.project(**{"pyproject.toml": "", "app.py": APP})
+        for i in range(6):
+            (root / f"z{i}.py").write_text("print('debug')\n", encoding="utf-8")
+        baseline = Baseline.capture(verify(ProjectInspector(root).inspect()))
+        (root / "z6.py").write_text("print('debug')\n", encoding="utf-8")
+        result = apply_baseline(verify(ProjectInspector(root).inspect()), baseline)
+        self.assertFalse(self.checks(result)["ARCH-PROTO-001"].acknowledged)
+
+    def test_duplicate_snippet_requires_separate_baseline_entry(self):
+        root = self.project(**{"pyproject.toml": "", "app.py": APP + "\nprint('debug')\n"})
+        baseline = Baseline.capture(verify(ProjectInspector(root).inspect()))
+        (root / "app.py").write_text(APP + "\nprint('debug')\nprint('debug')\n", encoding="utf-8")
+        result = apply_baseline(verify(ProjectInspector(root).inspect()), baseline)
+        self.assertFalse(self.checks(result)["ARCH-PROTO-001"].acknowledged)
     def project(self, **files):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
@@ -95,6 +131,7 @@ class BaselineCommandTests(unittest.TestCase):
         self.addCleanup(directory.cleanup)
         root = Path(directory.name)
         (root / "pyproject.toml").write_text("", encoding="utf-8")
+        (root / "src").mkdir()
         (root / "app.py").write_text(APP + "\nprint('debug')\n", encoding="utf-8")
         return root
 

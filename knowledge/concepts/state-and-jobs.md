@@ -52,7 +52,7 @@ Restoration initializes the persistence adapter, validates stored schemas, migra
 
 Applications define job behavior. The framework provides identifiable job
 records, execution, progress, results, supported cancellation, and timeouts.
-Proposed states include pending, running, completed, failed, cancelled and
+The current states are queued, running, succeeded, failed, cancelled and
 interrupted. An accepted job is not a completed job. Each active execution has
 an owner: persisted metadata alone does not mean a job survives its owning
 process. Recovery must distinguish interruption from actual durable execution.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -70,11 +71,15 @@ class ProjectProfile:
     errors: list[Finding]
     imports: dict[str, list[Evidence]]  # full dotted names, analysed but not serialized in reports
 
+    source_fingerprint: str | None = None
+    configuration_files: dict[str, bytes] = field(default_factory=dict, repr=False)
+
     def by_kind(self, kind: str) -> list[Finding]:
         return [finding for finding in self.findings if finding.kind == kind]
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "source_fingerprint": self.source_fingerprint,
             "root": self.root,
             "revision": self.revision,
             "dirty": self.dirty,
@@ -108,6 +113,11 @@ class ProjectInspector:
         files = [path for path in sorted(self.root.rglob("*"))
                  if path.is_file() and not self._excluded(path)]
         python_files = [path for path in files if path.suffix == ".py"]
+        inputs = [path for path in files if path.suffix == ".py" or path.suffix in _JS_SUFFIXES
+                  or self._relative(path) in {"pyproject.toml", "setup.cfg", "package.json", ".adhara-profile.json"}]
+        contents = {self._relative(path): path.read_bytes() for path in inputs}
+        manifest = [(name, hashlib.sha256(data).hexdigest()) for name, data in sorted(contents.items())]
+        fingerprint = hashlib.sha256(json.dumps(manifest, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
         modules = [self._module_name(path) for path in python_files]
         findings: list[Finding] = []
         errors: list[Finding] = []
@@ -115,14 +125,14 @@ class ProjectInspector:
         module_imports: dict[str, list[Evidence]] = {}
         for path in python_files:
             relative = self._relative(path)
-            digest = hashlib.sha256(path.read_bytes()).hexdigest() if self.cache is not None else ""
+            digest = hashlib.sha256(contents[relative]).hexdigest()
             cached = self.cache.files.get(relative) if self.cache is not None else None
             if cached is not None and cached[0] == digest:
                 file_findings, file_errors, file_imports, file_module_imports = cached[1:]
             else:
                 file_findings, file_errors = [], []
                 file_imports, file_module_imports = {}, {}
-                self._inspect_python(path, file_findings, file_errors, file_imports, file_module_imports)
+                self._inspect_python(path, contents[relative], file_findings, file_errors, file_imports, file_module_imports)
                 if self.cache is not None:
                     self.cache.files[relative] = (digest, file_findings, file_errors,
                                                   file_imports, file_module_imports)
@@ -136,8 +146,8 @@ class ProjectInspector:
                 del self.cache.files[stale]
         for path in files:
             if path.suffix in _JS_SUFFIXES:
-                self._inspect_javascript(path, findings)
-        self._inspect_scripts(findings)
+                self._inspect_javascript(path, contents[self._relative(path)], findings)
+        self._inspect_scripts(findings, contents)
         self._inspect_imports(imports, findings)
         revision, dirty = _revision(self.root)
         return ProjectProfile(
@@ -150,6 +160,8 @@ class ProjectInspector:
             findings=_dedupe(findings),
             errors=errors,
             imports=module_imports,
+            source_fingerprint=fingerprint,
+            configuration_files={name: contents[name] for name in ("pyproject.toml", ".adhara-profile.json") if name in contents},
         )
 
     def _excluded(self, path: Path) -> bool:
@@ -164,15 +176,11 @@ class ProjectInspector:
             parts.pop()
         return ".".join(parts) or "__root__"
 
-    def _inspect_python(self, path: Path, findings: list[Finding], errors: list[Finding],
+    def _inspect_python(self, path: Path, content: bytes, findings: list[Finding], errors: list[Finding],
                         imports: dict[str, list[Evidence]],
                         module_imports: dict[str, list[Evidence]]) -> None:
         relative = self._relative(path)
-        try:
-            source = path.read_text(encoding="utf-8", errors="replace")
-        except OSError as exc:
-            errors.append(Finding("read_error", relative, "observed", str(exc)))
-            return
+        source = content.decode("utf-8", errors="replace")
         try:
             tree = ast.parse(source, filename=str(path))
         except SyntaxError as exc:
@@ -185,6 +193,60 @@ class ProjectInspector:
             line = getattr(node, "lineno", 0)
             snippet = lines[line - 1].strip()[:200] if 0 < line <= len(lines) else ""
             return Evidence(relative, line, snippet)
+
+        # Recognize only stable, direct module-level imports and instance assignments.
+        constructors, namespaces = set(), set()
+        for item in tree.body:
+            if isinstance(item, ast.ImportFrom) and item.level == 0 and item.module == "nikhi.adhara_sutra":
+                constructors.update(alias.asname or alias.name for alias in item.names if alias.name == "Application")
+            elif isinstance(item, ast.Import):
+                namespaces.update(alias.asname for alias in item.names
+                                  if alias.name == "nikhi.adhara_sutra" and alias.asname)
+        bound = constructors | namespaces
+        had_framework_import = bool(bound)
+        shadowed = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)
+                    and isinstance(node.ctx, (ast.Store, ast.Del)) and node.id in bound}
+        shadowed.update(node.name for node in ast.walk(tree)
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name in bound)
+        shadowed.update(node.arg for node in ast.walk(tree) if isinstance(node, ast.arg) and node.arg in bound)
+        imports_per_name = {name: 0 for name in bound}
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:
+                    name = alias.asname or alias.name.split(".")[0]
+                    if name in imports_per_name:
+                        imports_per_name[name] += 1
+        shadowed.update(name for name, count in imports_per_name.items() if count != 1)
+        constructors -= shadowed
+        namespaces -= shadowed
+
+        def is_constructor(node: ast.AST) -> bool:
+            return (isinstance(node, ast.Name) and node.id in constructors) or (
+                isinstance(node, ast.Attribute) and node.attr == "Application"
+                and isinstance(node.value, ast.Name) and node.value.id in namespaces)
+
+        applications = set()
+        for item in tree.body:
+            if isinstance(item, (ast.Assign, ast.AnnAssign)) and isinstance(item.value, ast.Call) and is_constructor(item.value.func):
+                targets = item.targets if isinstance(item, ast.Assign) else [item.target]
+                if len(targets) == 1 and isinstance(targets[0], ast.Name):
+                    applications.add(targets[0].id)
+        stores = {name: 0 for name in applications}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id in stores and isinstance(node.ctx, (ast.Store, ast.Del)):
+                stores[node.id] += 1
+            elif isinstance(node, ast.arg) and node.arg in stores:
+                stores[node.arg] += 1
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name in stores:
+                stores[node.name] += 1
+            elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:
+                    bound_name = alias.asname or alias.name.split(".")[0]
+                    if bound_name in stores:
+                        stores[bound_name] += 1
+            elif isinstance(node, ast.ExceptHandler) and node.name in stores:
+                stores[node.name] += 1
+        applications = {name for name in applications if stores[name] == 1}
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
@@ -203,10 +265,16 @@ class ProjectInspector:
                             and decorator.func.attr in ("action", "job")
                             and decorator.args and isinstance(decorator.args[0], ast.Constant)
                             and isinstance(decorator.args[0].value, str)):
-                        findings.append(Finding(decorator.func.attr, decorator.args[0].value, "observed",
-                                                f"handler {node.name}", (evidence(decorator),)))
+                        owner = decorator.func.value
+                        if isinstance(owner, ast.Name) and owner.id in applications:
+                            findings.append(Finding(decorator.func.attr, decorator.args[0].value, "observed",
+                                                    f"handler {node.name}", (evidence(decorator),)))
+                        else:
+                            findings.append(Finding("framework_unresolved", "decorator", "inferred",
+                                                    "decorator owner is not a supported application binding",
+                                                    (evidence(decorator),)))
             elif isinstance(node, ast.Call):
-                self._inspect_call(node, evidence, findings)
+                self._inspect_call(node, evidence, findings, is_constructor, applications, tree)
             elif isinstance(node, ast.Attribute):
                 if node.attr in ("state", "session_state", "request_state") \
                         and isinstance(node.value, ast.Name) and node.value.id == "context":
@@ -226,7 +294,12 @@ class ProjectInspector:
                 findings.append(Finding("entry_point", "__main__", "observed", "module script entry",
                                         (evidence(node),)))
 
-    def _inspect_call(self, node: ast.Call, evidence: Any, findings: list[Finding]) -> None:
+        if had_framework_import and not any(item.kind == "application" for item in findings):
+            findings.append(Finding("framework_unresolved", "application binding", "inferred",
+                                    "framework import has no supported stable application assignment"))
+
+    def _inspect_call(self, node: ast.Call, evidence: Any, findings: list[Finding],
+                      is_constructor: Any, applications: set[str], tree: ast.AST) -> None:
         function = node.func
         if isinstance(function, ast.Name) and function.id == "print":
             findings.append(Finding("protocol_bypass", "print()", "inferred",
@@ -234,44 +307,49 @@ class ProjectInspector:
         elif isinstance(function, ast.Name) and function.id == "open":
             findings.append(Finding("integration", "filesystem", "inferred", "open() call",
                                     (evidence(node),)))
-        elif isinstance(function, ast.Name) and function.id == "Application":
+        elif is_constructor(function):
             name = "<unnamed>"
             for keyword in node.keywords:
                 if keyword.arg == "name" and isinstance(keyword.value, ast.Constant) \
                         and isinstance(keyword.value.value, str):
                     name = keyword.value.value
-            findings.append(Finding("application", name, "observed", "", (evidence(node),)))
+            # Only a constructor assigned to a stable module-level name is a supported binding.
+            if any(isinstance(item, ast.Assign) and item.value is node and len(item.targets) == 1
+                   and isinstance(item.targets[0], ast.Name) and item.targets[0].id in applications
+                   for item in tree.body) or any(
+                    isinstance(item, ast.AnnAssign) and item.value is node and isinstance(item.target, ast.Name)
+                    and item.target.id in applications for item in tree.body):
+                findings.append(Finding("application", name, "observed", "", (evidence(node),)))
+            else:
+                findings.append(Finding("framework_unresolved", "application", "inferred", "unsupported application binding", (evidence(node),)))
         elif isinstance(function, ast.Attribute):
             if function.attr == "service" and node.args and isinstance(node.args[0], ast.Constant) \
                     and isinstance(node.args[0].value, str):
                 findings.append(Finding("service", node.args[0].value, "observed", "",
                                         (evidence(node),)))
-            elif function.attr == "run" and isinstance(function.value, ast.Name) \
-                    and function.value.id in ("app", "application"):
-                findings.append(Finding("entry_point", f"{function.value.id}.run()", "observed",
+            elif function.attr in ("run", "serve") and isinstance(function.value, ast.Name) \
+                    and function.value.id in applications:
+                findings.append(Finding("entry_point", f"{function.value.id}.{function.attr}()", "observed",
                                         "application runtime entry", (evidence(node),)))
             elif isinstance(function.value, ast.Name) \
                     and function.attr in _UNMANAGED.get(function.value.id, ()):
                 findings.append(Finding("unmanaged_task", f"{function.value.id}.{function.attr}",
                                         "inferred", "unmanaged background work", (evidence(node),)))
 
-    def _inspect_javascript(self, path: Path, findings: list[Finding]) -> None:
+    def _inspect_javascript(self, path: Path, content: bytes, findings: list[Finding]) -> None:
         relative = self._relative(path)
-        try:
-            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-        except OSError:
-            return
+        lines = content.decode("utf-8", errors="replace").splitlines()
         for number, line in enumerate(lines, 1):
             for kind, pattern in _ELECTRON.items():
                 if pattern.search(line):
                     findings.append(Finding(kind, relative, "observed", "", (Evidence(relative, number, line.strip()[:200]),)))
 
-    def _inspect_scripts(self, findings: list[Finding]) -> None:
+    def _inspect_scripts(self, findings: list[Finding], contents: dict[str, bytes]) -> None:
         pyproject = self.root / "pyproject.toml"
-        if pyproject.is_file():
+        if "pyproject.toml" in contents:
             try:
-                data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-            except (OSError, tomllib.TOMLDecodeError):
+                data = tomllib.loads(contents["pyproject.toml"].decode("utf-8"))
+            except (UnicodeDecodeError, tomllib.TOMLDecodeError):
                 data = {}
             scripts = data.get("project", {}).get("scripts", {})
             if isinstance(scripts, dict):
@@ -280,11 +358,8 @@ class ProjectInspector:
                                             f"console script -> {target}",
                                             (Evidence("pyproject.toml", 0, f"[project.scripts] {name}"),)))
         setup_cfg = self.root / "setup.cfg"
-        if setup_cfg.is_file():
-            try:
-                lines = setup_cfg.read_text(encoding="utf-8", errors="replace").splitlines()
-            except OSError:
-                lines = []
+        if "setup.cfg" in contents:
+            lines = contents["setup.cfg"].decode("utf-8", errors="replace").splitlines()
             in_console_scripts = False
             for number, line in enumerate(lines, 1):
                 stripped = line.strip()
@@ -300,11 +375,11 @@ class ProjectInspector:
         for name, locations in sorted(imports.items()):
             if name in _CLI_TOOLS:
                 findings.append(Finding("cli", name, "inferred", f"import {name}",
-                                        tuple(locations[:3])))
+                                        tuple(locations)))
             integration = _INTEGRATIONS.get(name)
             if integration:
                 findings.append(Finding("integration", integration, "inferred", f"import {name}",
-                                        tuple(locations[:3])))
+                                        tuple(locations)))
 
 
 def _add_import(imports: dict[str, list[Evidence]], name: str, evidence: Evidence) -> None:
@@ -348,7 +423,7 @@ def _classify(imports: dict[str, list[Evidence]], modules: list[str]) -> list[di
         else:
             kind = "third-party"
         dependencies.append({"name": name, "kind": kind,
-                             "evidence": [asdict(evidence) for evidence in imports[name][:3]]})
+                             "evidence": [asdict(evidence) for evidence in imports[name]]})
     return dependencies
 
 
